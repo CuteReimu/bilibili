@@ -14,15 +14,12 @@ type Client struct {
 	logger        resty.Logger
 }
 
-var std = &Client{}
+// New 返回一个 bilibili.Client
+func New() *Client {
+	return &Client{timeout: 20 * time.Second}
+}
 
-// SetTimeout 设置http请求超时时间
-func SetTimeout(timeout time.Duration) {
-	std.SetTimeout(timeout)
-}
-func (c *Client) SetTimeout(timeout time.Duration) {
-	c.timeout = timeout
-}
+var std = New()
 
 // GetTimeout 获取http请求超时时间，默认20秒
 func GetTimeout() time.Duration {
@@ -51,10 +48,7 @@ func (c *Client) GetLogger() resty.Logger {
 	return c.logger
 }
 
-// GetCookiesString 获取字符串格式的cookies，方便自行存储后下次使用。只有正常登录或者调用 SetCookiesString 之后，
-// 这个函数才会有返回值。如果调用的是 SetCookies 或者没有进行过正常登录，则返回空字符串。
-//
-// 配合下面的 SetCookiesString 使用。
+// GetCookiesString 获取字符串格式的cookies，方便自行存储后下次使用。配合下面的 SetCookiesString 使用。
 func GetCookiesString() string {
 	return std.cookiesString
 }
@@ -87,7 +81,11 @@ func SetCookies(cookies []*http.Cookie) {
 }
 func (c *Client) SetCookies(cookies []*http.Cookie) {
 	c.cookies = cookies
-	c.cookiesString = ""
+	var cookieStrings []string
+	for _, cookie := range c.cookies {
+		cookieStrings = append(cookieStrings, cookie.String())
+	}
+	c.cookiesString = strings.Join(cookieStrings, "\n")
 }
 
 // 获取resty的一个request
