@@ -25,6 +25,8 @@ PS：因为B站接口同时支持`http`和`https`，为了数据安全，本项�
 
 本项目的注释不会太多，使用时建议对照着 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) 的文档查看。
 
+本项目预计不会编写单元测试代码。一则因为各项数据会频繁变动，难以写成固定的结果；二则因为每次单元测试都要大量请求B站API，会对其产生不必要的压力。
+
 ### 安装
 
 ```bash

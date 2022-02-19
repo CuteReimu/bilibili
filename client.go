@@ -94,5 +94,8 @@ func (c *Client) resty() *resty.Client {
 	if c.logger != nil {
 		client.SetLogger(c.logger)
 	}
+	if c.cookies != nil {
+		client.SetCookies(c.cookies)
+	}
 	return client
 }
