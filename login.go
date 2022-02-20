@@ -221,7 +221,7 @@ func (c *Client) LoginWithSMS(tel, cid, code int, sendSMSResult *SendSMSResult) 
 type GetQRCodeResult struct {
 	Code   int      `json:"code"`   // 返回值，0表示成功
 	Status bool     `json:"status"` // 作用尚不明确
-	Ts     uint32   `json:"ts"`     // 请求时间戳
+	Ts     int64    `json:"ts"`     // 请求时间戳
 	Data   struct { // 信息本体
 		Url      string `json:"url"`       // 二维码内容url
 		OauthKey string `json:"oauth_key"` // 扫码登录秘钥

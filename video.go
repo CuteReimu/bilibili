@@ -27,8 +27,8 @@ type VideoInfo struct {
 		Copyright int        `json:"copyright"` // 1：原创，2：转载
 		Pic       string     `json:"pic"`       // 稿件封面图片url
 		Title     string     `json:"title"`     // 稿件标题
-		Pubdate   int        `json:"pubdate"`   // 稿件发布时间戳
-		Ctime     int        `json:"ctime"`     // 用户投稿时间戳
+		Pubdate   int64      `json:"pubdate"`   // 稿件发布时间戳
+		Ctime     int64      `json:"ctime"`     // 用户投稿时间戳
 		Desc      string     `json:"desc"`      // 视频简介
 		DescV2    []struct { // 新版视频简介
 			RawText string `json:"raw_text"` // 简介内容
