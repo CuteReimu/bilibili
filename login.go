@@ -35,7 +35,7 @@ func Captcha() (*CaptchaResult, error) {
 	return std.Captcha()
 }
 func (c *Client) Captcha() (*CaptchaResult, error) {
-	resp, err := c.resty().R().SetQueryParam("source", "main_web").Get("https://passport.bilibili.com/web/captcha/combine")
+	resp, err := c.resty().R().SetQueryParam("source", "main_web").Get("https://passport.bilibili.com/x/passport-login/captcha")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
