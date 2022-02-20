@@ -99,3 +99,14 @@ func (c *Client) resty() *resty.Client {
 	}
 	return client
 }
+
+// 根据key获取指定的cookie值
+func (c *Client) getCookie(name string) string {
+	now := time.Now()
+	for _, cookie := range c.cookies {
+		if cookie.Name == name && now.Before(cookie.Expires) {
+			return cookie.Value
+		}
+	}
+	return ""
+}
