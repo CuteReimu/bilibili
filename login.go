@@ -93,15 +93,15 @@ func (c *Client) LoginWithPassword(userName, password string, captchaResult *Cap
 		return errors.WithStack(err)
 	}
 	resp, err = client.R().SetQueryParams(map[string]string{
-		"captchaType": "6",
-		"username":    userName,
-		"password":    encryptPwd,
-		"keep":        "true",
-		"key":         captchaResult.Data.Token,
-		"challenge":   captchaResult.Data.Geetest.Challenge,
-		"validate":    validate,
-		"seccode":     seccode,
-	}).Post("https://passport.bilibili.com/web/login/v2")
+		"source":    "main_web",
+		"username":  userName,
+		"password":  encryptPwd,
+		"keep":      "true",
+		"token":     captchaResult.Data.Token,
+		"challenge": captchaResult.Data.Geetest.Challenge,
+		"validate":  validate,
+		"seccode":   seccode,
+	}).Post("https://passport.bilibili.com/x/passport-login/web/login")
 	if err != nil {
 		return errors.WithStack(err)
 	}
