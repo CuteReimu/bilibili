@@ -84,12 +84,12 @@ func GetRoomInfo(roomId int) (*GetRoomInfoResult, error) {
 	return std.GetRoomInfo(roomId)
 }
 func (c *Client) GetRoomInfo(roomId int) (*GetRoomInfoResult, error) {
-	resp, err := c.resty().R().SetQueryParam("id", strconv.Itoa(roomId)).Get("https://api.live.bilibili.com/room/v1/Room/update")
+	resp, err := c.resty().R().SetQueryParam("id", strconv.Itoa(roomId)).Get("https://api.live.bilibili.com/room/v1/Room/get_info")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 	if resp.StatusCode() != 200 {
-		return nil, errors.Errorf("修改直播间标题失败，status code：%d", resp.StatusCode())
+		return nil, errors.Errorf("获取直播间状态失败，status code：%d", resp.StatusCode())
 	}
 	var ret *GetRoomInfoResult
 	err = json.Unmarshal(resp.Body(), &ret)
