@@ -42,15 +42,15 @@ go get -u github.com/CuteReimu/bilibili
 首先获取二维码：
 
 ```go
-result, _ := bilibili.GetQRCode()
-buf, _ := result.Encode()
+qrCode, _ := bilibili.GetQRCode()
+buf, _ := qrCode.Encode()
 img, _ := png.Decode(buf) // 或者写入文件 os.WriteFile("qrcode.png", buf, 0644)
 ```
 
 扫码并确认成功后，发送登录请求：
 
 ```go
-err := bilibili.LoginWithQRCode(result)
+err := bilibili.LoginWithQRCode(qrCode)
 if err == nil {
     log.Println("登录成功")
 }
@@ -79,7 +79,7 @@ if err == nil {
 首先用上述方法二相同的方式获取人机验证参数并进行人机验证。然后获取国际地区代码：
 
 ```go
-countryResult, _ := bilibili.ListCountry()
+common, others, _ := bilibili.ListCountry()
 ```
 
 当然，如果你已经确定`cid`的值，这一步可以跳过。中国大陆的`cid`就是1。
@@ -87,13 +87,13 @@ countryResult, _ := bilibili.ListCountry()
 然后发送短信验证码：
 
 ```go
-sendSMSResult, _ := bilibili.SendSMS(tel, cid, captchaResult, validate, seccode)
+captchaKey, _ := bilibili.SendSMS(tel, cid, captchaResult, validate, seccode)
 ```
 
 然后就可以使用手机验证码登录了：
 
 ```go
-err := bilibili.LoginWithSMS(tel, cid, code, sendSMSResult) // 其中code是短信验证码
+err := bilibili.LoginWithSMS(tel, cid, code, captchaKey) // 其中code是短信验证码
 if err == nil {
     log.Println("登录成功")
 }

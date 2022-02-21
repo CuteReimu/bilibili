@@ -37,28 +37,23 @@ type Video struct {
 }
 
 type GetUserVideosResult struct {
-	Code    int      `json:"code"`    // 返回值，0表示成功
-	Message string   `json:"message"` // 错误信息
-	TTL     int      `json:"ttl"`     // 固定值1，作用尚不明确
-	Data    struct { // 信息本体
-		List struct { // 列表信息
-			Tlist map[int]struct { // 投稿视频分区索引
-				Count int    `json:"count"` // 投稿至该分区的视频数
-				Name  string `json:"name"`  // 该分区名称
-				Tid   int    `json:"tid"`   // 该分区tid
-			} `json:"tlist"`
-			Vlist []Video `json:"vlist"` // 投稿视频列表
-		} `json:"list"`
-		Page struct { // 页面信息
-			Count int `json:"count"` // 总计稿件数
-			Pn    int `json:"pn"`    // 当前页码
-			Ps    int `json:"ps"`    // 每页项数
-		} `json:"page"`
-		EpisodicButton struct { // “播放全部“按钮
-			Text string `json:"text"` // 按钮文字
-			Uri  string `json:"uri"`  // 全部播放页url
-		} `json:"episodic_button"`
-	} `json:"data"`
+	List struct { // 列表信息
+		Tlist map[int]struct { // 投稿视频分区索引
+			Count int    `json:"count"` // 投稿至该分区的视频数
+			Name  string `json:"name"`  // 该分区名称
+			Tid   int    `json:"tid"`   // 该分区tid
+		} `json:"tlist"`
+		Vlist []Video `json:"vlist"` // 投稿视频列表
+	} `json:"list"`
+	Page struct { // 页面信息
+		Count int `json:"count"` // 总计稿件数
+		Pn    int `json:"pn"`    // 当前页码
+		Ps    int `json:"ps"`    // 每页项数
+	} `json:"page"`
+	EpisodicButton struct { // “播放全部“按钮
+		Text string `json:"text"` // 按钮文字
+		Uri  string `json:"uri"`  // 全部播放页url
+	} `json:"episodic_button"`
 }
 
 // GetUserVideos 获取用户投稿视频明细
@@ -84,10 +79,11 @@ func (c *Client) GetUserVideos(mid int, order OrderType, tid int, keyword string
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	if resp.StatusCode() != 200 {
-		return nil, errors.Errorf("获取用户视频失败，错误码：%d", resp.StatusCode())
+	data, err := getRespData(resp, "获取用户视频")
+	if err != nil {
+		return nil, err
 	}
 	var ret *GetUserVideosResult
-	err = json.Unmarshal(resp.Body(), &ret)
+	err = json.Unmarshal(data, &ret)
 	return ret, errors.WithStack(err)
 }

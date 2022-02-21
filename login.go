@@ -14,20 +14,15 @@ import (
 )
 
 type CaptchaResult struct {
-	Code    int      `json:"code"`    // 返回值，0是成功
-	Message string   `json:"message"` // 返回信息
-	TTL     int      `json:"ttl"`     // 固定值1，作用尚不明确
-	Data    struct { // 信息本体
-		Geetest struct {
-			Gt        string `json:"gt"`        // 极验id
-			Challenge string `json:"challenge"` // 极验KEY
-		} `json:"geetest"`
-		Tencent struct { // 作用不明确
-			Appid string `json:"appid"`
-		} `json:"tencent"`
-		Token string `json:"token"` // 极验token
-		Type  string `json:"type"`  // 验证方式
-	} `json:"data"`
+	Geetest struct {
+		Gt        string `json:"gt"`        // 极验id
+		Challenge string `json:"challenge"` // 极验KEY
+	} `json:"geetest"`
+	Tencent struct { // 作用不明确
+		Appid string `json:"appid"`
+	} `json:"tencent"`
+	Token string `json:"token"` // 极验token
+	Type  string `json:"type"`  // 验证方式
 }
 
 // Captcha 申请验证码参数
@@ -39,11 +34,12 @@ func (c *Client) Captcha() (*CaptchaResult, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	if resp.StatusCode() != 200 {
-		return nil, errors.Errorf("申请验证码参数失败，status code: %d", resp.StatusCode())
+	data, err := getRespData(resp, "申请验证码参数")
+	if err != nil {
+		return nil, err
 	}
 	var result *CaptchaResult
-	err = json.Unmarshal(resp.Body(), &result)
+	err = json.Unmarshal(data, &result)
 	return result, errors.WithStack(err)
 }
 
@@ -97,8 +93,8 @@ func (c *Client) LoginWithPassword(userName, password string, captchaResult *Cap
 		"username":  userName,
 		"password":  encryptPwd,
 		"keep":      "true",
-		"token":     captchaResult.Data.Token,
-		"challenge": captchaResult.Data.Geetest.Challenge,
+		"token":     captchaResult.Token,
+		"challenge": captchaResult.Geetest.Challenge,
 		"validate":  validate,
 		"seccode":   seccode,
 	}).Post("https://passport.bilibili.com/x/passport-login/web/login")
@@ -125,73 +121,70 @@ type CountryInfo struct {
 	CountryId string `json:"country_id"` // 国家或地区区号
 }
 
-type ListCountryResult struct {
-	Code int      `json:"code"` // 返回值，0表示成功
-	Data struct { // 数据本体
-		Common []*CountryInfo `json:"common"` // 常用国家或地区
-		Others []*CountryInfo `json:"others"` // 其他国家或地区
-	} `json:"data"`
-}
-
 // ListCountry 获取国际地区代码
-func ListCountry() (*ListCountryResult, error) {
+func ListCountry() (common []CountryInfo, others []CountryInfo, err error) {
 	return std.ListCountry()
 }
-func (c *Client) ListCountry() (*ListCountryResult, error) {
+func (c *Client) ListCountry() (common []CountryInfo, others []CountryInfo, err error) {
 	resp, err := c.resty().R().Get("https://passport.bilibili.com/web/generic/country/list")
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, nil, errors.WithStack(err)
 	}
 	if resp.StatusCode() != 200 {
-		return nil, errors.Errorf("获取国际地区代码失败，status code: %d", resp.StatusCode())
+		return nil, nil, errors.Errorf("获取国际地区代码失败，status code: %d", resp.StatusCode())
 	}
-	var result *ListCountryResult
-	err = json.Unmarshal(resp.Body(), &result)
-	return result, errors.WithStack(err)
-}
-
-type SendSMSResult struct {
-	Code    int      `json:"code"`    // 返回值，0表示成功
-	Message string   `json:"message"` // 错误信息
-	Data    struct { // 数据
-		CaptchaKey string `json:"captcha_key"`
-	} `json:"data"`
+	if !gjson.ValidBytes(resp.Body()) {
+		return nil, nil, errors.New("json解析失败：" + resp.String())
+	}
+	res := gjson.ParseBytes(resp.Body())
+	code := res.Get("code").Int()
+	if code != 0 {
+		return nil, nil, errors.Errorf("获取国际地区代码失败，返回值：%d", code)
+	}
+	err = json.Unmarshal([]byte(res.Get("data.common").Raw), &common)
+	if err != nil {
+		return nil, nil, errors.WithStack(err)
+	}
+	err = json.Unmarshal([]byte(res.Get("data.others").Raw), &others)
+	if err != nil {
+		return nil, nil, errors.WithStack(err)
+	}
+	return common, others, nil
 }
 
 // SendSMS 发送短信验证码
-func SendSMS(tel, cid int, captchaResult *CaptchaResult, validate, seccode string) (*SendSMSResult, error) {
+func SendSMS(tel, cid int, captchaResult *CaptchaResult, validate, seccode string) (captchaKey string, err error) {
 	return std.SendSMS(tel, cid, captchaResult, validate, seccode)
 }
-func (c *Client) SendSMS(tel, cid int, captchaResult *CaptchaResult, validate, seccode string) (*SendSMSResult, error) {
+func (c *Client) SendSMS(tel, cid int, captchaResult *CaptchaResult, validate, seccode string) (captchaKey string, err error) {
 	if captchaResult == nil {
-		return nil, errors.New("请先进行极验人机验证")
+		return "", errors.New("请先进行极验人机验证")
 	}
 	resp, err := c.resty().R().SetQueryParams(map[string]string{
 		"tel":       strconv.Itoa(tel),
 		"cid":       strconv.Itoa(cid),
 		"source":    "main_web",
-		"token":     captchaResult.Data.Token,
-		"challenge": captchaResult.Data.Geetest.Challenge,
+		"token":     captchaResult.Token,
+		"challenge": captchaResult.Geetest.Challenge,
 		"validate":  validate,
 		"seccode":   seccode,
 	}).Post("https://passport.bilibili.com/x/passport-login/web/sms/send")
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return "", errors.WithStack(err)
 	}
-	if resp.StatusCode() != 200 {
-		return nil, errors.Errorf("发送短信验证码失败，status code: %d", resp.StatusCode())
+	data, err := getRespData(resp, "发送短信验证码")
+	if err != nil {
+		return "", err
 	}
-	var result *SendSMSResult
-	err = json.Unmarshal(resp.Body(), &result)
-	return result, errors.WithStack(err)
+	return gjson.GetBytes(data, "captcha_key").String(), nil
 }
 
 // LoginWithSMS 使用短信验证码登录
-func LoginWithSMS(tel, cid, code int, sendSMSResult *SendSMSResult) error {
-	return std.LoginWithSMS(tel, cid, code, sendSMSResult)
+func LoginWithSMS(tel, cid, code int, captchaKey string) error {
+	return std.LoginWithSMS(tel, cid, code, captchaKey)
 }
-func (c *Client) LoginWithSMS(tel, cid, code int, sendSMSResult *SendSMSResult) error {
-	if sendSMSResult == nil {
+func (c *Client) LoginWithSMS(tel, cid, code int, captchaKey string) error {
+	if len(captchaKey) == 0 {
 		return errors.New("请先发送短信")
 	}
 	resp, err := c.resty().R().SetQueryParams(map[string]string{
@@ -199,7 +192,7 @@ func (c *Client) LoginWithSMS(tel, cid, code int, sendSMSResult *SendSMSResult) 
 		"tel":         strconv.Itoa(tel),
 		"code":        strconv.Itoa(code),
 		"source":      "main_web",
-		"captcha_key": sendSMSResult.Data.CaptchaKey,
+		"captcha_key": captchaKey,
 	}).Post("https://passport.bilibili.com/x/passport-login/web/login/sms")
 	if err != nil {
 		return errors.WithStack(err)
@@ -218,48 +211,44 @@ func (c *Client) LoginWithSMS(tel, cid, code int, sendSMSResult *SendSMSResult) 
 	return nil
 }
 
-type GetQRCodeResult struct {
-	Code   int      `json:"code"`   // 返回值，0表示成功
-	Status bool     `json:"status"` // 作用尚不明确
-	Ts     int64    `json:"ts"`     // 请求时间戳
-	Data   struct { // 信息本体
-		Url      string `json:"url"`       // 二维码内容url
-		OauthKey string `json:"oauth_key"` // 扫码登录秘钥
-	} `json:"data"`
+type QRCode struct {
+	Url      string `json:"url"`       // 二维码内容url
+	OauthKey string `json:"oauth_key"` // 扫码登录秘钥
 }
 
 // Encode a QRCode and return a raw PNG image.
-func (result *GetQRCodeResult) Encode() ([]byte, error) {
-	return qrcode.Encode(result.Data.Url, qrcode.Medium, 256)
+func (result *QRCode) Encode() ([]byte, error) {
+	return qrcode.Encode(result.Url, qrcode.Medium, 256)
 }
 
 // GetQRCode 申请二维码URL及扫码密钥
-func GetQRCode() (*GetQRCodeResult, error) {
+func GetQRCode() (*QRCode, error) {
 	return std.GetQRCode()
 }
-func (c *Client) GetQRCode() (*GetQRCodeResult, error) {
+func (c *Client) GetQRCode() (*QRCode, error) {
 	resp, err := c.resty().R().Get("https://passport.bilibili.com/qrcode/getLoginUrl")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	if resp.StatusCode() != 200 {
-		return nil, errors.New("申请二维码失败")
+	data, err := getRespData(resp, "申请二维码")
+	if err != nil {
+		return nil, err
 	}
-	var result *GetQRCodeResult
-	err = json.Unmarshal(resp.Body(), &result)
+	var result *QRCode
+	err = json.Unmarshal(data, &result)
 	return result, errors.WithStack(err)
 }
 
 // LoginWithQRCode 使用扫码登录
-func LoginWithQRCode(getQRCodeResult *GetQRCodeResult) error {
-	return std.LoginWithQRCode(getQRCodeResult)
+func LoginWithQRCode(qrCode *QRCode) error {
+	return std.LoginWithQRCode(qrCode)
 }
-func (c *Client) LoginWithQRCode(getQRCodeResult *GetQRCodeResult) error {
-	if getQRCodeResult == nil {
+func (c *Client) LoginWithQRCode(qrCode *QRCode) error {
+	if qrCode == nil {
 		return errors.New("请先获取二维码")
 	}
 	resp, err := c.resty().R().SetQueryParams(map[string]string{
-		"oauthKey": getQRCodeResult.Data.OauthKey,
+		"oauthKey": qrCode.OauthKey,
 		"gourl":    "https://www.bilibili.com",
 	}).Post("https://passport.bilibili.com/qrcode/getLoginInfo")
 	if err != nil {
