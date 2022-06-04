@@ -108,8 +108,9 @@ func (c *Client) LoginWithPassword(userName, password string, captchaResult *Cap
 		return errors.Errorf("json invalid: %s", resp.String())
 	}
 	code := gjson.GetBytes(resp.Body(), "code").Int()
-	if code != 0 {
-		return errors.Errorf("登录bilibili失败，错误码：%d，错误信息：%s", code, gjson.GetBytes(resp.Body(), "message").String())
+	status := gjson.GetBytes(resp.Body(), "data.status").Int()
+	if code != 0 || status != 0 {
+		return errors.Errorf("登录bilibili失败，错误码：%d，状态码：%d, 错误信息：%s", code, status, gjson.GetBytes(resp.Body(), "message").String())
 	}
 	c.SetCookies(resp.Cookies())
 	return nil
@@ -204,8 +205,9 @@ func (c *Client) LoginWithSMS(tel, cid, code int, captchaKey string) error {
 		return errors.Errorf("json invalid: %s", resp.String())
 	}
 	retCode := gjson.GetBytes(resp.Body(), "code").Int()
-	if retCode != 0 {
-		return errors.Errorf("登录bilibili失败，错误码：%d，错误信息：%s", retCode, gjson.GetBytes(resp.Body(), "message").String())
+	status := gjson.GetBytes(resp.Body(), "data.status").Int()
+	if retCode != 0 || status != 0 {
+		return errors.Errorf("登录bilibili失败，错误码：%d，状态码：%d, 错误信息：%s", retCode, status, gjson.GetBytes(resp.Body(), "message").String())
 	}
 	c.SetCookies(resp.Cookies())
 	return nil
