@@ -189,3 +189,41 @@ func (c *Client) GetVideoInfoByShortUrl(shortUrl string) (*VideoInfo, error) {
 	}
 	return GetVideoInfoByBvid(ret[0][0])
 }
+
+// GetRecommendVideoByAvid 通过Avid获取推荐视频
+func GetRecommendVideoByAvid(avid int) ([]*VideoInfo, error) {
+	return std.GetRecommendVideoByAvid(avid)
+}
+func (c *Client) GetRecommendVideoByAvid(avid int) ([]*VideoInfo, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/web-interface/archive/related")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取推荐视频")
+	if err != nil {
+		return nil, err
+	}
+	var ret []*VideoInfo
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+// GetRecommendVideoByBvid 通过Bvid获取推荐视频
+func GetRecommendVideoByBvid(bvid string) ([]*VideoInfo, error) {
+	return std.GetRecommendVideoByBvid(bvid)
+}
+func (c *Client) GetRecommendVideoByBvid(bvid string) ([]*VideoInfo, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/web-interface/archive/related")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取推荐视频")
+	if err != nil {
+		return nil, err
+	}
+	var ret []*VideoInfo
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
