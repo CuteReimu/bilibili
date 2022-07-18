@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/pkg/errors"
 	"github.com/skip2/go-qrcode"
 	"github.com/tidwall/gjson"
@@ -227,6 +228,12 @@ type QRCode struct {
 // Encode a QRCode and return a raw PNG image.
 func (result *QRCode) Encode() ([]byte, error) {
 	return qrcode.Encode(result.Url, qrcode.Medium, 256)
+}
+
+// Print the QRCode in the console
+func (result *QRCode) Print() {
+	front, back := qrcodeTerminal.ConsoleColors.BrightBlack, qrcodeTerminal.ConsoleColors.BrightWhite
+	qrcodeTerminal.New2(front, back, qrcodeTerminal.QRCodeRecoveryLevels.Low).Get(result.Url).Print()
 }
 
 // GetQRCode 申请二维码URL及扫码密钥
