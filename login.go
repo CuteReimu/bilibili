@@ -220,8 +220,8 @@ func (c *Client) LoginWithSMS(tel, cid, code int, captchaKey string) error {
 }
 
 type QRCode struct {
-	Url      string `json:"url"`       // 二维码内容url
-	OauthKey string `json:"oauth_key"` // 扫码登录秘钥
+	Url      string `json:"url"`      // 二维码内容url
+	OauthKey string `json:"oauthKey"` // 扫码登录秘钥
 }
 
 // Encode a QRCode and return a raw PNG image.
