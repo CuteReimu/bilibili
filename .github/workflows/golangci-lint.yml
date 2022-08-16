@@ -9,6 +9,9 @@ on:
 jobs:
 
   build:
+    strategy:
+      matrix:
+        go: [ 1.17, 1.18 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,13 +19,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: ${{ matrix.go }}
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
-          args: --timeout 3m0s
-          skip-go-installation: true
+          version: latest
+          args: --out-${NO_FUTURE}format line-number --timeout 3m0s
 
       - name: Build
         run: go build -v ./...
