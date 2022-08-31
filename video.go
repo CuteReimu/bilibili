@@ -7,6 +7,7 @@ import (
 	"github.com/tidwall/gjson"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var regBv = regexp.MustCompile(`(?i)bv([\dA-Za-z]{10})`)
@@ -621,4 +622,291 @@ func (c *Client) GetVideoTagsByShortUrl(shortUrl string) ([]*VideoTag, error) {
 		return nil, err
 	}
 	return GetVideoTagsByBvid(bvid)
+}
+
+// LikeVideoByAvid 通过Avid点赞视频，like为false表示取消点赞
+func LikeVideoByAvid(avid int, like bool) error {
+	return std.LikeVideoByAvid(avid, like)
+}
+func (c *Client) LikeVideoByAvid(avid int, like bool) error {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return errors.New("B站登录过期")
+	}
+	var likeNum string
+	if like {
+		likeNum = "1"
+	} else {
+		likeNum = "2"
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"aid":  strconv.Itoa(avid),
+		"like": likeNum,
+		"csrf": biliJct,
+	}).Post("https://api.bilibili.com/x/web-interface/archive/like")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	_, err = getRespData(resp, "点赞视频")
+	return err
+}
+
+// LikeVideoByBvid 通过Bvid点赞视频，like为false表示取消点赞
+func LikeVideoByBvid(bvid string, like bool) error {
+	return std.LikeVideoByBvid(bvid, like)
+}
+func (c *Client) LikeVideoByBvid(bvid string, like bool) error {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return errors.New("B站登录过期")
+	}
+	var likeNum string
+	if like {
+		likeNum = "1"
+	} else {
+		likeNum = "2"
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"bvid": bvid,
+		"like": likeNum,
+		"csrf": biliJct,
+	}).Post("https://api.bilibili.com/x/web-interface/archive/like")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	_, err = getRespData(resp, "点赞视频")
+	return err
+}
+
+// LikeVideoByShortUrl 通过短链接点赞视频，like为false表示取消点赞
+func LikeVideoByShortUrl(shortUrl string, like bool) error {
+	return std.LikeVideoByShortUrl(shortUrl, like)
+}
+func (c *Client) LikeVideoByShortUrl(shortUrl string, like bool) error {
+	bvid, err := c.GetBvidByShortUrl(shortUrl)
+	if err != nil {
+		return err
+	}
+	return LikeVideoByBvid(bvid, like)
+}
+
+// CoinVideoByAvid 通过Avid投币视频，multiply为投币数量，上限为2，like为是否附加点赞。返回是否附加点赞成功
+func CoinVideoByAvid(avid int, multiply int, like bool) (bool, error) {
+	return std.CoinVideoByAvid(avid, multiply, like)
+}
+func (c *Client) CoinVideoByAvid(avid int, multiply int, like bool) (bool, error) {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return false, errors.New("B站登录过期")
+	}
+	var likeNum string
+	if like {
+		likeNum = "1"
+	} else {
+		likeNum = "0"
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"aid":         strconv.Itoa(avid),
+		"select_like": likeNum,
+		"multiply":    strconv.Itoa(multiply),
+		"csrf":        biliJct,
+	}).Post("https://api.bilibili.com/x/web-interface/coin/add")
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "投币视频")
+	if err != nil {
+		return false, err
+	}
+	return gjson.GetBytes(data, "like").Bool(), nil
+}
+
+// CoinVideoByBvid 通过Bvid投币视频，multiply为投币数量，上限为2，like为是否附加点赞。返回是否附加点赞成功
+func CoinVideoByBvid(bvid string, multiply int, like bool) (bool, error) {
+	return std.CoinVideoByBvid(bvid, multiply, like)
+}
+func (c *Client) CoinVideoByBvid(bvid string, multiply int, like bool) (bool, error) {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return false, errors.New("B站登录过期")
+	}
+	var likeNum string
+	if like {
+		likeNum = "1"
+	} else {
+		likeNum = "0"
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"bvid":        bvid,
+		"select_like": likeNum,
+		"multiply":    strconv.Itoa(multiply),
+		"csrf":        biliJct,
+	}).Post("https://api.bilibili.com/x/web-interface/coin/add")
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "投币视频")
+	if err != nil {
+		return false, err
+	}
+	return gjson.GetBytes(data, "like").Bool(), nil
+}
+
+// CoinVideoByShortUrl 通过短链接投币视频，multiply为投币数量，上限为2，like为是否附加点赞。返回是否附加点赞成功
+func CoinVideoByShortUrl(shortUrl string, multiply int, like bool) (bool, error) {
+	return std.CoinVideoByShortUrl(shortUrl, multiply, like)
+}
+func (c *Client) CoinVideoByShortUrl(shortUrl string, multiply int, like bool) (bool, error) {
+	bvid, err := c.GetBvidByShortUrl(shortUrl)
+	if err != nil {
+		return false, err
+	}
+	return CoinVideoByBvid(bvid, multiply, like)
+}
+
+// FavourVideoByAvid 通过Avid收藏视频，addMediaIds和delMediaIds为要增加/删除的收藏列表，非必填。返回是否为未关注用户收藏
+func FavourVideoByAvid(avid int, addMediaIds, delMediaIds []int) (bool, error) {
+	return std.FavourVideoByAvid(avid, addMediaIds, delMediaIds)
+}
+func (c *Client) FavourVideoByAvid(avid int, addMediaIds, delMediaIds []int) (bool, error) {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return false, errors.New("B站登录过期")
+	}
+	var addMediaIdStr, delMediaIdStr []string
+	for _, id := range addMediaIds {
+		addMediaIdStr = append(addMediaIdStr, strconv.Itoa(id))
+	}
+	for _, id := range delMediaIds {
+		delMediaIdStr = append(delMediaIdStr, strconv.Itoa(id))
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"rid":           strconv.Itoa(avid),
+		"type":          "2",
+		"add_media_ids": strings.Join(addMediaIdStr, ","),
+		"del_media_ids": strings.Join(delMediaIdStr, ","),
+		"csrf":          biliJct,
+	}).Post("https://api.bilibili.com/medialist/gateway/coll/resource/deal")
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "收藏视频")
+	if err != nil {
+		return false, err
+	}
+	return gjson.GetBytes(data, "prompt").Bool(), nil
+}
+
+// FavourVideoByBvid 通过Bvid收藏视频，addMediaIds和delMediaIds为要增加/删除的收藏列表，非必填。返回是否为未关注用户收藏
+func FavourVideoByBvid(bvid string, addMediaIds, delMediaIds []int) (bool, error) {
+	return std.FavourVideoByBvid(bvid, addMediaIds, delMediaIds)
+}
+func (c *Client) FavourVideoByBvid(bvid string, addMediaIds, delMediaIds []int) (bool, error) {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return false, errors.New("B站登录过期")
+	}
+	var addMediaIdStr, delMediaIdStr []string
+	for _, id := range addMediaIds {
+		addMediaIdStr = append(addMediaIdStr, strconv.Itoa(id))
+	}
+	for _, id := range delMediaIds {
+		delMediaIdStr = append(delMediaIdStr, strconv.Itoa(id))
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"rid":           bvid,
+		"type":          "2",
+		"add_media_ids": strings.Join(addMediaIdStr, ","),
+		"del_media_ids": strings.Join(delMediaIdStr, ","),
+		"csrf":          biliJct,
+	}).Post("https://api.bilibili.com/medialist/gateway/coll/resource/deal")
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "收藏视频")
+	if err != nil {
+		return false, err
+	}
+	return gjson.GetBytes(data, "prompt").Bool(), nil
+}
+
+// FavourVideoByShortUrl 通过短链接收藏视频，addMediaIds和delMediaIds为要增加/删除的收藏列表，非必填。返回是否为未关注用户收藏
+func FavourVideoByShortUrl(shortUrl string, addMediaIds, delMediaIds []int) (bool, error) {
+	return std.FavourVideoByShortUrl(shortUrl, addMediaIds, delMediaIds)
+}
+func (c *Client) FavourVideoByShortUrl(shortUrl string, addMediaIds, delMediaIds []int) (bool, error) {
+	bvid, err := c.GetBvidByShortUrl(shortUrl)
+	if err != nil {
+		return false, err
+	}
+	return FavourVideoByBvid(bvid, addMediaIds, delMediaIds)
+}
+
+type LikeCoinFavourResult struct {
+	Like     bool `json:"like"`     // 是否点赞成功
+	Coin     bool `json:"coin"`     // 是否投币成功
+	Fav      bool `json:"fav"`      // 是否收藏成功
+	Multiply int  `json:"multiply"` // 投币枚数
+}
+
+// LikeCoinFavourVideoByAvid 通过Avid一键三连视频
+func LikeCoinFavourVideoByAvid(avid int) (*LikeCoinFavourResult, error) {
+	return std.LikeCoinFavourVideoByAvid(avid)
+}
+func (c *Client) LikeCoinFavourVideoByAvid(avid int) (*LikeCoinFavourResult, error) {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return nil, errors.New("B站登录过期")
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"aid":  strconv.Itoa(avid),
+		"csrf": biliJct,
+	}).Post("http://api.bilibili.com/x/web-interface/archive/like/triple")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "一键三连视频")
+	if err != nil {
+		return nil, err
+	}
+	var ret *LikeCoinFavourResult
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+// LikeCoinFavourVideoByBvid 通过Bvid一键三连视频
+func LikeCoinFavourVideoByBvid(bvid string) (*LikeCoinFavourResult, error) {
+	return std.LikeCoinFavourVideoByBvid(bvid)
+}
+func (c *Client) LikeCoinFavourVideoByBvid(bvid string) (*LikeCoinFavourResult, error) {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return nil, errors.New("B站登录过期")
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"bvid": bvid,
+		"csrf": biliJct,
+	}).Post("http://api.bilibili.com/x/web-interface/archive/like/triple")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "一键三连视频")
+	if err != nil {
+		return nil, err
+	}
+	var ret *LikeCoinFavourResult
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+// LikeCoinFavourVideoByShortUrl 通过短链接一键三连视频
+func LikeCoinFavourVideoByShortUrl(shortUrl string) (*LikeCoinFavourResult, error) {
+	return std.LikeCoinFavourVideoByShortUrl(shortUrl)
+}
+func (c *Client) LikeCoinFavourVideoByShortUrl(shortUrl string) (*LikeCoinFavourResult, error) {
+	bvid, err := c.GetBvidByShortUrl(shortUrl)
+	if err != nil {
+		return nil, err
+	}
+	return LikeCoinFavourVideoByBvid(bvid)
 }
