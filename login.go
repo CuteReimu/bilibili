@@ -31,7 +31,8 @@ func Captcha() (*CaptchaResult, error) {
 	return std.Captcha()
 }
 func (c *Client) Captcha() (*CaptchaResult, error) {
-	resp, err := c.resty().R().SetQueryParam("source", "main_web").Get("https://passport.bilibili.com/x/passport-login/captcha")
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("source", "main_web").Get("https://passport.bilibili.com/x/passport-login/captcha")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -74,7 +75,8 @@ func (c *Client) LoginWithPassword(userName, password string, captchaResult *Cap
 		return errors.New("请先进行极验人机验证")
 	}
 	client := c.resty()
-	resp, err := client.R().SetQueryParam("act", "getkey").Get("https://passport.bilibili.com/login")
+	resp, err := client.R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("act", "getkey").Get("https://passport.bilibili.com/login")
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -89,7 +91,7 @@ func (c *Client) LoginWithPassword(userName, password string, captchaResult *Cap
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	resp, err = client.R().SetQueryParams(map[string]string{
+	resp, err = client.R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"source":    "main_web",
 		"username":  userName,
 		"password":  encryptPwd,
@@ -131,7 +133,8 @@ func ListCountry() (common []CountryInfo, others []CountryInfo, err error) {
 	return std.ListCountry()
 }
 func (c *Client) ListCountry() (common []CountryInfo, others []CountryInfo, err error) {
-	resp, err := c.resty().R().Get("https://passport.bilibili.com/web/generic/country/list")
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		Get("https://passport.bilibili.com/web/generic/country/list")
 	if err != nil {
 		return nil, nil, errors.WithStack(err)
 	}
@@ -165,7 +168,7 @@ func (c *Client) SendSMS(tel, cid int, captchaResult *CaptchaResult, validate, s
 	if captchaResult == nil {
 		return "", errors.New("请先进行极验人机验证")
 	}
-	resp, err := c.resty().R().SetQueryParams(map[string]string{
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"tel":       strconv.Itoa(tel),
 		"cid":       strconv.Itoa(cid),
 		"source":    "main_web",
@@ -192,7 +195,7 @@ func (c *Client) LoginWithSMS(tel, cid, code int, captchaKey string) error {
 	if len(captchaKey) == 0 {
 		return errors.New("请先发送短信")
 	}
-	resp, err := c.resty().R().SetQueryParams(map[string]string{
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"cid":         strconv.Itoa(cid),
 		"tel":         strconv.Itoa(tel),
 		"code":        strconv.Itoa(code),
@@ -241,7 +244,8 @@ func GetQRCode() (*QRCode, error) {
 	return std.GetQRCode()
 }
 func (c *Client) GetQRCode() (*QRCode, error) {
-	resp, err := c.resty().R().Get("https://passport.bilibili.com/qrcode/getLoginUrl")
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		Get("https://passport.bilibili.com/qrcode/getLoginUrl")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -262,7 +266,7 @@ func (c *Client) LoginWithQRCode(qrCode *QRCode) error {
 	if qrCode == nil {
 		return errors.New("请先获取二维码")
 	}
-	resp, err := c.resty().R().SetQueryParams(map[string]string{
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"oauthKey": qrCode.OauthKey,
 		"gourl":    "https://www.bilibili.com",
 	}).Post("https://passport.bilibili.com/qrcode/getLoginInfo")

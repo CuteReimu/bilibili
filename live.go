@@ -80,7 +80,7 @@ func GetRoomInfo(roomId int) (*RoomInfo, error) {
 	return std.GetRoomInfo(roomId)
 }
 func (c *Client) GetRoomInfo(roomId int) (*RoomInfo, error) {
-	resp, err := c.resty().R().SetQueryParam("id", strconv.Itoa(roomId)).Get("https://api.live.bilibili.com/room/v1/Room/get_info")
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("id", strconv.Itoa(roomId)).Get("https://api.live.bilibili.com/room/v1/Room/get_info")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -108,7 +108,7 @@ func (c *Client) UpdateLive(roomId int, title string) error {
 	if len(biliJct) == 0 {
 		return errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetQueryParams(map[string]string{
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"room_id": strconv.Itoa(roomId),
 		"title":   title,
 		"csrf":    biliJct,
@@ -158,7 +158,7 @@ func (c *Client) StartLive(roomId, area int) (*StartLiveResult, error) {
 	if len(biliJct) == 0 {
 		return nil, errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetQueryParams(map[string]string{
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"room_id":  strconv.Itoa(roomId),
 		"platform": "pc",
 		"area_v2":  strconv.Itoa(area),
@@ -185,7 +185,7 @@ func (c *Client) StopLive(roomId int) (bool, error) {
 	if len(biliJct) == 0 {
 		return false, errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetQueryParams(map[string]string{
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"room_id": strconv.Itoa(roomId),
 		"csrf":    biliJct,
 	}).Post("https://api.live.bilibili.com/room/v1/Room/stopLive")
