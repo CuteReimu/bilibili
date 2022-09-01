@@ -13,8 +13,8 @@ import (
 var regBv = regexp.MustCompile(`(?i)bv([\dA-Za-z]{10})`)
 
 // GetBvidByShortUrl 根据视频短id获取bvid
-func GetBvidByShortUrl(bvid string) (string, error) {
-	return std.GetBvidByShortUrl(bvid)
+func GetBvidByShortUrl(shortUrl string) (string, error) {
+	return std.GetBvidByShortUrl(shortUrl)
 }
 func (c *Client) GetBvidByShortUrl(shortUrl string) (string, error) {
 	resp, err := c.resty().SetRedirectPolicy(resty.NoRedirectPolicy()).R().Get(shortUrl)
