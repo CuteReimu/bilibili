@@ -920,7 +920,7 @@ type VideoOnlineInfo struct {
 	} `json:"show_switch"`
 }
 
-// GetVideoOnlineInfoByAvid 通过Avid获取视频在线人数视频
+// GetVideoOnlineInfoByAvid 通过Avid获取视频在线人数
 func GetVideoOnlineInfoByAvid(avid, cid int) (*VideoOnlineInfo, error) {
 	return std.GetVideoOnlineInfoByAvid(avid, cid)
 }
@@ -932,7 +932,7 @@ func (c *Client) GetVideoOnlineInfoByAvid(avid, cid int) (*VideoOnlineInfo, erro
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	data, err := getRespData(resp, "获取视频在线人数视频")
+	data, err := getRespData(resp, "获取视频在线人数")
 	if err != nil {
 		return nil, err
 	}
@@ -1000,4 +1000,73 @@ func (c *Client) GetVideoPbPInfo(cid int) (*VideoPbPInfo, error) {
 	var ret *VideoPbPInfo
 	err = json.Unmarshal(data, &ret)
 	return ret, errors.WithStack(err)
+}
+
+type VideoStatusNumber struct {
+	Aid        int         `json:"aid"`        // 稿件avid
+	Bvid       string      `json:"bvid"`       // 稿件bvid
+	View       interface{} `json:"view"`       // 播放次数（有值则为一个int，如果被屏蔽了则为字符串"--"）
+	Danmaku    int         `json:"danmaku"`    // 弹幕条数
+	Reply      int         `json:"reply"`      // 评论条数
+	Favorite   int         `json:"favorite"`   // 收藏人数
+	Coin       int         `json:"coin"`       // 投币枚数
+	Share      int         `json:"share"`      // 分享次数
+	Like       int         `json:"like"`       // 获赞次数
+	NowRank    int         `json:"now_rank"`   // 固定值0，作用尚不明确
+	HisRank    int         `json:"his_rank"`   // 历史最高排行
+	Dislike    int         `json:"dislike"`    // 固定值0，作用尚不明确
+	NoReprint  int         `json:"no_reprint"` // 禁止转载标志，0：无，1：禁止
+	Copyright  int         `json:"copyright"`  // 版权标志，1：自制，2：转载
+	ArgueMsg   string      `json:"argue_msg"`  // 警告信息
+	Evaluation string      `json:"evaluation"` // 视频评分
+}
+
+// GetVideoStatusNumberByAvid 通过Avid获取视频状态数视频
+func GetVideoStatusNumberByAvid(avid int) (*VideoStatusNumber, error) {
+	return std.GetVideoStatusNumberByAvid(avid)
+}
+func (c *Client) GetVideoStatusNumberByAvid(avid int) (*VideoStatusNumber, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/web-interface/archive/stat")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取视频状态数视频")
+	if err != nil {
+		return nil, err
+	}
+	var ret *VideoStatusNumber
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+// GetVideoStatusNumberByBvid 通过Bvid获取视频状态数
+func GetVideoStatusNumberByBvid(bvid string) (*VideoStatusNumber, error) {
+	return std.GetVideoStatusNumberByBvid(bvid)
+}
+func (c *Client) GetVideoStatusNumberByBvid(bvid string) (*VideoStatusNumber, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/web-interface/archive/stat")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取视频状态数")
+	if err != nil {
+		return nil, err
+	}
+	var ret *VideoStatusNumber
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+// GetVideoStatusNumberByShortUrl 通过短链接获取视频状态数
+func GetVideoStatusNumberByShortUrl(shortUrl string) (*VideoStatusNumber, error) {
+	return std.GetVideoStatusNumberByShortUrl(shortUrl)
+}
+func (c *Client) GetVideoStatusNumberByShortUrl(shortUrl string) (*VideoStatusNumber, error) {
+	bvid, err := c.GetBvidByShortUrl(shortUrl)
+	if err != nil {
+		return nil, err
+	}
+	return GetVideoStatusNumberByBvid(bvid)
 }
