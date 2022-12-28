@@ -861,7 +861,7 @@ func (c *Client) LikeCoinFavourVideoByAvid(avid int) (*LikeCoinFavourResult, err
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"aid":  strconv.Itoa(avid),
 		"csrf": biliJct,
-	}).Post("http://api.bilibili.com/x/web-interface/archive/like/triple")
+	}).Post("https://api.bilibili.com/x/web-interface/archive/like/triple")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -886,7 +886,7 @@ func (c *Client) LikeCoinFavourVideoByBvid(bvid string) (*LikeCoinFavourResult, 
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"bvid": bvid,
 		"csrf": biliJct,
-	}).Post("http://api.bilibili.com/x/web-interface/archive/like/triple")
+	}).Post("https://api.bilibili.com/x/web-interface/archive/like/triple")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -909,4 +909,67 @@ func (c *Client) LikeCoinFavourVideoByShortUrl(shortUrl string) (*LikeCoinFavour
 		return nil, err
 	}
 	return LikeCoinFavourVideoByBvid(bvid)
+}
+
+type VideoOnlineInfo struct {
+	Total      string `json:"total"`
+	Count      string `json:"count"`
+	ShowSwitch struct {
+		Total bool `json:"total"`
+		Count bool `json:"count"`
+	} `json:"show_switch"`
+}
+
+// GetVideoOnlineInfoByAvid 通过Avid获取视频在线人数视频
+func GetVideoOnlineInfoByAvid(avid, cid int) (*VideoOnlineInfo, error) {
+	return std.GetVideoOnlineInfoByAvid(avid, cid)
+}
+func (c *Client) GetVideoOnlineInfoByAvid(avid, cid int) (*VideoOnlineInfo, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"aid": strconv.Itoa(avid),
+		"cid": strconv.Itoa(cid),
+	}).Get("https://api.bilibili.com/x/player/online/total")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取视频在线人数视频")
+	if err != nil {
+		return nil, err
+	}
+	var ret *VideoOnlineInfo
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+// GetVideoOnlineInfoByBvid 通过Bvid获取视频在线人数
+func GetVideoOnlineInfoByBvid(bvid string, cid int) (*VideoOnlineInfo, error) {
+	return std.GetVideoOnlineInfoByBvid(bvid, cid)
+}
+func (c *Client) GetVideoOnlineInfoByBvid(bvid string, cid int) (*VideoOnlineInfo, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"bvid": bvid,
+		"cid":  strconv.Itoa(cid),
+	}).Get("https://api.bilibili.com/x/player/online/total")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取视频在线人数")
+	if err != nil {
+		return nil, err
+	}
+	var ret *VideoOnlineInfo
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+// GetVideoOnlineInfoByShortUrl 通过短链接获取视频在线人数
+func GetVideoOnlineInfoByShortUrl(shortUrl string, cid int) (*VideoOnlineInfo, error) {
+	return std.GetVideoOnlineInfoByShortUrl(shortUrl, cid)
+}
+func (c *Client) GetVideoOnlineInfoByShortUrl(shortUrl string, cid int) (*VideoOnlineInfo, error) {
+	bvid, err := c.GetBvidByShortUrl(shortUrl)
+	if err != nil {
+		return nil, err
+	}
+	return GetVideoOnlineInfoByBvid(bvid, cid)
 }
