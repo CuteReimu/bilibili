@@ -624,6 +624,48 @@ func (c *Client) GetVideoTagsByShortUrl(shortUrl string) ([]*VideoTag, error) {
 	return GetVideoTagsByBvid(bvid)
 }
 
+// LikeVideoTag 点赞视频TAG，重复访问为取消
+func LikeVideoTag(avid, tagId int) error {
+	return std.LikeVideoTag(avid, tagId)
+}
+func (c *Client) LikeVideoTag(avid, tagId int) error {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return errors.New("B站登录过期")
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"aid":    strconv.Itoa(avid),
+		"tag_id": strconv.Itoa(tagId),
+		"csrf":   biliJct,
+	}).Post("https://api.bilibili.com/x/tag/archive/like2")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	_, err = getRespData(resp, "点赞视频TAG")
+	return err
+}
+
+// HateVideoTag 点踩视频TAG，重复访问为取消
+func HateVideoTag(avid, tagId int) error {
+	return std.HateVideoTag(avid, tagId)
+}
+func (c *Client) HateVideoTag(avid, tagId int) error {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return errors.New("B站登录过期")
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"aid":    strconv.Itoa(avid),
+		"tag_id": strconv.Itoa(tagId),
+		"csrf":   biliJct,
+	}).Post("https://api.bilibili.com/x/tag/archive/hate2")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	_, err = getRespData(resp, "点踩视频TAG")
+	return err
+}
+
 // LikeVideoByAvid 通过Avid点赞视频，like为false表示取消点赞
 func LikeVideoByAvid(avid int, like bool) error {
 	return std.LikeVideoByAvid(avid, like)
