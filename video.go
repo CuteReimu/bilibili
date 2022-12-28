@@ -912,11 +912,11 @@ func (c *Client) LikeCoinFavourVideoByShortUrl(shortUrl string) (*LikeCoinFavour
 }
 
 type VideoOnlineInfo struct {
-	Total      string `json:"total"`
-	Count      string `json:"count"`
-	ShowSwitch struct {
-		Total bool `json:"total"`
-		Count bool `json:"count"`
+	Total      string   `json:"total"` // 所有终端总计人数，例如“10万+”
+	Count      string   `json:"count"` // web端实时在线人数
+	ShowSwitch struct { // 数据显示控制
+		Total bool `json:"total"` // 是否展示所有终端总计人数
+		Count bool `json:"count"` // 是否展示web端实时在线人数
 	} `json:"show_switch"`
 }
 
@@ -972,4 +972,32 @@ func (c *Client) GetVideoOnlineInfoByShortUrl(shortUrl string, cid int) (*VideoO
 		return nil, err
 	}
 	return GetVideoOnlineInfoByBvid(bvid, cid)
+}
+
+type VideoPbPInfo struct {
+	StepSec int      `json:"step_sec"` // 采样间隔时间（单位为秒，由视频时长决定）
+	Tagstr  string   `json:"tagstr"`   // 作用尚不明确
+	Events  struct { // 数据本体
+		Default []float64 `json:"default"` // 顶点值列表（顶点个数由视频时长和采样时间决定）
+	} `json:"events"`
+	Debug string `json:"debug"` // 调试信息（json字串）
+}
+
+// GetVideoPbPInfo 获取视频弹幕趋势顶点列表（高能进度条）
+func GetVideoPbPInfo(cid int) (*VideoPbPInfo, error) {
+	return std.GetVideoPbPInfo(cid)
+}
+func (c *Client) GetVideoPbPInfo(cid int) (*VideoPbPInfo, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("cid", strconv.Itoa(cid)).Get("https://api.bilibili.com/pbp/data")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取视频弹幕趋势顶点列表")
+	if err != nil {
+		return nil, err
+	}
+	var ret *VideoPbPInfo
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
 }
