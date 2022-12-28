@@ -2,7 +2,7 @@
 
 # 哔哩哔哩-API-Go版本
 
-![](https://img.shields.io/github/go-mod/go-version/CuteReimu/bilibili?filename=go.mod "语言")
+![](https://img.shields.io/github/languages/top/CuteReimu/bilibili?filename=go.mod "语言")
 [![](https://img.shields.io/github/actions/workflow/status/CuteReimu/bilibili/golangci-lint.yml?branch=master)](https://github.com/CuteReimu/bilibili/actions/workflows/golangci-lint.yml "代码分析")
 [![](https://img.shields.io/github/contributors/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/graphs/contributors "贡献者")
 [![](https://img.shields.io/github/license/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/blob/master/LICENSE "许可协议")
@@ -45,6 +45,7 @@ go get -u github.com/CuteReimu/bilibili
 qrCode, _ := bilibili.GetQRCode()
 buf, _ := qrCode.Encode()
 img, _ := png.Decode(buf) // 或者写入文件 os.WriteFile("qrcode.png", buf, 0644)
+// 也可以调用 qrCode.Print() 将二维码打印在控制台
 ```
 
 扫码并确认成功后，发送登录请求：
