@@ -261,6 +261,59 @@ func (c *Client) GetRecommendVideoByBvid(bvid string) ([]*VideoInfo, error) {
 	return ret, errors.WithStack(err)
 }
 
+type OfficialVerify struct {
+	Type int    `json:"type"` // 是否认证，-1：无，0：认证
+	Desc string `json:"desc"` // 认证信息，无为空
+}
+
+type NamePlate struct {
+	Nid        int    `json:"nid"`         // 勋章id
+	Name       string `json:"name"`        // 勋章名称
+	Image      string `json:"image"`       // 挂件图片url 正常
+	ImageSmall string `json:"image_small"` // 勋章图片url 小
+	Level      string `json:"level"`       // 勋章等级
+	Condition  string `json:"condition"`   // 勋章条件
+}
+
+type Vip struct {
+	Type       int   `json:"type"`         // 大会员类型，0：无，1：月度大会员，2：年度及以上大会员
+	Status     int   `json:"status"`       // 大会员状态，0：无，1：有
+	DueDate    int64 `json:"due_date"`     // 到期时间戳（毫秒）
+	VipPayType int   `json:"vip_pay_type"` // 大会员付费类型
+	ThemeType  int   `json:"theme_type"`   // 固定值0，作用尚不明确
+	Label      struct {
+		Path                  string `json:"path"`
+		Text                  string `json:"text"`          // 大会员标签上的文字
+		LabelTheme            string `json:"label_theme"`   // 大会员标签主题
+		TextColor             string `json:"text_color"`    // 大会员文字颜色
+		BgStyle               int    `json:"bg_style"`      // 大会员背景样式
+		BgColor               string `json:"bg_color"`      // 大会员背景颜色
+		BorderColor           string `json:"border_color"`  // 大会员边框颜色
+		UseImgLabel           bool   `json:"use_img_label"` // 是否使用图片标签
+		ImgLabelUriHans       string `json:"img_label_uri_hans"`
+		ImgLabelUriHant       string `json:"img_label_uri_hant"`
+		ImgLabelUriHansStatic string `json:"img_label_uri_hans_static"` // 大会员图片标签（简体中文）的url
+		ImgLabelUriHantStatic string `json:"img_label_uri_hant_static"` // 大会员图片标签（繁体中文）的url
+	} `json:"label"`
+	AvatarSubscript    int    `json:"avatar_subscript"` // 作用尚不明确
+	NicknameColor      string `json:"nickname_color"`   // 昵称颜色
+	Role               int    `json:"role"`
+	AvatarSubscriptUrl string `json:"avatar_subscript_url"` // 作用尚不明确
+	TvVipStatus        int    `json:"tv_vip_status"`        // TV大会员状态，0：无，1：有
+	TvVipPayType       int    `json:"tv_vip_pay_type"`      // TV大会员付费类型
+	VipType            int    `json:"vipType"`              // 大会员类型，0：无，1：月度大会员，2：年度及以上大会员
+	VipStatus          int    `json:"vipStatus"`            // 大会员状态，0：无，1：有
+}
+
+type Pendant struct {
+	Pid               int    `json:"pid"`    // 挂件id
+	Name              string `json:"name"`   // 挂件名称
+	Image             string `json:"image"`  // 挂件图片url
+	Expire            int    `json:"expire"` // 固定值0，作用尚不明确
+	ImageEnhance      string `json:"image_enhance"`
+	ImageEnhanceFrame string `json:"image_enhance_frame"`
+}
+
 type VideoDetailInfo struct {
 	View VideoInfo `json:"View"` // 视频基本信息
 	Card struct {  // 视频UP主信息
@@ -290,57 +343,12 @@ type VideoDetailInfo struct {
 				CurrentExp   int `json:"current_exp"`   // 固定值0，作用尚不明确
 				NextExp      int `json:"next_exp"`      // 固定值0，作用尚不明确
 			} `json:"level_info"`
-			Pendant struct { // 挂件
-				Pid               int    `json:"pid"`    // 挂件id
-				Name              string `json:"name"`   // 挂件名称
-				Image             string `json:"image"`  // 挂件图片url
-				Expire            int    `json:"expire"` // 固定值0，作用尚不明确
-				ImageEnhance      string `json:"image_enhance"`
-				ImageEnhanceFrame string `json:"image_enhance_frame"`
-			} `json:"pendant"`
-			Nameplate struct { // 勋章
-				Nid        int    `json:"nid"`         // 勋章id
-				Name       string `json:"name"`        // 勋章名称
-				Image      string `json:"image"`       // 挂件图片url 正常
-				ImageSmall string `json:"image_small"` // 勋章图片url 小
-				Level      string `json:"level"`       // 勋章等级
-				Condition  string `json:"condition"`   // 勋章条件
-			} `json:"nameplate"`
-			Official       OfficialInfo `json:"Official"` // 认证信息
-			OfficialVerify struct {     // 认证信息2
-				Type int    `json:"type"` // 是否认证，-1：无，0：认证
-				Desc string `json:"desc"` // 认证信息，无为空
-			} `json:"official_verify"`
-			Vip struct { // 大会员状态
-				Type       int   `json:"type"`         // 大会员类型，0：无，1：月度大会员，2：年度及以上大会员
-				Status     int   `json:"status"`       // 大会员状态，0：无，1：有
-				DueDate    int64 `json:"due_date"`     // 到期时间戳（毫秒）
-				VipPayType int   `json:"vip_pay_type"` // 大会员付费类型
-				ThemeType  int   `json:"theme_type"`   // 固定值0，作用尚不明确
-				Label      struct {
-					Path                  string `json:"path"`
-					Text                  string `json:"text"`          // 大会员标签上的文字
-					LabelTheme            string `json:"label_theme"`   // 大会员标签主题
-					TextColor             string `json:"text_color"`    // 大会员文字颜色
-					BgStyle               int    `json:"bg_style"`      // 大会员背景样式
-					BgColor               string `json:"bg_color"`      // 大会员背景颜色
-					BorderColor           string `json:"border_color"`  // 大会员边框颜色
-					UseImgLabel           bool   `json:"use_img_label"` // 是否使用图片标签
-					ImgLabelUriHans       string `json:"img_label_uri_hans"`
-					ImgLabelUriHant       string `json:"img_label_uri_hant"`
-					ImgLabelUriHansStatic string `json:"img_label_uri_hans_static"` // 大会员图片标签（简体中文）的url
-					ImgLabelUriHantStatic string `json:"img_label_uri_hant_static"` // 大会员图片标签（繁体中文）的url
-				} `json:"label"`
-				AvatarSubscript    int    `json:"avatar_subscript"` // 作用尚不明确
-				NicknameColor      string `json:"nickname_color"`   // 昵称颜色
-				Role               int    `json:"role"`
-				AvatarSubscriptUrl string `json:"avatar_subscript_url"` // 作用尚不明确
-				TvVipStatus        int    `json:"tv_vip_status"`        // TV大会员状态，0：无，1：有
-				TvVipPayType       int    `json:"tv_vip_pay_type"`      // TV大会员付费类型
-				VipType            int    `json:"vipType"`              // 大会员类型，0：无，1：月度大会员，2：年度及以上大会员
-				VipStatus          int    `json:"vipStatus"`            // 大会员状态，0：无，1：有
-			} `json:"vip"`
-			IsSeniorMember int `json:"is_senior_member"` // 是否为硬核会员，0：否，1：是
+			Pendant        Pendant        `json:"pendant"`          // 挂件
+			Nameplate      NamePlate      `json:"nameplate"`        // 勋章
+			Official       OfficialInfo   `json:"Official"`         // 认证信息
+			OfficialVerify OfficialVerify `json:"official_verify"`  // 认证信息2
+			Vip            Vip            `json:"vip"`              // 大会员状态
+			IsSeniorMember int            `json:"is_senior_member"` // 是否为硬核会员，0：否，1：是
 		} `json:"card"`
 		Space struct { // 主页头图
 			SImg string `json:"s_img"` // 主页头图url 小图
