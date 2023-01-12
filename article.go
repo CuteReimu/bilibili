@@ -87,3 +87,57 @@ func (c *Client) GetArticlesInfo(id int) (*ArticlesInfo, error) {
 	err = json.Unmarshal(data, &ret)
 	return ret, errors.WithStack(err)
 }
+
+type ArticleViewInfo struct {
+	Like      int      `json:"like"`      // 是否点赞，0：未点赞，1：已点赞
+	Attention bool     `json:"attention"` // 是否关注文章作者
+	Favorite  bool     `json:"favorite"`  // 是否收藏
+	Coin      int      `json:"coin"`      // 为文章投币数
+	Stats     struct { // 状态数信息
+		View     int `json:"view"`     // 阅读数
+		Favorite int `json:"favorite"` // 收藏数
+		Like     int `json:"like"`     // 点赞数
+		Dislike  int `json:"dislike"`  // 点踩数
+		Reply    int `json:"reply"`    // 评论数
+		Share    int `json:"share"`    // 分享数
+		Coin     int `json:"coin"`     // 投币数
+		Dynamic  int `json:"dynamic"`  // 动态转发数
+	} `json:"stats"`
+	Title           string     `json:"title"`             // 文章标题
+	BannerUrl       string     `json:"banner_url"`        // 文章头图url
+	Mid             int        `json:"mid"`               // 文章作者mid
+	AuthorName      string     `json:"author_name"`       // 文章作者昵称
+	IsAuthor        bool       `json:"is_author"`         // 固定值true，作用尚不明确
+	ImageUrls       []string   `json:"image_urls"`        // 动态封面图片url
+	OriginImageUrls []string   `json:"origin_image_urls"` // 文章封面图片url
+	Shareable       bool       `json:"shareable"`         // 固定值true，作用尚不明确
+	ShowLaterWatch  bool       `json:"show_later_watch"`  // 固定值true，作用尚不明确
+	ShowSmallWindow bool       `json:"show_small_window"` // 固定值true，作用尚不明确
+	InList          bool       `json:"in_list"`           // 是否收于文集
+	Pre             int        `json:"pre"`               // 上一篇文章cvid
+	Next            int        `json:"next"`              // 下一篇文章cvid
+	ShareChannels   []struct { // 分享方式列表
+		Name         string `json:"name"`          // 分享名称：QQ，QQ空间，微信，朋友圈，微博
+		Picture      string `json:"picture"`       // 分享图片url
+		ShareChannel string `json:"share_channel"` // 分享代号：QQ，QZONE，WEIXIN，WEIXIN_MOMENT，SINA
+	} `json:"share_channels"`
+}
+
+// GetArticleViewInfo 获取专栏文章基本信息
+func GetArticleViewInfo(id int) (*ArticleViewInfo, error) {
+	return std.GetArticleViewInfo(id)
+}
+func (c *Client) GetArticleViewInfo(id int) (*ArticleViewInfo, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("id", strconv.Itoa(id)).Get("https://api.bilibili.com/x/article/viewinfo")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取专栏文章基本信息")
+	if err != nil {
+		return nil, err
+	}
+	var ret *ArticleViewInfo
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
