@@ -3,6 +3,7 @@ package bilibili
 import (
 	"encoding/json"
 	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 	"strconv"
 )
 
@@ -140,4 +141,77 @@ func (c *Client) GetArticleViewInfo(id int) (*ArticleViewInfo, error) {
 	var ret *ArticleViewInfo
 	err = json.Unmarshal(data, &ret)
 	return ret, errors.WithStack(err)
+}
+
+// LikeArticle 点赞文章，like为false表示取消点赞
+func LikeArticle(id int, like bool) error {
+	return std.LikeArticle(id, like)
+}
+func (c *Client) LikeArticle(id int, like bool) error {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return errors.New("B站登录过期")
+	}
+	var typeNum string
+	if like {
+		typeNum = "1"
+	} else {
+		typeNum = "2"
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"id":   strconv.Itoa(id),
+		"type": typeNum,
+		"csrf": biliJct,
+	}).Post("https://api.bilibili.com/x/article/like")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	_, err = getRespData(resp, "点赞文章")
+	return err
+}
+
+// CoinArticle 投币文章，id为文章cvid，upid为作者mid，mutiply为投币数量。返回的bool值为是否附加点赞成功，若已赞过则附加点赞失败
+func CoinArticle(id, upid, multiply int) (bool, error) {
+	return std.CoinArticle(id, upid, multiply)
+}
+func (c *Client) CoinArticle(id, upid, multiply int) (bool, error) {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return false, errors.New("B站登录过期")
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"aid":      strconv.Itoa(id),
+		"upid":     strconv.Itoa(upid),
+		"multiply": strconv.Itoa(multiply),
+		"avtype":   "2",
+		"csrf":     biliJct,
+	}).Post("https://api.bilibili.com/x/web-interface/coin/add")
+	if err != nil {
+		return false, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "投币文章")
+	if err != nil {
+		return false, err
+	}
+	return gjson.GetBytes(data, "like").Bool(), nil
+}
+
+// FavourArticle 收藏文章
+func FavourArticle(id int) error {
+	return std.FavourArticle(id)
+}
+func (c *Client) FavourArticle(id int) error {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return errors.New("B站登录过期")
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"id":   strconv.Itoa(id),
+		"csrf": biliJct,
+	}).Post("https://api.bilibili.com/x/article/favorites/add")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	_, err = getRespData(resp, "收藏文章")
+	return err
 }
