@@ -271,15 +271,17 @@ type DynamicLikeList struct {
 	Gt         int `json:"_gt_"`        // 固定值0
 }
 
-// GetDynamicLikeList 获取动态点赞列表
+// GetDynamicLikeList 获取动态点赞列表。offset是非必填项
 func GetDynamicLikeList(dynamicId, offset int) (*DynamicLikeList, error) {
 	return std.GetDynamicLikeList(dynamicId, offset)
 }
 func (c *Client) GetDynamicLikeList(dynamicId, offset int) (*DynamicLikeList, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
-		"dynamic_id": strconv.Itoa(dynamicId),
-		"offset":     strconv.Itoa(offset),
-	}).Get("https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/spec_item_likes")
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("dynamic_id", strconv.Itoa(dynamicId))
+	if offset != 0 {
+		r = r.SetQueryParam("offset", strconv.Itoa(offset))
+	}
+	resp, err := r.Get("https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/spec_item_likes")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -288,6 +290,108 @@ func (c *Client) GetDynamicLikeList(dynamicId, offset int) (*DynamicLikeList, er
 		return nil, err
 	}
 	var ret *DynamicLikeList
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+type DynamicLiveUserList struct {
+	Count int        `json:"count"` // 直播者数量
+	Group string     `json:"group"` // 固定值"default"，作用尚不明确
+	Items []struct { // 直播者列表
+		Uid   int    `json:"uid"`   // 直播者id
+		Uname string `json:"uname"` // 直播者昵称
+		Face  string `json:"face"`  // 直播者头像
+		Link  string `json:"link"`  // 直播链接
+		Title string `json:"title"` // 直播标题
+	} `json:"items"`
+	Gt int `json:"_gt_"` // 固定值0，作用尚不明确
+}
+
+// GetDynamicLiveUserList 获取正在直播的已关注者。size是非必填项
+func GetDynamicLiveUserList(size int) (*DynamicLiveUserList, error) {
+	return std.GetDynamicLiveUserList(size)
+}
+func (c *Client) GetDynamicLiveUserList(size int) (*DynamicLiveUserList, error) {
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded")
+	if size != 0 {
+		r = r.SetQueryParam("size", strconv.Itoa(size))
+	}
+	resp, err := r.Get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_live_users")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取正在直播的已关注者")
+	if err != nil {
+		return nil, err
+	}
+	var ret *DynamicLiveUserList
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+type DynamicUpList struct {
+	ButtonStatement string     `json:"button_statement"` // 固定值空，作用尚不明确
+	Items           []struct { // 更新者列表
+		UserProfile struct {
+			Info struct {
+				Uid   int    `json:"uid"`
+				Uname string `json:"uname"`
+				Face  string `json:"face"`
+			} `json:"info"`
+			Card struct {
+				OfficialVerify struct {
+					Type int    `json:"type"`
+					Desc string `json:"desc"`
+				} `json:"official_verify"`
+			} `json:"card"`
+			Vip struct {
+				VipType       int    `json:"vipType"`
+				VipDueDate    int64  `json:"vipDueDate"`
+				DueRemark     string `json:"dueRemark"`
+				AccessStatus  int    `json:"accessStatus"`
+				VipStatus     int    `json:"vipStatus"`
+				VipStatusWarn string `json:"vipStatusWarn"`
+				ThemeType     int    `json:"themeType"`
+				Label         struct {
+					Path string `json:"path"`
+				} `json:"label"`
+			} `json:"vip"`
+			Pendant struct {
+				Pid          int    `json:"pid"`
+				Name         string `json:"name"`
+				Image        string `json:"image"`
+				Expire       int    `json:"expire"`
+				ImageEnhance string `json:"image_enhance"`
+			} `json:"pendant"`
+			Rank      string `json:"rank"`
+			Sign      string `json:"sign"`
+			LevelInfo struct {
+				CurrentLevel int    `json:"current_level"`
+				CurrentMin   int    `json:"current_min"`
+				CurrentExp   int    `json:"current_exp"`
+				NextExp      string `json:"next_exp"`
+			} `json:"level_info"`
+		} `json:"user_profile"`
+		HasUpdate int `json:"has_update"`
+	} `json:"items"`
+	Gt int `json:"_gt_"` // 固定值0，作用尚不明确
+}
+
+// GetDynamicUpList 获取发布新动态的已关注者。size参数，0：不开启青少年模式，1：开启青少年模式
+func GetDynamicUpList(size int) (*DynamicUpList, error) {
+	return std.GetDynamicUpList(size)
+}
+func (c *Client) GetDynamicUpList(size int) (*DynamicUpList, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("size", strconv.Itoa(size)).Get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取发布新动态的已关注者")
+	if err != nil {
+		return nil, err
+	}
+	var ret *DynamicUpList
 	err = json.Unmarshal(data, &ret)
 	return ret, errors.WithStack(err)
 }
