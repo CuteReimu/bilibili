@@ -419,18 +419,20 @@ func (c *Client) RemoveDynamic(dynamicId int) error {
 	return err
 }
 
-// DynamicDetail 动态卡片信息。因为 ActivityInfos 、 Desc 、 Display 等字段会随着此动态类型不同发生一定的变化，
-// 无法统一，因此都转换成了 map[string]interface{} ，请自行解析
+// DynamicCard 动态卡片内容。因为 ActivityInfos 、 Desc 、 Display 等字段会随着此动态类型不同发生一定的变化，
+// // 无法统一，因此都转换成了 map[string]interface{} ，请自行解析
+type DynamicCard struct {
+	ActivityInfos map[string]interface{} `json:"activity_infos"` // 该条动态参与的活动
+	Card          string                 `json:"card"`           // 动态详细信息
+	Desc          map[string]interface{} `json:"desc"`           // 动态相关信息
+	Display       map[string]interface{} `json:"display"`        // 动态部分的可操作项
+	ExtendJson    string                 `json:"extend_json"`    // 动态扩展项
+}
+
 type DynamicDetail struct {
-	Card *struct { // 动态卡片内容
-		ActivityInfos map[string]interface{} `json:"activity_infos"` // 该条动态参与的活动
-		Card          string                 `json:"card"`           // 动态详细信息
-		Desc          map[string]interface{} `json:"desc"`           // 动态相关信息
-		Display       map[string]interface{} `json:"display"`        // 动态部分的可操作项
-		ExtendJson    string                 `json:"extend_json"`    // 动态扩展项
-	} `json:"card"`
-	Result int `json:"result"`
-	Gt     int `json:"_gt_"`
+	Card   *DynamicCard `json:"card"` // 动态卡片内容
+	Result int          `json:"result"`
+	Gt     int          `json:"_gt_"`
 }
 
 // GetDynamicDetail 获取特定动态卡片信息
@@ -592,7 +594,7 @@ func (c *Client) CreateDynamic(content, extension string, atUids []int, ctrl []*
 		"csrf":              biliJct,
 	})
 	if len(extension) > 0 {
-		r.SetQueryParam("extension", extension)
+		r = r.SetQueryParam("extension", extension)
 	}
 	resp, err := r.Post("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/create")
 	if err != nil {
@@ -603,4 +605,70 @@ func (c *Client) CreateDynamic(content, extension string, atUids []int, ctrl []*
 		return 0, err
 	}
 	return int(gjson.GetBytes(ret, "dynamic_id").Int()), nil
+}
+
+// DynamicList 包含置顶及热门的动态列表
+//
+// TODO: 因为不清楚 attentions 字段（关注列表）的格式，暂未对此字段进行解析
+type DynamicList struct {
+	Cards         *DynamicCard `json:"cards"` // 动态列表
+	FounderUid    int          `json:"founder_uid,omitempty"`
+	HasMore       int          `json:"has_more"` // 当前话题是否有额外的动态，0：无额外动态，1：有额外动态
+	IsDrawerTopic int          `json:"is_drawer_topic,omitempty"`
+	Offset        string       `json:"offset"` // 接下来获取列表时的偏移值，一般为当前获取的话题列表下最后一个动态id
+	Gt            int          `json:"_gt_"`   // 固定值0，作用尚不明确
+}
+
+// FetchDynamics 获取包含置顶及热门的动态列表，topicId与topicName任选一个
+func FetchDynamics(topicId int, topicName string, sortby, offset int) (*DynamicList, error) {
+	return std.FetchDynamics(topicId, topicName, sortby, offset)
+}
+func (c *Client) FetchDynamics(topicId int, topicName string, sortby, offset int) (*DynamicList, error) {
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded")
+	if topicId != 0 {
+		r = r.SetQueryParam("topic_id", strconv.Itoa(topicId))
+	} else {
+		r = r.SetQueryParam("topic_name", topicName)
+	}
+	if sortby != 0 {
+		r = r.SetQueryParam("sortby", strconv.Itoa(sortby))
+	}
+	if offset != 0 {
+		r = r.SetQueryParam("offset", strconv.Itoa(offset))
+	}
+	resp, err := r.Get("https://api.vc.bilibili.com/topic_svr/v1/topic_svr/fetch_dynamics")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取动态列表")
+	if err != nil {
+		return nil, err
+	}
+	var ret *DynamicList
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+// GetTopicHistory 获取历史动态列表，topicId与topicName任选一个
+func GetTopicHistory(topicId int, topicName string, offsetDynamicId int) (*DynamicList, error) {
+	return std.GetTopicHistory(topicId, topicName, offsetDynamicId)
+}
+func (c *Client) GetTopicHistory(topicId int, topicName string, offsetDynamicId int) (*DynamicList, error) {
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("offset_dynamic_id", strconv.Itoa(offsetDynamicId))
+	if topicId != 0 {
+		r = r.SetQueryParam("topic_id", strconv.Itoa(topicId))
+	} else {
+		r = r.SetQueryParam("topic_name", topicName)
+	}
+	resp, err := r.Get("https://api.vc.bilibili.com/topic_svr/v1/topic_svr/topic_history")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取历史动态列表")
+	if err != nil {
+		return nil, err
+	}
+	var ret *DynamicList
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
 }
