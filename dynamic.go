@@ -415,3 +415,114 @@ func (c *Client) RemoveDynamic(dynamicId int) error {
 	_, err = getRespData(resp, "删除动态")
 	return err
 }
+
+// DynamicDetail 动态卡片信息。因为 ActivityInfos 、 Desc 、 Display 等字段会随着此动态类型不同发生一定的变化，
+// 无法统一，因此都转换成了 map[string]interface{} ，请自行解析
+type DynamicDetail struct {
+	Card *struct { // 动态卡片内容
+		ActivityInfos map[string]interface{} `json:"activity_infos"` // 该条动态参与的活动
+		Card          string                 `json:"card"`           // 动态详细信息
+		Desc          map[string]interface{} `json:"desc"`           // 动态相关信息
+		Display       map[string]interface{} `json:"display"`        // 动态部分的可操作项
+		ExtendJson    string                 `json:"extend_json"`    // 动态扩展项
+	} `json:"card"`
+	Result int `json:"result"`
+	Gt     int `json:"_gt_"`
+}
+
+// GetDynamicDetail 获取特定动态卡片信息
+func GetDynamicDetail(dynamicId int) (*DynamicDetail, error) {
+	return std.GetDynamicDetail(dynamicId)
+}
+func (c *Client) GetDynamicDetail(dynamicId int) (*DynamicDetail, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("dynamic_id", strconv.Itoa(dynamicId)).Get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取特定动态卡片信息")
+	if err != nil {
+		return nil, err
+	}
+	var ret *DynamicDetail
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+type DynamicPortal struct {
+	MyInfo struct { // 个人关注的一些信息
+		Dyns      int      `json:"dyns"`      // 个人动态
+		Face      string   `json:"face"`      // 头像url
+		FaceNft   int      `json:"face_nft"`  // 含义尚不明确
+		Follower  int      `json:"follower"`  // 粉丝数量
+		Following int      `json:"following"` // 我的关注
+		LevelInfo struct { // 本人等级内容
+			CurrentExp   int   `json:"current_exp"`
+			CurrentLevel int   `json:"current_level"` // 当前等级，0-6级
+			CurrentMin   int   `json:"current_min"`
+			LevelUp      int64 `json:"level_up"`
+			NextExp      int   `json:"next_exp"`
+		} `json:"level_info"`
+		Mid      int      `json:"mid"`  // 账户mid
+		Name     string   `json:"name"` // 账户名称
+		Official struct { // 认证信息
+			Desc  string `json:"desc"`  // 认证备注
+			Role  int    `json:"role"`  // 认证类型，0：无，1 2 7：个人认证，3 4 5 6：机构认证
+			Title string `json:"title"` // 认证信息
+			Type  int    `json:"type"`  // 是否认证，-1：无，0：认证
+		} `json:"official"`
+		SpaceBg string   `json:"space_bg"` // 账户个人中心的背景横幅url
+		Vip     struct { // vip信息
+			AvatarSubscript    int      `json:"avatar_subscript"`     // 是否显示会员图标，0：不显示，1：显示
+			AvatarSubscriptUrl string   `json:"avatar_subscript_url"` // 大会员角标地址
+			DueDate            int64    `json:"due_date"`             // 会员过期时间，Unix时间戳（毫秒）
+			Label              struct { // 会员标签
+				BgColor               string `json:"bg_color"`                  // 会员标签背景颜色，颜色码，一般为#FB7299，曾用于愚人节改变大会员配色
+				BgStyle               int    `json:"bg_style"`                  // 固定值1，作用尚不明确
+				BorderColor           string `json:"border_color"`              // 会员标签边框颜色，未使用
+				ImgLabelUriHans       string `json:"img_label_uri_hans"`        // 固定值空
+				ImgLabelUriHansStatic string `json:"img_label_uri_hans_static"` // 大会员牌子图片，简体版
+				ImgLabelUriHant       string `json:"img_label_uri_hant"`        // 固定值空
+				ImgLabelUriHantStatic string `json:"img_label_uri_hant_static"` // 大会员牌子图片，繁体版
+				LabelTheme            string `json:"label_theme"`               // 会员标签，vip，annual_vip，ten_annual_vip，hundred_annual_vip，fools_day_hundred_annual_vip
+				Path                  string `json:"path"`                      // 固定值空，作用尚不明确
+				Text                  string `json:"text"`                      // 会员类型文案，大会员，年度大会员，十年大会员，百年大会员，最强绿鲤鱼
+				TextColor             string `json:"text_color"`                // 会员标签文字颜色
+				UseImgLabel           bool   `json:"use_img_label"`             // 固定值true
+			} `json:"label"`
+			NicknameColor string `json:"nickname_color"`  // 会员昵称颜色，颜色码，一般为#FB7299，曾用于愚人节改变大会员配色
+			Role          int    `json:"role"`            // 大会员类型，1：月度大会员，3：年度大会员，7：十年大会员，15：百年大会员
+			Status        int    `json:"status"`          // 会员状态，0：无，1：有
+			ThemeType     int    `json:"theme_type"`      // 固定值0，作用尚不明确
+			TvVipPayType  int    `json:"tv_vip_pay_type"` // 电视大会员支付类型
+			TvVipStatus   int    `json:"tv_vip_status"`   // 电视大会员状态，0：未开通
+			Type          int    `json:"type"`            // 会员类型，0：无，1：月大会员，2：年度及以上大会员
+			VipPayType    int    `json:"vip_pay_type"`    // 支付类型，0：未支付，1：已支付
+		} `json:"vip"`
+	} `json:"my_info"`
+	UpList []struct { // 最近更新的up主列表
+		Face            string `json:"face"`       // UP主头像
+		HasUpdate       bool   `json:"has_update"` // 最近是否有更新
+		IsReserveRecall bool   `json:"is_reserve_recall"`
+		Mid             int    `json:"mid"`   // UP主mid
+		Uname           string `json:"uname"` // UP主昵称
+	} `json:"up_list"`
+}
+
+// GetDynamicPortal 获取最近更新UP主列表（其实就是获取自己的动态门户）
+func GetDynamicPortal() (*DynamicPortal, error) {
+	return std.GetDynamicPortal()
+}
+func (c *Client) GetDynamicPortal() (*DynamicPortal, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.bilibili.com/x/polymer/web-dynamic/v1/portal")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取最近更新UP主列表")
+	if err != nil {
+		return nil, err
+	}
+	var ret *DynamicPortal
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
