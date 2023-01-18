@@ -76,6 +76,9 @@ type RoomInfo struct {
 }
 
 // GetRoomInfo 获取直播间状态
+//
+// SocialSisterYi/bilibili-API-collect 文档中的接口已经无法使用了。下面的实现是参照
+// https://github.com/SocialSisterYi/bilibili-API-collect/issues/272 的接口，已验证，可以使用。
 func GetRoomInfo(roomId int) (*RoomInfo, error) {
 	return std.GetRoomInfo(roomId)
 }
