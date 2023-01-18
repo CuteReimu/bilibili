@@ -3,7 +3,10 @@ package bilibili
 import (
 	"encoding/json"
 	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
+	"io"
 	"strconv"
+	"strings"
 )
 
 type SearchDynamicAtResult struct {
@@ -525,4 +528,79 @@ func (c *Client) GetDynamicPortal() (*DynamicPortal, error) {
 	var ret *DynamicPortal
 	err = json.Unmarshal(data, &ret)
 	return ret, errors.WithStack(err)
+}
+
+// UploadDynamicBfs 为图片动态上传图片
+func UploadDynamicBfs(fileName string, file io.Reader, category string) (url string, size Size, err error) {
+	return std.UploadDynamicBfs(fileName, file, category)
+}
+func (c *Client) UploadDynamicBfs(fileName string, file io.Reader, category string) (url string, size Size, err error) {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return "", Size{}, errors.New("B站登录过期")
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetFileReader("file_up", fileName, file).SetQueryParams(map[string]string{
+		"category": category,
+		"csrf":     biliJct,
+	}).Post("https://api.bilibili.com/x/dynamic/feed/draw/upload_bfs")
+	if err != nil {
+		return "", Size{}, errors.WithStack(err)
+	}
+	ret, err := getRespData(resp, "为图片动态上传图片")
+	if err != nil {
+		return "", Size{}, err
+	}
+	var data struct {
+		ImageUrl    string `json:"image_url"`
+		ImageWidth  int    `json:"image_width"`
+		ImageHeight int    `json:"image_height"`
+	}
+	err = json.Unmarshal(ret, &data)
+	return data.ImageUrl, Size{Width: data.ImageWidth, Height: data.ImageHeight}, err
+}
+
+// CreateDynamic 发表纯文本动态
+//
+// TODO: extension 字段尚不知如何使用，需自行填写。参考 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/dynamic/publish.md
+func CreateDynamic(content, extension string, atUids []int, ctrl []*FormatCtrl) (dynamicId int, err error) {
+	return std.CreateDynamic(content, extension, atUids, ctrl)
+}
+func (c *Client) CreateDynamic(content, extension string, atUids []int, ctrl []*FormatCtrl) (dynamicId int, err error) {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return 0, errors.New("B站登录过期")
+	}
+	ctrlJson, err := json.Marshal(ctrl)
+	if err != nil {
+		return 0, errors.WithStack(err)
+	}
+	atUidsStr := make([]string, len(atUids))
+	for _, atUid := range atUids {
+		atUidsStr = append(atUidsStr, strconv.Itoa(atUid))
+	}
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"dynamic_id":        "0",
+		"type":              "4",
+		"rid":               "0",
+		"content":           content,
+		"up_choose_comment": "0",
+		"up_close_comment":  "0",
+		"at_uids":           strings.Join(atUidsStr, ","),
+		"ctrl":              string(ctrlJson),
+		"csrf_token":        biliJct,
+		"csrf":              biliJct,
+	})
+	if len(extension) > 0 {
+		r.SetQueryParam("extension", extension)
+	}
+	resp, err := r.Post("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/create")
+	if err != nil {
+		return 0, errors.WithStack(err)
+	}
+	ret, err := getRespData(resp, "发表纯文本动态")
+	if err != nil {
+		return 0, err
+	}
+	return int(gjson.GetBytes(ret, "dynamic_id").Int()), nil
 }
