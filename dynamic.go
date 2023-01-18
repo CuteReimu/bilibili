@@ -395,3 +395,23 @@ func (c *Client) GetDynamicUpList(size int) (*DynamicUpList, error) {
 	err = json.Unmarshal(data, &ret)
 	return ret, errors.WithStack(err)
 }
+
+// RemoveDynamic 删除动态
+func RemoveDynamic(dynamicId int) error {
+	return std.RemoveDynamic(dynamicId)
+}
+func (c *Client) RemoveDynamic(dynamicId int) error {
+	biliJct := c.getCookie("bili_jct")
+	if len(biliJct) == 0 {
+		return errors.New("B站登录过期")
+	}
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"dynamic_id": strconv.Itoa(dynamicId),
+		"csrf":       biliJct,
+	}).Post("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/rm_dynamic")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	_, err = getRespData(resp, "删除动态")
+	return err
+}
