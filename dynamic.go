@@ -577,7 +577,7 @@ func (c *Client) CreateDynamic(content, extension string, atUids []int, ctrl []*
 	if err != nil {
 		return 0, errors.WithStack(err)
 	}
-	atUidsStr := make([]string, len(atUids))
+	atUidsStr := make([]string, 0, len(atUids))
 	for _, atUid := range atUids {
 		atUidsStr = append(atUidsStr, strconv.Itoa(atUid))
 	}
