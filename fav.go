@@ -24,13 +24,13 @@ func (c *Client) AddFavourFolder(title, intro string, privacy bool, cover string
 		"csrf":  biliJct,
 	})
 	if len(intro) > 0 {
-		r.SetQueryParam("intro", intro)
+		r = r.SetQueryParam("intro", intro)
 	}
 	if privacy {
-		r.SetQueryParam("privacy", "1")
+		r = r.SetQueryParam("privacy", "1")
 	}
 	if len(cover) > 0 {
-		r.SetQueryParam("cover", cover)
+		r = r.SetQueryParam("cover", cover)
 	}
 	resp, err := r.Post("https://api.bilibili.com/x/v3/fav/folder/add")
 	if err != nil {
@@ -64,13 +64,13 @@ func (c *Client) EditFavourFolder(mediaId int, title, intro string, privacy bool
 		"csrf":     biliJct,
 	})
 	if len(intro) > 0 {
-		r.SetQueryParam("intro", intro)
+		r = r.SetQueryParam("intro", intro)
 	}
 	if privacy {
-		r.SetQueryParam("privacy", "1")
+		r = r.SetQueryParam("privacy", "1")
 	}
 	if len(cover) > 0 {
-		r.SetQueryParam("cover", cover)
+		r = r.SetQueryParam("cover", cover)
 	}
 	resp, err := r.Post("https://api.bilibili.com/x/v3/fav/folder/edit")
 	if err != nil {
@@ -124,17 +124,17 @@ func (c *Client) CopyFavourResources(srcMediaId, tarMediaId, mid int, resources 
 	for _, resource := range resources {
 		resourcesStr = append(resourcesStr, resource.String())
 	}
-	if len(platform) == 0 {
-		platform = "web"
-	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"src_media_id": strconv.Itoa(srcMediaId),
 		"tar_media_id": strconv.Itoa(tarMediaId),
 		"mid":          strconv.Itoa(mid),
 		"resources":    strings.Join(resourcesStr, ","),
-		"platform":     platform,
 		"csrf":         biliJct,
-	}).Post("https://api.bilibili.com/x/v3/fav/resource/copy")
+	})
+	if len(platform) > 0 {
+		r = r.SetQueryParam("platform", platform)
+	}
+	resp, err := r.Post("https://api.bilibili.com/x/v3/fav/resource/copy")
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -155,17 +155,17 @@ func (c *Client) MoveFavourResources(srcMediaId, tarMediaId, mid int, resources 
 	for _, resource := range resources {
 		resourcesStr = append(resourcesStr, resource.String())
 	}
-	if len(platform) == 0 {
-		platform = "web"
-	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"src_media_id": strconv.Itoa(srcMediaId),
 		"tar_media_id": strconv.Itoa(tarMediaId),
 		"mid":          strconv.Itoa(mid),
 		"resources":    strings.Join(resourcesStr, ","),
-		"platform":     platform,
 		"csrf":         biliJct,
-	}).Post("https://api.bilibili.com/x/v3/fav/resource/move")
+	})
+	if len(platform) > 0 {
+		r = r.SetQueryParam("platform", platform)
+	}
+	resp, err := r.Post("https://api.bilibili.com/x/v3/fav/resource/move")
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -186,15 +186,15 @@ func (c *Client) DeleteFavourResources(mediaId int, resources []Resource, platfo
 	for _, resource := range resources {
 		resourcesStr = append(resourcesStr, resource.String())
 	}
-	if len(platform) == 0 {
-		platform = "web"
-	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"media_id":  strconv.Itoa(mediaId),
 		"resources": strings.Join(resourcesStr, ","),
-		"platform":  platform,
 		"csrf":      biliJct,
-	}).Post("https://api.bilibili.com/x/v3/fav/resource/batch-del")
+	})
+	if len(platform) > 0 {
+		r.SetQueryParam("platform", platform)
+	}
+	resp, err := r.Post("https://api.bilibili.com/x/v3/fav/resource/batch-del")
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -259,14 +259,8 @@ func GetFavourFolderInfo(mediaId int) (*FavourFolderInfo, error) {
 	return std.GetFavourFolderInfo(mediaId)
 }
 func (c *Client) GetFavourFolderInfo(mediaId int) (*FavourFolderInfo, error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return nil, errors.New("B站登录过期")
-	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
-		"media_id": strconv.Itoa(mediaId),
-		"csrf":     biliJct,
-	}).Get("https://api.bilibili.com/x/v3/fav/folder/info")
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("media_id", strconv.Itoa(mediaId)).Get("https://api.bilibili.com/x/v3/fav/folder/info")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -275,6 +269,98 @@ func (c *Client) GetFavourFolderInfo(mediaId int) (*FavourFolderInfo, error) {
 		return nil, errors.WithStack(err)
 	}
 	var ret *FavourFolderInfo
+	err = json.Unmarshal(data, &ret)
+	return ret, err
+}
+
+type AllFavourFolderInfo struct {
+	Count int        `json:"count"` // 创建的收藏夹总数
+	List  []struct { // 创建的收藏夹列表
+		Id         int    `json:"id"`          // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
+		Fid        int    `json:"fid"`         // 收藏夹原始id
+		Mid        int    `json:"mid"`         // 创建者mid
+		Attr       int    `json:"attr"`        // 属性位（？）
+		Title      string `json:"title"`       // 收藏夹标题
+		FavState   int    `json:"fav_state"`   // 目标id是否存在于该收藏夹，存在于该收藏夹：1，不存在于该收藏夹：0
+		MediaCount int    `json:"media_count"` // 收藏夹内容数量
+	} `json:"list"`
+}
+
+// GetAllFavourFolderInfo 获取指定用户创建的所有收藏夹信息
+func GetAllFavourFolderInfo(upMid, attrType, rid int) (*AllFavourFolderInfo, error) {
+	return std.GetAllFavourFolderInfo(upMid, attrType, rid)
+}
+func (c *Client) GetAllFavourFolderInfo(upMid, attrType, rid int) (*AllFavourFolderInfo, error) {
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"up_mid": strconv.Itoa(upMid),
+		"type":   strconv.Itoa(attrType),
+	})
+	if rid != 0 {
+		r = r.SetQueryParam("rid", strconv.Itoa(rid))
+	}
+	resp, err := r.Get("https://api.bilibili.com/x/v3/fav/folder/created/list-all")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取指定用户创建的所有收藏夹信息")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	var ret *AllFavourFolderInfo
+	err = json.Unmarshal(data, &ret)
+	return ret, err
+}
+
+type FavourInfo struct {
+	Id       int    `json:"id"`
+	Type     int    `json:"type"`
+	Title    string `json:"title"`
+	Cover    string `json:"cover"`
+	Intro    string `json:"intro"`
+	Page     int    `json:"page"`
+	Duration int    `json:"duration"`
+	Upper    struct {
+		Mid  int    `json:"mid"`
+		Name string `json:"name"`
+		Face string `json:"face"`
+	} `json:"upper"`
+	Attr    int `json:"attr"`
+	CntInfo struct {
+		Collect int `json:"collect"`
+		Play    int `json:"play"`
+		Danmaku int `json:"danmaku"`
+	} `json:"cnt_info"`
+	Link    string      `json:"link"`
+	Ctime   int         `json:"ctime"`
+	Pubtime int         `json:"pubtime"`
+	FavTime int         `json:"fav_time"`
+	BvId    string      `json:"bv_id"`
+	Bvid    string      `json:"bvid"`
+	Season  interface{} `json:"season"`
+}
+
+// GetFavourInfo 获取收藏内容
+func GetFavourInfo(resources []Resource, platform string) ([]*FavourInfo, error) {
+	return std.GetFavourInfo(resources, platform)
+}
+func (c *Client) GetFavourInfo(resources []Resource, platform string) ([]*FavourInfo, error) {
+	resourcesStr := make([]string, 0, len(resources))
+	for _, resource := range resources {
+		resourcesStr = append(resourcesStr, resource.String())
+	}
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("resources", strings.Join(resourcesStr, ","))
+	if len(platform) > 0 {
+		r = r.SetQueryParam("platform", platform)
+	}
+	resp, err := r.Get("https://api.bilibili.com/x/v3/fav/resource/infos")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取收藏内容")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	var ret []*FavourInfo
 	err = json.Unmarshal(data, &ret)
 	return ret, err
 }
