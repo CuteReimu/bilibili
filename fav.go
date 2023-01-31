@@ -364,3 +364,130 @@ func (c *Client) GetFavourInfo(resources []Resource, platform string) ([]*Favour
 	err = json.Unmarshal(data, &ret)
 	return ret, err
 }
+
+type FavourList struct {
+	Info struct { // 收藏夹元数据
+		Id    int      `json:"id"`    // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
+		Fid   int      `json:"fid"`   // 收藏夹原始id
+		Mid   int      `json:"mid"`   // 创建者mid
+		Attr  int      `json:"attr"`  // 属性，0：正常，1：失效
+		Title string   `json:"title"` // 收藏夹标题
+		Cover string   `json:"cover"` // 收藏夹封面图片url
+		Upper struct { // 创建者信息
+			Mid       int    `json:"mid"`        // 创建者mid
+			Name      string `json:"name"`       // 创建者昵称
+			Face      string `json:"face"`       // 创建者头像url
+			Followed  bool   `json:"followed"`   // 是否已关注创建者
+			VipType   int    `json:"vip_type"`   // 会员类别，0：无，1：月大会员，2：年度及以上大会员
+			VipStatue int    `json:"vip_statue"` // 会员开通状态，0：无，1：有
+		} `json:"upper"`
+		CoverType int      `json:"cover_type"` // 封面图类别（？）
+		CntInfo   struct { // 收藏夹状态数
+			Collect int `json:"collect"`  // 收藏数
+			Play    int `json:"play"`     // 播放数
+			ThumbUp int `json:"thumb_up"` // 点赞数
+			Share   int `json:"share"`    // 分享数
+		} `json:"cnt_info"`
+		Type       int    `json:"type"`        // 类型（？），一般是11
+		Intro      string `json:"intro"`       // 备注
+		Ctime      int    `json:"ctime"`       // 创建时间戳
+		Mtime      int    `json:"mtime"`       // 收藏时间戳
+		State      int    `json:"state"`       // 状态（？），一般为0
+		FavState   int    `json:"fav_state"`   // 收藏夹收藏状态，已收藏收藏夹：1，未收藏收藏夹：0
+		LikeState  int    `json:"like_state"`  // 点赞状态，已点赞：1，未点赞：0
+		MediaCount int    `json:"media_count"` // 收藏夹内容数量
+	} `json:"info"`
+	Medias []struct { // 收藏夹内容
+		Id       int      `json:"id"`       // 内容id，视频稿件：视频稿件avid，音频：音频auid，视频合集：视频合集id
+		Type     int      `json:"type"`     // 内容类型，2：视频稿件，12：音频，21：视频合集
+		Title    string   `json:"title"`    // 标题
+		Cover    string   `json:"cover"`    // 封面url
+		Intro    string   `json:"intro"`    // 简介
+		Page     int      `json:"page"`     // 视频分P数
+		Duration int      `json:"duration"` // 音频/视频时长
+		Upper    struct { // UP主信息
+			Mid  int    `json:"mid"`  // UP主mid
+			Name string `json:"name"` // UP主昵称
+			Face string `json:"face"` // UP主头像url
+		} `json:"upper"`
+		Attr    int      `json:"attr"` // 属性位（？）
+		CntInfo struct { // 状态数
+			Collect int `json:"collect"` // 收藏数
+			Play    int `json:"play"`    // 播放数
+			Danmaku int `json:"danmaku"` // 弹幕数
+		} `json:"cnt_info"`
+		Link    string `json:"link"`     // 跳转uri
+		Ctime   int    `json:"ctime"`    // 投稿时间戳
+		Pubtime int    `json:"pubtime"`  // 发布时间戳
+		FavTime int    `json:"fav_time"` // 收藏时间戳
+		BvId    string `json:"bv_id"`    // 视频稿件bvid
+		Bvid    string `json:"bvid"`     // 视频稿件bvid
+	} `json:"medias"`
+	HasMore bool `json:"has_more"`
+}
+
+// GetFavourList 获取收藏夹内容明细列表
+func GetFavourList(mediaId, tid int, keyword, order string, searchType, ps, pn int, platform string) (*FavourList, error) {
+	return std.GetFavourList(mediaId, tid, keyword, order, searchType, ps, pn, platform)
+}
+func (c *Client) GetFavourList(mediaId, tid int, keyword, order string, searchType, ps, pn int, platform string) (*FavourList, error) {
+	if pn == 0 {
+		pn = 1
+	}
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"media_id": strconv.Itoa(mediaId),
+		"tid":      strconv.Itoa(tid),
+		"type":     strconv.Itoa(searchType),
+		"ps":       strconv.Itoa(ps),
+		"pn":       strconv.Itoa(pn),
+	})
+	if len(keyword) > 0 {
+		r = r.SetQueryParam("keyword", keyword)
+	}
+	if len(order) > 0 {
+		r = r.SetQueryParam("order", order)
+	}
+	if len(platform) > 0 {
+		r = r.SetQueryParam("platform", platform)
+	}
+	resp, err := r.Get("https://api.bilibili.com/x/v3/fav/resource/list")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取收藏夹内容明细列表")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	var ret *FavourList
+	err = json.Unmarshal(data, &ret)
+	return ret, err
+}
+
+type FavourId struct {
+	Id   int    `json:"id"`    // 内容id，视频稿件：视频稿件avid，音频：音频auid，视频合集：视频合集id
+	Type int    `json:"type"`  // 内容类型，2：视频稿件，12：音频，21：视频合集
+	BvId string `json:"bv_id"` // 视频稿件bvid
+	Bvid string `json:"bvid"`  // 视频稿件bvid
+}
+
+// GetFavourIds 获取收藏夹全部内容id
+func GetFavourIds(mediaId int, platform string) ([]*FavourId, error) {
+	return std.GetFavourIds(mediaId, platform)
+}
+func (c *Client) GetFavourIds(mediaId int, platform string) ([]*FavourId, error) {
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("media_id", strconv.Itoa(mediaId))
+	if len(platform) > 0 {
+		r = r.SetQueryParam("platform", platform)
+	}
+	resp, err := r.Get("https://api.bilibili.com/x/v3/fav/resource/ids")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取收藏夹全部内容id")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	var ret []*FavourId
+	err = json.Unmarshal(data, &ret)
+	return ret, err
+}
