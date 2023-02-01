@@ -196,3 +196,56 @@ func (c *Client) SendPrivateMessageRecall(senderUid, receiverId, msgKey int) (in
 	}
 	return int(res.Get("data.msg_key").Int()), res.Get("data.msg_content").String(), err
 }
+
+type SessionMessages struct {
+	Messages []struct { // 聊天记录列表
+		SenderUid      int    `json:"sender_uid"`                 // 发送者uid
+		ReceiverType   int    `json:"receiver_type"`              // 1为用户，2为粉丝团
+		ReceiverId     int    `json:"receiver_id"`                // 接收者uid
+		MsgType        int    `json:"msg_type"`                   // 消息类型，1:文字消息，2:图片消息，5:撤回的消息，12、13:通知
+		Content        string `json:"content"`                    // 消息内容
+		MsgSeqno       int64  `json:"msg_seqno"`                  // 作用尚不明确
+		Timestamp      int    `json:"timestamp"`                  // 消息发送时间戳
+		AtUids         []int  `json:"at_uids"`                    // 作用尚不明确
+		MsgKey         int64  `json:"msg_key"`                    // 作用尚不明确
+		MsgStatus      int    `json:"msg_status"`                 // 固定值0
+		NotifyCode     string `json:"notify_code"`                // 作用尚不明确
+		NewFaceVersion int    `json:"new_face_version,omitempty"` // 作用尚不明确
+	} `json:"messages"`
+	HasMore  int        `json:"has_more"`  // 固定值0
+	MinSeqno int64      `json:"min_seqno"` // 作用尚不明确
+	MaxSeqno int64      `json:"max_seqno"` // 作用尚不明确
+	EInfos   []struct { // 聊天表情列表
+		Text string `json:"text"` // 表情名称
+		Url  string `json:"url"`  // 表情链接
+		Size int    `json:"size"` // 表情尺寸
+	} `json:"e_infos"`
+}
+
+// GetSessionMessages 获取私信消息记录
+func GetSessionMessages(talkerId, sessionType, size int, mobiApp string) (*SessionMessages, error) {
+	return std.GetSessionMessages(talkerId, sessionType, size, mobiApp)
+}
+func (c *Client) GetSessionMessages(talkerId, sessionType, size int, mobiApp string) (*SessionMessages, error) {
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"talker_id":    strconv.Itoa(talkerId),
+		"session_type": strconv.Itoa(sessionType),
+	})
+	if size != 0 {
+		r.SetQueryParam("size", strconv.Itoa(size))
+	}
+	if len(mobiApp) > 0 {
+		r.SetQueryParam("mobi_app", mobiApp)
+	}
+	resp, err := r.Get("https://api.vc.bilibili.com/svr_sync/v1/svr_sync/fetch_session_msgs")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取私信消息记录")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	var ret *SessionMessages
+	err = json.Unmarshal(data, &ret)
+	return ret, err
+}
