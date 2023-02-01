@@ -8,7 +8,7 @@
 [![](https://img.shields.io/github/license/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/blob/master/LICENSE "许可协议")
 </div>
 
-本项目是基于Go语言编写的哔哩哔哩API调用
+本项目是基于Go语言编写的哔哩哔哩API调用。目前常用的接口已经基本完成，具体进度可以看[这里](#进度)
 
 **声明**：
 
@@ -33,7 +33,11 @@ PS：目前，B站调用接口时强制使用 `https` 协议
 go get -u github.com/CuteReimu/bilibili
 ```
 
-因为项目正在不断更新中，请经常使用`go get -u`更新依赖，确保处于最新版本。
+在项目中引用即可使用
+
+```go
+import "github.com/CuteReimu/bilibili"
+```
 
 ### 首次登录
 
@@ -127,3 +131,21 @@ err := client.LoginWithQRCode(result)
 bilibili.SetTimeout(20 * time.Second) // 设置超时时间
 bilibili.SetLogger(logger) // 自定义logger
 ```
+
+## 进度
+
+目前常用的接口已经基本完成，计划在这个版本内的功能有：
+
+- [x] 专栏
+- [x] 评论
+- [x] 动态
+- [x] 收藏
+- [x] 直播
+- [x] 登录
+- [x] 消息
+- [x] 用户
+- [x] 视频
+- [ ] 大会员
+
+其余的非常用接口会在后续的版本中不断补充
+
