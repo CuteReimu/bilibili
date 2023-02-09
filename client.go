@@ -93,7 +93,7 @@ func (c *Client) SetCookies(cookies []*http.Cookie) {
 
 // 获取resty的一个request
 func (c *Client) resty() *resty.Client {
-	client := resty.New().SetTimeout(c.GetTimeout())
+	client := resty.New().SetTimeout(c.GetTimeout()).SetHeader("user-agent", "go")
 	if c.logger != nil {
 		client.SetLogger(c.logger)
 	}
