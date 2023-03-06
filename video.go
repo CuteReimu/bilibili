@@ -12,7 +12,7 @@ import (
 
 var regBv = regexp.MustCompile(`(?i)bv([\dA-Za-z]{10})`)
 
-// GetBvidByShortUrl 根据视频短id获取bvid
+// GetBvidByShortUrl 通过视频短链接获取bvid
 func GetBvidByShortUrl(shortUrl string) (string, error) {
 	return std.GetBvidByShortUrl(shortUrl)
 }
@@ -25,11 +25,11 @@ func (c *Client) GetBvidByShortUrl(shortUrl string) (string, error) {
 		return "", errors.Errorf("通过短链接获取视频详细信息失败，status code: %d", resp.StatusCode())
 	}
 	url := resp.Header().Get("Location")
-	ret := regBv.FindAllStringSubmatch(url, 1)
-	if len(ret) != 1 {
+	ret := regBv.FindString(url)
+	if len(ret) == 0 {
 		return "", errors.New("无法解析链接：" + url)
 	}
-	return ret[0][0], nil
+	return ret, nil
 }
 
 // OfficialInfo 成员认证信息
