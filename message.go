@@ -249,3 +249,78 @@ func (c *Client) GetSessionMessages(talkerId, sessionType, size int, mobiApp str
 	err = json.Unmarshal(data, &ret)
 	return ret, err
 }
+
+type SessionList struct {
+	SessionList []struct {
+		TalkerId    int64  `json:"talker_id"`
+		SessionType int    `json:"session_type"`
+		AtSeqno     int    `json:"at_seqno"`
+		TopTs       int    `json:"top_ts"`
+		GroupName   string `json:"group_name"`
+		GroupCover  string `json:"group_cover"`
+		IsFollow    int    `json:"is_follow"`
+		IsDnd       int    `json:"is_dnd"`
+		AckSeqno    int64  `json:"ack_seqno"`
+		AckTs       int64  `json:"ack_ts"`
+		SessionTs   int64  `json:"session_ts"`
+		UnreadCount int    `json:"unread_count"`
+		LastMsg     struct {
+			SenderUid      int64  `json:"sender_uid"`
+			ReceiverType   int    `json:"receiver_type"`
+			ReceiverId     int    `json:"receiver_id"`
+			MsgType        int    `json:"msg_type"`
+			Content        string `json:"content"`
+			MsgSeqno       int64  `json:"msg_seqno"`
+			Timestamp      int    `json:"timestamp"`
+			MsgKey         int64  `json:"msg_key"`
+			MsgStatus      int    `json:"msg_status"`
+			NotifyCode     string `json:"notify_code"`
+			NewFaceVersion int    `json:"new_face_version,omitempty"`
+		} `json:"last_msg"`
+		GroupType         int   `json:"group_type"`
+		CanFold           int   `json:"can_fold"`
+		Status            int   `json:"status"`
+		MaxSeqno          int64 `json:"max_seqno"`
+		NewPushMsg        int   `json:"new_push_msg"`
+		Setting           int   `json:"setting"`
+		IsGuardian        int   `json:"is_guardian"`
+		IsIntercept       int   `json:"is_intercept"`
+		IsTrust           int   `json:"is_trust"`
+		SystemMsgType     int   `json:"system_msg_type"`
+		LiveStatus        int   `json:"live_status"`
+		BizMsgUnreadCount int   `json:"biz_msg_unread_count"`
+		AccountInfo       struct {
+			Name   string `json:"name"`
+			PicUrl string `json:"pic_url"`
+		} `json:"account_info,omitempty"`
+	} `json:"session_list"`
+	HasMore             int              `json:"has_more"`
+	AntiDisturbCleaning bool             `json:"anti_disturb_cleaning"`
+	IsAddressListEmpty  int              `json:"is_address_list_empty"`
+	SystemMsg           map[string]int64 `json:"system_msg"`
+	ShowLevel           bool             `json:"show_level"`
+}
+
+// GetSessions 获取消息列表 session_type，1：系统，2：用户，3：应援团
+//
+// 参照 https://github.com/CuteReimu/bilibili/issues/8
+func GetSessions(sessionType int, mobiApp string) (*SessionList, error) {
+	return std.GetSessions(sessionType, mobiApp)
+}
+func (c *Client) GetSessions(sessionType int, mobiApp string) (*SessionList, error) {
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("session_type", strconv.Itoa(sessionType))
+	if len(mobiApp) > 0 {
+		r.SetQueryParam("mobi_app", mobiApp)
+	}
+	resp, err := r.Get("https://api.vc.bilibili.com/session_svr/v1/session_svr/get_sessions")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取消息列表")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	var ret *SessionList
+	err = json.Unmarshal(data, &ret)
+	return ret, err
+}
