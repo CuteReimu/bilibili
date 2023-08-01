@@ -71,8 +71,7 @@ if err == nil {
 captchaResult, _ := bilibili.Captcha()
 ```
 
-将`result`中的`gt`和`challenge`值保存下来，自行使用 [手动验证器](https://kuresaru.github.io/geetest-validator/) 进行人机验证，并获得`validate`
-和`seccode`。然后使用账号密码进行登录即可：
+将`captchaResult`中的`gt`和`challenge`值保存下来，自行使用 [手动验证器](https://kuresaru.github.io/geetest-validator/) 进行人机验证，并获得`validate`和`seccode`。然后使用账号密码进行登录即可：
 
 ```go
 err := bilibili.LoginWithPassword(userName, password, captchaResult, validate, seccode)
