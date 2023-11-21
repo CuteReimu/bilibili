@@ -229,3 +229,30 @@ func (c *Client) StopLive(roomId int) (bool, error) {
 	}
 	return gjson.GetBytes(data, "change").Bool(), nil
 }
+
+type LiveAreaData struct {
+	Id   int    `json:"id"`   // 父分区id
+	Name string `json:"name"` // 父分区名
+	List []struct {
+		Id   int    `json:"id"`   // 子分区id
+		Name string `json:"name"` // 子分区名
+	} `json:"list"` // 子分区列表
+}
+
+// GetLiveAreaList 获取直播分区列表
+func GetLiveAreaList() ([]LiveAreaData, error) {
+	return std.GetLiveAreaList()
+}
+func (c *Client) GetLiveAreaList() ([]LiveAreaData, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.live.bilibili.com/room/v1/Area/getList")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取直播分区列表")
+	if err != nil {
+		return nil, err
+	}
+	var ret []LiveAreaData
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
