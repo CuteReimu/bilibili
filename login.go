@@ -224,8 +224,8 @@ func (c *Client) LoginWithSMS(tel, cid, code int, captchaKey string) error {
 }
 
 type QRCode struct {
-	Url      string `json:"url"`      // 二维码内容url
-	OauthKey string `json:"oauthKey"` // 扫码登录秘钥
+	Url       string `json:"url"`        // 二维码内容url
+	QrcodeKey string `json:"qrcode_key"` // 扫码登录秘钥
 }
 
 // Encode a QRCode and return a raw PNG image.
@@ -245,7 +245,7 @@ func GetQRCode() (*QRCode, error) {
 }
 func (c *Client) GetQRCode() (*QRCode, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		Get("https://passport.bilibili.com/qrcode/getLoginUrl")
+		Get("https://passport.bilibili.com/x/passport-login/web/qrcode/generate")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -266,10 +266,8 @@ func (c *Client) LoginWithQRCode(qrCode *QRCode) error {
 	if qrCode == nil {
 		return errors.New("请先获取二维码")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
-		"oauthKey": qrCode.OauthKey,
-		"gourl":    "https://www.bilibili.com",
-	}).Post("https://passport.bilibili.com/qrcode/getLoginInfo")
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetQueryParam("qrcode_key", qrCode.QrcodeKey).Get("https://passport.bilibili.com/x/passport-login/web/qrcode/poll")
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -283,18 +281,23 @@ func (c *Client) LoginWithQRCode(qrCode *QRCode) error {
 	retCode := result.Get("code").Int()
 	if retCode != 0 {
 		return errors.Errorf("登录bilibili失败，错误码：%d，错误信息：%s", retCode, gjson.GetBytes(resp.Body(), "message").String())
-	} else if !result.Get("status").Bool() {
-		switch result.Get("data").Int() {
-		case -1:
-			return errors.New("扫码登录未成功，原因：密钥错误")
-		case -2:
-			return errors.New("扫码登录未成功，原因：密钥超时")
-		case -4:
-			return errors.New("扫码登录未成功，原因：未扫描")
-		case -5:
-			return errors.New("扫码登录未成功，原因：未确认")
+	} else {
+		codeValue := result.Get("data.code")
+		if !codeValue.Exists() || codeValue.Type != gjson.Number {
+			return errors.New("扫码登录未成功，返回异常")
 		}
-		return errors.New("由于未知原因，扫码登录未成功")
+		code := codeValue.Int()
+		switch code {
+		case 86038:
+			return errors.New("扫码登录未成功，原因：二维码已失效")
+		case 86090:
+			return errors.New("扫码登录未成功，原因：二维码已扫码未确认")
+		case 86101:
+			return errors.New("扫码登录未成功，原因：未扫码")
+		case 0:
+		default:
+			return errors.Errorf("由于未知原因，扫码登录未成功，错误码：%d", code)
+		}
 	}
 	c.SetCookies(resp.Cookies())
 	return nil
