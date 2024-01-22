@@ -7,11 +7,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"strconv"
+	"time"
+
 	"github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/pkg/errors"
 	"github.com/skip2/go-qrcode"
 	"github.com/tidwall/gjson"
-	"strconv"
 )
 
 type CaptchaResult struct {
@@ -266,39 +268,54 @@ func (c *Client) LoginWithQRCode(qrCode *QRCode) error {
 	if qrCode == nil {
 		return errors.New("请先获取二维码")
 	}
+
+	for {
+		ok, err := c.qrCodeSuccess(qrCode)
+		if err != nil {
+			return err
+		}
+		if ok {
+			return nil
+		}
+		time.Sleep(3 * time.Second) // 主站 3s 一次请求
+	}
+}
+
+// qrCodeSuccess 是否扫码成功
+func (c *Client) qrCodeSuccess(qrCode *QRCode) (bool, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetQueryParam("qrcode_key", qrCode.QrcodeKey).Get("https://passport.bilibili.com/x/passport-login/web/qrcode/poll")
 	if err != nil {
-		return errors.WithStack(err)
+		return false, errors.WithStack(err)
 	}
 	if resp.StatusCode() != 200 {
-		return errors.New("登录bilibili失败")
+		return false, errors.New("登录bilibili失败")
 	}
 	if !gjson.ValidBytes(resp.Body()) {
-		return errors.Errorf("json invalid: %s", resp.String())
+		return false, errors.Errorf("json invalid: %s", resp.String())
 	}
 	result := gjson.ParseBytes(resp.Body())
 	retCode := result.Get("code").Int()
 	if retCode != 0 {
-		return errors.Errorf("登录bilibili失败，错误码：%d，错误信息：%s", retCode, gjson.GetBytes(resp.Body(), "message").String())
+		return false, errors.Errorf("登录bilibili失败，错误码：%d，错误信息：%s", retCode, gjson.GetBytes(resp.Body(), "message").String())
 	} else {
 		codeValue := result.Get("data.code")
 		if !codeValue.Exists() || codeValue.Type != gjson.Number {
-			return errors.New("扫码登录未成功，返回异常")
+			return false, errors.New("扫码登录未成功，返回异常")
 		}
 		code := codeValue.Int()
 		switch code {
-		case 86038:
-			return errors.New("扫码登录未成功，原因：二维码已失效")
-		case 86090:
-			return errors.New("扫码登录未成功，原因：二维码已扫码未确认")
-		case 86101:
-			return errors.New("扫码登录未成功，原因：未扫码")
+		case 86038: // 二维码已失效
+			return false, nil
+		case 86090: // 二维码已扫码未确认
+			return false, nil
+		case 86101: // 未扫码
+			return false, nil
 		case 0:
+			c.SetCookies(resp.Cookies())
+			return true, nil
 		default:
-			return errors.Errorf("由于未知原因，扫码登录未成功，错误码：%d", code)
+			return false, errors.Errorf("由于未知原因，扫码登录未成功，错误码：%d", code)
 		}
 	}
-	c.SetCookies(resp.Cookies())
-	return nil
 }
