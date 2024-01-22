@@ -306,7 +306,7 @@ func (c *Client) qrCodeSuccess(qrCode *QRCode) (bool, error) {
 		code := codeValue.Int()
 		switch code {
 		case 86038: // 二维码已失效
-			return false, nil
+			return false, errors.New("扫码登录未成功，原因：二维码已失效")
 		case 86090: // 二维码已扫码未确认
 			return false, nil
 		case 86101: // 未扫码
