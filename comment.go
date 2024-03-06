@@ -56,6 +56,9 @@ func (c *Client) GetVideoComment(oidType, oid, sort int) (*HotReply, error) {
 		"oid":  strconv.Itoa(oid),
 		"sort": strconv.Itoa(sort),
 	}).Get("https://api.bilibili.com/x/v2/reply")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
 	data, err := getRespData(resp, "获取视频评论")
 	if err != nil {
 		return nil, err
