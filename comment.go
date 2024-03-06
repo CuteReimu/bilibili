@@ -1,5 +1,11 @@
 package bilibili
 
+import (
+	"encoding/json"
+	"github.com/pkg/errors"
+	"strconv"
+)
+
 type Comment struct { // 评论条目对象
 	Rpid      int64    `json:"rpid"`      // 评论 rpid
 	Oid       int      `json:"oid"`       // 评论区对象 id
@@ -36,4 +42,25 @@ type HotReply struct {
 		Size   int `json:"size"`   // 每页项数
 	} `json:"page"`
 	Replies []Comment `json:"replies"` // 热评列表
+}
+
+// GetVideoComment 获取视频评论，sort：0按时间、1按点赞数、2按回复数
+//
+// oidType：见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/readme.md
+func GetVideoComment(oidType, oid, sort int) (*HotReply, error) {
+	return std.GetVideoComment(oidType, oid, sort)
+}
+func (c *Client) GetVideoComment(oidType, oid, sort int) (*HotReply, error) {
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+		"type": strconv.Itoa(oidType),
+		"oid":  strconv.Itoa(oid),
+		"sort": strconv.Itoa(sort),
+	}).Get("https://api.bilibili.com/x/v2/reply")
+	data, err := getRespData(resp, "获取视频评论")
+	if err != nil {
+		return nil, err
+	}
+	var ret *HotReply
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
 }
