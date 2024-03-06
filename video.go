@@ -1120,3 +1120,28 @@ func (c *Client) GetVideoStatusNumberByShortUrl(shortUrl string) (*VideoStatusNu
 	}
 	return GetVideoStatusNumberByBvid(bvid)
 }
+
+// GetTopRecommendVideo 获取首页视频推荐列表，freshType相关性（默认为3），ps单页返回的记录条数（默认为8）
+func GetTopRecommendVideo(freshType, ps int) ([]*VideoInfo, error) {
+	return std.GetTopRecommendVideo(freshType, ps)
+}
+func (c *Client) GetTopRecommendVideo(freshType, ps int) ([]*VideoInfo, error) {
+	request := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("version", "1")
+	if freshType != 0 {
+		request.SetQueryParam("fresh_type", strconv.Itoa(freshType))
+	}
+	if ps != 0 {
+		request.SetQueryParam("ps", strconv.Itoa(ps))
+	}
+	resp, err := request.Get("https://api.bilibili.com/x/web-interface/index/top/rcmd")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取首页视频推荐列表")
+	if err != nil {
+		return nil, err
+	}
+	var ret []*VideoInfo
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
