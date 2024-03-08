@@ -1143,24 +1143,10 @@ func (c *Client) GetTopRecommendVideo(freshType, ps int) ([]*VideoInfo, error) {
 	}
 	
 	type MixedData struct {
-		Item          []*VideoInfo
-		SideBarColumn interface{} `json:"side_bar_column"`
-		BusinessCard  interface{} `json:"business_card"`
-		FloorInfo     interface{} `json:"floor_info"`
-		UserFeature   interface{} `json:"user_feature"`
-		Abtest        struct {
-			Group string `json:"group"`
-		} `json:"abtest"`
-		PreloadExposePct      int   `json:"preload_expose_pct"`
-		PreloadFloorExposePct int   `json:"preload_floor_expose_pct"`
-		Mid                   int64 `json:"mid"`
+		Item []*VideoInfo `json:"item"`
 	}
 	
 	var mixedRet MixedData
-	
 	err = json.Unmarshal(data, &mixedRet)
-	var ret []*VideoInfo
-	ret = mixedRet.Item
-	
-	return ret, errors.WithStack(err)
+	return mixedRet.Item, errors.WithStack(err)
 }
