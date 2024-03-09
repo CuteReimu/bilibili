@@ -7,7 +7,7 @@ import (
 )
 
 type Comment struct {
-	Rpid      int64  `json:"rpid"`       // 评论 rpid
+	Rpid      int    `json:"rpid"`       // 评论 rpid
 	Oid       int    `json:"oid"`        // 评论区对象 id
 	Type      int    `json:"type"`       // 评论区类型代码
 	Mid       int    `json:"mid"`        // 发送者 mid
@@ -211,23 +211,43 @@ type HotReply struct {
 // GetVideoComment 获取视频评论，sort：0按时间、1按点赞数、2按回复数
 //
 // oidType：见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/readme.md
-func GetVideoComment(oidType, oid, sort int) (*HotReply, error) {
-	return std.GetVideoComment(oidType, oid, sort)
+func GetVideoComment(oidType, oid, sort, root int) (*HotReply, error) {
+	return std.GetVideoComment(oidType, oid, sort, root)
 }
-func (c *Client) GetVideoComment(oidType, oid, sort int) (*HotReply, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+
+// GetVideoComment 用于获取视频评论 及二级评论
+func (c *Client) GetVideoComment(oidType, oid, sort, root int) (*HotReply, error) {
+	// 创建一个包含 type、oid 和 sort 参数的映射
+	params := map[string]string{
 		"type": strconv.Itoa(oidType),
 		"oid":  strconv.Itoa(oid),
 		"sort": strconv.Itoa(sort),
-	}).Get("https://api.bilibili.com/x/v2/reply")
+	}
+
+	// 设置请求 URL
+	url := "https://api.bilibili.com/x/v2/reply"
+	if root != 0 {
+		// 如果 root 不为 0,则需要访问 /x/v2/reply/reply ,并添加 root 参数
+		url = "https://api.bilibili.com/x/v2/reply/reply"
+		params["root"] = strconv.Itoa(root)
+	}
+
+	// 发送 HTTP GET 请求
+	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(params).Get(url)
 	if err != nil {
+		// 返回错误
 		return nil, errors.WithStack(err)
 	}
+
+	// 处理响应数据
 	data, err := getRespData(resp, "获取视频评论")
 	if err != nil {
+		// 发生错误,返回错误
 		return nil, err
 	}
+
 	var ret *HotReply
 	err = json.Unmarshal(data, &ret)
+	// 返回 HotReply
 	return ret, errors.WithStack(err)
 }
