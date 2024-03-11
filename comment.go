@@ -7,7 +7,7 @@ import (
 )
 
 type Comment struct {
-	Rpid      int    `json:"rpid"`       // 评论 rpid
+	Rpid      int64  `json:"rpid"`       // 评论 rpid
 	Oid       int    `json:"oid"`        // 评论区对象 id
 	Type      int    `json:"type"`       // 评论区类型代码
 	Mid       int    `json:"mid"`        // 发送者 mid
