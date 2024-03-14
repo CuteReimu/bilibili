@@ -24,6 +24,14 @@ func New() *Client {
 
 var std = New()
 
+// SetTimeout 设置http请求超时时间
+func SetTimeout(timeout time.Duration) {
+	std.SetTimeout(timeout)
+}
+func (c *Client) SetTimeout(timeout time.Duration) {
+	c.timeout = timeout
+}
+
 // GetTimeout 获取http请求超时时间，默认20秒
 func GetTimeout() time.Duration {
 	return std.GetTimeout()
