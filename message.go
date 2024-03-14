@@ -232,10 +232,10 @@ func (c *Client) GetSessionMessages(talkerId, sessionType, size int, mobiApp str
 		"session_type": strconv.Itoa(sessionType),
 	})
 	if size != 0 {
-		r.SetQueryParam("size", strconv.Itoa(size))
+		r = r.SetQueryParam("size", strconv.Itoa(size))
 	}
 	if len(mobiApp) > 0 {
-		r.SetQueryParam("mobi_app", mobiApp)
+		r = r.SetQueryParam("mobi_app", mobiApp)
 	}
 	resp, err := r.Get("https://api.vc.bilibili.com/svr_sync/v1/svr_sync/fetch_session_msgs")
 	if err != nil {
@@ -310,7 +310,7 @@ func GetSessions(sessionType int, mobiApp string) (*SessionList, error) {
 func (c *Client) GetSessions(sessionType int, mobiApp string) (*SessionList, error) {
 	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("session_type", strconv.Itoa(sessionType))
 	if len(mobiApp) > 0 {
-		r.SetQueryParam("mobi_app", mobiApp)
+		r = r.SetQueryParam("mobi_app", mobiApp)
 	}
 	resp, err := r.Get("https://api.vc.bilibili.com/session_svr/v1/session_svr/get_sessions")
 	if err != nil {

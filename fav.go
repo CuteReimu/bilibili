@@ -192,7 +192,7 @@ func (c *Client) DeleteFavourResources(mediaId int, resources []Resource, platfo
 		"csrf":      biliJct,
 	})
 	if len(platform) > 0 {
-		r.SetQueryParam("platform", platform)
+		r = r.SetQueryParam("platform", platform)
 	}
 	resp, err := r.Post("https://api.bilibili.com/x/v3/fav/resource/batch-del")
 	if err != nil {
