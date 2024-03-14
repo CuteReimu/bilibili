@@ -1090,12 +1090,15 @@ type DynamicInfo struct {
 // GetUserSpaceDynamic 获取用户空间动态，mid就是用户UID，无需登录。
 //
 // 返回结构较为繁琐，见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/dynamic/space.md
-func GetUserSpaceDynamic(mid int) (*DynamicInfo, error) {
-	return std.GetUserSpaceDynamic(mid)
+func GetUserSpaceDynamic(mid int, offset string) (*DynamicInfo, error) {
+	return std.GetUserSpaceDynamic(mid, offset)
 }
-func (c *Client) GetUserSpaceDynamic(mid int) (*DynamicInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetQueryParam("host_mid", strconv.Itoa(mid)).Get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space")
+func (c *Client) GetUserSpaceDynamic(mid int, offset string) (*DynamicInfo, error) {
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("host_mid", strconv.Itoa(mid))
+	if len(offset) > 0 {
+		r = r.SetQueryParam("offset", offset)
+	}
+	resp, err := r.Get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
