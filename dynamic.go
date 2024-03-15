@@ -826,7 +826,7 @@ type DynamicItem struct {
 					Id    int `json:"id"`
 					Items []struct {
 						Height int           `json:"height"`
-						Size   int           `json:"size"`
+						Size   float64       `json:"size"`
 						Src    string        `json:"src"`
 						Tags   []interface{} `json:"tags"`
 						Width  int           `json:"width"`
