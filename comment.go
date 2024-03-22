@@ -90,7 +90,7 @@ type Comment struct {
 			Intimacy     int    `json:"intimacy"`
 			MasterStatus int    `json:"master_status"`
 			IsReceive    int    `json:"is_receive"`
-		} `json:"fans_detail"` // 发送者粉丝标签
+		} `json:"fans_detail"`               // 发送者粉丝标签
 		Following   int `json:"following"`   // 是否关注该用户，需要登录(Cookie或APP)，否则恒为0，0：未关注，1：已关注
 		IsFollowed  int `json:"is_followed"` // 是否被该用户关注，需要登录(Cookie或APP)，否则恒为0，0：未关注，1：已关注
 		UserSailing *struct {
@@ -114,11 +114,11 @@ type Comment struct {
 					Color   string `json:"color"`    // 数字颜色
 					Name    string `json:"name"`     // 装扮名称
 					NumDesc string `json:"num_desc"` // 粉丝专属编号，字串格式
-				} `json:"fan"` // 粉丝专属信息
+				} `json:"fan"`            // 粉丝专属信息
 				Type string `json:"type"` // 装扮类型，suit：一般装扮，vip_suit：vip装扮
-			} `json:"cardbg"` // 评论卡片装扮
+			} `json:"cardbg"`                                      // 评论卡片装扮
 			CardbgWithFocus interface{} `json:"cardbg_with_focus"` // null
-		} `json:"user_sailing"` // 发送者评论条目装扮信息
+		} `json:"user_sailing"`                    // 发送者评论条目装扮信息
 		IsContractor bool   `json:"is_contractor"` // 是否为合作用户
 		ContractDesc string `json:"contract_desc"` // 合作用户说明
 	} `json:"member"`
@@ -150,7 +150,7 @@ type Comment struct {
 			AppName        string `json:"appName"`
 			AppPackageName string `json:"appPackageName"`
 			ClickReport    string `json:"clickReport"` // 上报 id
-		} `json:"jump_url"` // 需要高亮的超链转义
+		} `json:"jump_url"`            // 需要高亮的超链转义
 		MaxLine  int `json:"max_line"` // 收起最大行数
 		Pictures []struct {
 			ImgSrc    string `json:"img_src"`    // 图片地址
@@ -169,7 +169,7 @@ type Comment struct {
 	UpAction struct {
 		Like  bool `json:"like"`  // 是否UP主觉得很赞
 		Reply bool `json:"reply"` // 是否被UP主回复
-	} `json:"up_action"` // 评论 UP 主操作信息
+	} `json:"up_action"`                 // 评论 UP 主操作信息
 	ShowFollow bool `json:"show_follow"` // 作用尚不明确
 	Invisible  bool `json:"invisible"`   // 评论是否被隐藏
 	CardLabel  struct {
@@ -211,9 +211,6 @@ type HotReply struct {
 // GetVideoComment 获取视频评论，sort：0按时间、1按点赞数、2按回复数
 //
 // oidType：见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/readme.md
-func GetVideoComment(oidType, oid, sort, root int) (*HotReply, error) {
-	return std.GetVideoComment(oidType, oid, sort, root)
-}
 
 // GetVideoComment 用于获取视频评论 及二级评论
 func (c *Client) GetVideoComment(oidType, oid, sort, root int) (*HotReply, error) {
@@ -223,7 +220,7 @@ func (c *Client) GetVideoComment(oidType, oid, sort, root int) (*HotReply, error
 		"oid":  strconv.Itoa(oid),
 		"sort": strconv.Itoa(sort),
 	}
-
+	
 	// 设置请求 URL
 	url := "https://api.bilibili.com/x/v2/reply"
 	if root != 0 {
@@ -231,21 +228,21 @@ func (c *Client) GetVideoComment(oidType, oid, sort, root int) (*HotReply, error
 		url = "https://api.bilibili.com/x/v2/reply/reply"
 		params["root"] = strconv.Itoa(root)
 	}
-
+	
 	// 发送 HTTP GET 请求
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(params).Get(url)
 	if err != nil {
 		// 返回错误
 		return nil, errors.WithStack(err)
 	}
-
+	
 	// 处理响应数据
 	data, err := getRespData(resp, "获取视频评论")
 	if err != nil {
 		// 发生错误,返回错误
 		return nil, err
 	}
-
+	
 	var ret *HotReply
 	err = json.Unmarshal(data, &ret)
 	// 返回 HotReply

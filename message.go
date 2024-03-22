@@ -19,9 +19,6 @@ type UnreadMessage struct {
 }
 
 // GetUnreadMessage 获取未读消息数
-func GetUnreadMessage() (*UnreadMessage, error) {
-	return std.GetUnreadMessage()
-}
 func (c *Client) GetUnreadMessage() (*UnreadMessage, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.bilibili.com/x/msgfeed/unread")
 	if err != nil {
@@ -43,9 +40,6 @@ type UnreadPrivateMessage struct {
 }
 
 // GetUnreadPrivateMessage 获取未读私信数
-func GetUnreadPrivateMessage() (*UnreadPrivateMessage, error) {
-	return std.GetUnreadPrivateMessage()
-}
 func (c *Client) GetUnreadPrivateMessage() (*UnreadPrivateMessage, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread")
 	if err != nil {
@@ -82,9 +76,6 @@ func init() {
 }
 
 // SendPrivateMessageText 发送私信（文字消息）
-func SendPrivateMessageText(senderUid, receiverId int, content string) (int, string, error) {
-	return std.SendPrivateMessageText(senderUid, receiverId, content)
-}
 func (c *Client) SendPrivateMessageText(senderUid, receiverId int, content string) (int, string, error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -122,9 +113,6 @@ func (c *Client) SendPrivateMessageText(senderUid, receiverId int, content strin
 }
 
 // SendPrivateMessageImage 发送私信（图片消息）
-func SendPrivateMessageImage(senderUid, receiverId int, url string) (int, string, error) {
-	return std.SendPrivateMessageImage(senderUid, receiverId, url)
-}
 func (c *Client) SendPrivateMessageImage(senderUid, receiverId int, url string) (int, string, error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -162,9 +150,6 @@ func (c *Client) SendPrivateMessageImage(senderUid, receiverId int, url string) 
 }
 
 // SendPrivateMessageRecall 发送私信（撤回消息）
-func SendPrivateMessageRecall(senderUid, receiverId, msgKey int) (int, string, error) {
-	return std.SendPrivateMessageRecall(senderUid, receiverId, msgKey)
-}
 func (c *Client) SendPrivateMessageRecall(senderUid, receiverId, msgKey int) (int, string, error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -212,9 +197,9 @@ type SessionMessages struct {
 		NotifyCode     string `json:"notify_code"`                // 作用尚不明确
 		NewFaceVersion int    `json:"new_face_version,omitempty"` // 作用尚不明确
 	} `json:"messages"`
-	HasMore  int        `json:"has_more"`  // 固定值0
-	MinSeqno int64      `json:"min_seqno"` // 作用尚不明确
-	MaxSeqno int64      `json:"max_seqno"` // 作用尚不明确
+	HasMore  int   `json:"has_more"`  // 固定值0
+	MinSeqno int64 `json:"min_seqno"` // 作用尚不明确
+	MaxSeqno int64 `json:"max_seqno"` // 作用尚不明确
 	EInfos   []struct { // 聊天表情列表
 		Text string `json:"text"` // 表情名称
 		Url  string `json:"url"`  // 表情链接
@@ -223,9 +208,6 @@ type SessionMessages struct {
 }
 
 // GetSessionMessages 获取私信消息记录
-func GetSessionMessages(talkerId, sessionType, size int, mobiApp string) (*SessionMessages, error) {
-	return std.GetSessionMessages(talkerId, sessionType, size, mobiApp)
-}
 func (c *Client) GetSessionMessages(talkerId, sessionType, size int, mobiApp string) (*SessionMessages, error) {
 	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"talker_id":    strconv.Itoa(talkerId),
@@ -304,9 +286,6 @@ type SessionList struct {
 // GetSessions 获取消息列表 session_type，1：系统，2：用户，3：应援团
 //
 // 参照 https://github.com/CuteReimu/bilibili/issues/8
-func GetSessions(sessionType int, mobiApp string) (*SessionList, error) {
-	return std.GetSessions(sessionType, mobiApp)
-}
 func (c *Client) GetSessions(sessionType int, mobiApp string) (*SessionList, error) {
 	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("session_type", strconv.Itoa(sessionType))
 	if len(mobiApp) > 0 {

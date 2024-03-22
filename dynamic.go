@@ -11,8 +11,8 @@ import (
 
 type SearchDynamicAtResult struct {
 	Groups []struct { // 内容分组
-		GroupType int        `json:"group_type"` // 2：我的关注，4：其他
-		GroupName string     `json:"group_name"` // 分组名字
+		GroupType int    `json:"group_type"` // 2：我的关注，4：其他
+		GroupName string `json:"group_name"` // 分组名字
 		Items     []struct { // 用户信息
 			Uid                int    `json:"uid"`   // 用户id
 			Uname              string `json:"uname"` // 用户昵称
@@ -25,9 +25,7 @@ type SearchDynamicAtResult struct {
 }
 
 // SearchDynamicAt 根据关键字搜索用户(at别人时的填充列表)
-func SearchDynamicAt(uid int, keyword string) (*SearchDynamicAtResult, error) {
-	return std.SearchDynamicAt(uid, keyword)
-}
+
 func (c *Client) SearchDynamicAt(uid int, keyword string) (*SearchDynamicAtResult, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"uid":     strconv.Itoa(uid),
@@ -200,9 +198,7 @@ type DynamicRepostDetail struct {
 }
 
 // GetDynamicRepostDetail 获取动态转发列表
-func GetDynamicRepostDetail(dynamicId, offset int) (*DynamicRepostDetail, error) {
-	return std.GetDynamicRepostDetail(dynamicId, offset)
-}
+
 func (c *Client) GetDynamicRepostDetail(dynamicId, offset int) (*DynamicRepostDetail, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"dynamic_id": strconv.Itoa(dynamicId),
@@ -275,9 +271,7 @@ type DynamicLikeList struct {
 }
 
 // GetDynamicLikeList 获取动态点赞列表。offset是非必填项
-func GetDynamicLikeList(dynamicId, offset int) (*DynamicLikeList, error) {
-	return std.GetDynamicLikeList(dynamicId, offset)
-}
+
 func (c *Client) GetDynamicLikeList(dynamicId, offset int) (*DynamicLikeList, error) {
 	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetQueryParam("dynamic_id", strconv.Itoa(dynamicId))
@@ -298,8 +292,8 @@ func (c *Client) GetDynamicLikeList(dynamicId, offset int) (*DynamicLikeList, er
 }
 
 type DynamicLiveUserList struct {
-	Count int        `json:"count"` // 直播者数量
-	Group string     `json:"group"` // 固定值"default"，作用尚不明确
+	Count int    `json:"count"` // 直播者数量
+	Group string `json:"group"` // 固定值"default"，作用尚不明确
 	Items []struct { // 直播者列表
 		Uid   int    `json:"uid"`   // 直播者id
 		Uname string `json:"uname"` // 直播者昵称
@@ -311,9 +305,7 @@ type DynamicLiveUserList struct {
 }
 
 // GetDynamicLiveUserList 获取正在直播的已关注者。size是非必填项
-func GetDynamicLiveUserList(size int) (*DynamicLiveUserList, error) {
-	return std.GetDynamicLiveUserList(size)
-}
+
 func (c *Client) GetDynamicLiveUserList(size int) (*DynamicLiveUserList, error) {
 	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded")
 	if size != 0 {
@@ -333,7 +325,7 @@ func (c *Client) GetDynamicLiveUserList(size int) (*DynamicLiveUserList, error) 
 }
 
 type DynamicUpList struct {
-	ButtonStatement string     `json:"button_statement"` // 固定值空，作用尚不明确
+	ButtonStatement string `json:"button_statement"` // 固定值空，作用尚不明确
 	Items           []struct { // 更新者列表
 		UserProfile struct {
 			Info struct {
@@ -381,9 +373,7 @@ type DynamicUpList struct {
 }
 
 // GetDynamicUpList 获取发布新动态的已关注者。size参数，0：不开启青少年模式，1：开启青少年模式
-func GetDynamicUpList(size int) (*DynamicUpList, error) {
-	return std.GetDynamicUpList(size)
-}
+
 func (c *Client) GetDynamicUpList(size int) (*DynamicUpList, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetQueryParam("size", strconv.Itoa(size)).Get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist")
@@ -400,9 +390,7 @@ func (c *Client) GetDynamicUpList(size int) (*DynamicUpList, error) {
 }
 
 // RemoveDynamic 删除动态
-func RemoveDynamic(dynamicId int) error {
-	return std.RemoveDynamic(dynamicId)
-}
+
 func (c *Client) RemoveDynamic(dynamicId int) error {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -436,9 +424,7 @@ type DynamicDetail struct {
 }
 
 // GetDynamicDetail 获取特定动态卡片信息
-func GetDynamicDetail(dynamicId int) (*DynamicDetail, error) {
-	return std.GetDynamicDetail(dynamicId)
-}
+
 func (c *Client) GetDynamicDetail(dynamicId int) (*DynamicDetail, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetQueryParam("dynamic_id", strconv.Itoa(dynamicId)).Get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail")
@@ -456,11 +442,11 @@ func (c *Client) GetDynamicDetail(dynamicId int) (*DynamicDetail, error) {
 
 type DynamicPortal struct {
 	MyInfo struct { // 个人关注的一些信息
-		Dyns      int      `json:"dyns"`      // 个人动态
-		Face      string   `json:"face"`      // 头像url
-		FaceNft   int      `json:"face_nft"`  // 含义尚不明确
-		Follower  int      `json:"follower"`  // 粉丝数量
-		Following int      `json:"following"` // 我的关注
+		Dyns      int    `json:"dyns"`      // 个人动态
+		Face      string `json:"face"`      // 头像url
+		FaceNft   int    `json:"face_nft"`  // 含义尚不明确
+		Follower  int    `json:"follower"`  // 粉丝数量
+		Following int    `json:"following"` // 我的关注
 		LevelInfo struct { // 本人等级内容
 			CurrentExp   int   `json:"current_exp"`
 			CurrentLevel int   `json:"current_level"` // 当前等级，0-6级
@@ -468,19 +454,19 @@ type DynamicPortal struct {
 			LevelUp      int64 `json:"level_up"`
 			NextExp      int   `json:"next_exp"`
 		} `json:"level_info"`
-		Mid      int      `json:"mid"`  // 账户mid
-		Name     string   `json:"name"` // 账户名称
+		Mid      int    `json:"mid"`  // 账户mid
+		Name     string `json:"name"` // 账户名称
 		Official struct { // 认证信息
 			Desc  string `json:"desc"`  // 认证备注
 			Role  int    `json:"role"`  // 认证类型，0：无，1 2 7：个人认证，3 4 5 6：机构认证
 			Title string `json:"title"` // 认证信息
 			Type  int    `json:"type"`  // 是否认证，-1：无，0：认证
 		} `json:"official"`
-		SpaceBg string   `json:"space_bg"` // 账户个人中心的背景横幅url
+		SpaceBg string `json:"space_bg"` // 账户个人中心的背景横幅url
 		Vip     struct { // vip信息
-			AvatarSubscript    int      `json:"avatar_subscript"`     // 是否显示会员图标，0：不显示，1：显示
-			AvatarSubscriptUrl string   `json:"avatar_subscript_url"` // 大会员角标地址
-			DueDate            int64    `json:"due_date"`             // 会员过期时间，Unix时间戳（毫秒）
+			AvatarSubscript    int    `json:"avatar_subscript"`     // 是否显示会员图标，0：不显示，1：显示
+			AvatarSubscriptUrl string `json:"avatar_subscript_url"` // 大会员角标地址
+			DueDate            int64  `json:"due_date"`             // 会员过期时间，Unix时间戳（毫秒）
 			Label              struct { // 会员标签
 				BgColor               string `json:"bg_color"`                  // 会员标签背景颜色，颜色码，一般为#FB7299，曾用于愚人节改变大会员配色
 				BgStyle               int    `json:"bg_style"`                  // 固定值1，作用尚不明确
@@ -515,9 +501,6 @@ type DynamicPortal struct {
 }
 
 // GetDynamicPortal 获取最近更新UP主列表（其实就是获取自己的动态门户）
-func GetDynamicPortal() (*DynamicPortal, error) {
-	return std.GetDynamicPortal()
-}
 func (c *Client) GetDynamicPortal() (*DynamicPortal, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.bilibili.com/x/polymer/web-dynamic/v1/portal")
 	if err != nil {
@@ -533,9 +516,7 @@ func (c *Client) GetDynamicPortal() (*DynamicPortal, error) {
 }
 
 // UploadDynamicBfs 为图片动态上传图片
-func UploadDynamicBfs(fileName string, file io.Reader, category string) (url string, size Size, err error) {
-	return std.UploadDynamicBfs(fileName, file, category)
-}
+
 func (c *Client) UploadDynamicBfs(fileName string, file io.Reader, category string) (url string, size Size, err error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -565,9 +546,7 @@ func (c *Client) UploadDynamicBfs(fileName string, file io.Reader, category stri
 // CreateDynamic 发表纯文本动态
 //
 // TODO: extension 字段尚不知如何使用，需自行填写。参考 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/dynamic/publish.md
-func CreateDynamic(content, extension string, atUids []int, ctrl []*FormatCtrl) (dynamicId int, err error) {
-	return std.CreateDynamic(content, extension, atUids, ctrl)
-}
+
 func (c *Client) CreateDynamic(content, extension string, atUids []int, ctrl []*FormatCtrl) (dynamicId int, err error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -620,9 +599,7 @@ type DynamicList struct {
 }
 
 // FetchDynamics 获取包含置顶及热门的动态列表，topicId与topicName任选一个
-func FetchDynamics(topicId int, topicName string, sortby, offset int) (*DynamicList, error) {
-	return std.FetchDynamics(topicId, topicName, sortby, offset)
-}
+
 func (c *Client) FetchDynamics(topicId int, topicName string, sortby, offset int) (*DynamicList, error) {
 	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded")
 	if topicId != 0 {
@@ -650,9 +627,7 @@ func (c *Client) FetchDynamics(topicId int, topicName string, sortby, offset int
 }
 
 // GetTopicHistory 获取历史动态列表，topicId与topicName任选一个
-func GetTopicHistory(topicId int, topicName string, offsetDynamicId int) (*DynamicList, error) {
-	return std.GetTopicHistory(topicId, topicName, offsetDynamicId)
-}
+
 func (c *Client) GetTopicHistory(topicId int, topicName string, offsetDynamicId int) (*DynamicList, error) {
 	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("offset_dynamic_id", strconv.Itoa(offsetDynamicId))
 	if topicId != 0 {
@@ -1090,9 +1065,7 @@ type DynamicInfo struct {
 // GetUserSpaceDynamic 获取用户空间动态，mid就是用户UID，无需登录。
 //
 // 返回结构较为繁琐，见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/dynamic/space.md
-func GetUserSpaceDynamic(mid int, offset string) (*DynamicInfo, error) {
-	return std.GetUserSpaceDynamic(mid, offset)
-}
+
 func (c *Client) GetUserSpaceDynamic(mid int, offset string) (*DynamicInfo, error) {
 	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("host_mid", strconv.Itoa(mid))
 	if len(offset) > 0 {
