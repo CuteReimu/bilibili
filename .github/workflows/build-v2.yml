@@ -1,4 +1,4 @@
-name: Go
+name: Go-v2
 
 on:
   push:
