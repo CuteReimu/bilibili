@@ -1,10 +1,10 @@
 package bilibili
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
-	"math/rand"
 	"strconv"
 	"time"
 )
