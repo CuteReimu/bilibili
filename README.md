@@ -3,7 +3,7 @@
 # 哔哩哔哩-API-Go版本
 
 ![](https://img.shields.io/github/go-mod/go-version/CuteReimu/bilibili "语言")
-[![](https://img.shields.io/github/actions/workflow/status/CuteReimu/bilibili/golangci-lint.yml?branch=master)](https://github.com/CuteReimu/bilibili/actions/workflows/golangci-lint.yml "代码分析")
+[![](https://img.shields.io/github/actions/workflow/status/CuteReimu/bilibili/golangci-lint.yml?branch=v2)](https://github.com/CuteReimu/bilibili/actions/workflows/golangci-lint.yml "代码分析")
 [![](https://img.shields.io/github/contributors/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/graphs/contributors "贡献者")
 [![](https://img.shields.io/github/license/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/blob/master/LICENSE "许可协议")
 </div>
@@ -34,13 +34,13 @@ PS：目前，B站调用接口时强制使用 `https` 协议
 ### 安装
 
 ```bash
-go get -u github.com/CuteReimu/bilibili
+go get -u github.com/CuteReimu/bilibili/v2
 ```
 
 在项目中引用即可使用
 
 ```go
-import "github.com/CuteReimu/bilibili"
+import "github.com/CuteReimu/bilibili/v2"
 ```
 
 ### 首次登录
