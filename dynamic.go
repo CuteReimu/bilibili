@@ -11,8 +11,8 @@ import (
 
 type SearchDynamicAtResult struct {
 	Groups []struct { // 内容分组
-		GroupType int    `json:"group_type"` // 2：我的关注，4：其他
-		GroupName string `json:"group_name"` // 分组名字
+		GroupType int        `json:"group_type"` // 2：我的关注，4：其他
+		GroupName string     `json:"group_name"` // 分组名字
 		Items     []struct { // 用户信息
 			Uid                int    `json:"uid"`   // 用户id
 			Uname              string `json:"uname"` // 用户昵称
@@ -292,8 +292,8 @@ func (c *Client) GetDynamicLikeList(dynamicId, offset int) (*DynamicLikeList, er
 }
 
 type DynamicLiveUserList struct {
-	Count int    `json:"count"` // 直播者数量
-	Group string `json:"group"` // 固定值"default"，作用尚不明确
+	Count int        `json:"count"` // 直播者数量
+	Group string     `json:"group"` // 固定值"default"，作用尚不明确
 	Items []struct { // 直播者列表
 		Uid   int    `json:"uid"`   // 直播者id
 		Uname string `json:"uname"` // 直播者昵称
@@ -325,7 +325,7 @@ func (c *Client) GetDynamicLiveUserList(size int) (*DynamicLiveUserList, error) 
 }
 
 type DynamicUpList struct {
-	ButtonStatement string `json:"button_statement"` // 固定值空，作用尚不明确
+	ButtonStatement string     `json:"button_statement"` // 固定值空，作用尚不明确
 	Items           []struct { // 更新者列表
 		UserProfile struct {
 			Info struct {
@@ -442,11 +442,11 @@ func (c *Client) GetDynamicDetail(dynamicId int) (*DynamicDetail, error) {
 
 type DynamicPortal struct {
 	MyInfo struct { // 个人关注的一些信息
-		Dyns      int    `json:"dyns"`      // 个人动态
-		Face      string `json:"face"`      // 头像url
-		FaceNft   int    `json:"face_nft"`  // 含义尚不明确
-		Follower  int    `json:"follower"`  // 粉丝数量
-		Following int    `json:"following"` // 我的关注
+		Dyns      int      `json:"dyns"`      // 个人动态
+		Face      string   `json:"face"`      // 头像url
+		FaceNft   int      `json:"face_nft"`  // 含义尚不明确
+		Follower  int      `json:"follower"`  // 粉丝数量
+		Following int      `json:"following"` // 我的关注
 		LevelInfo struct { // 本人等级内容
 			CurrentExp   int   `json:"current_exp"`
 			CurrentLevel int   `json:"current_level"` // 当前等级，0-6级
@@ -454,19 +454,19 @@ type DynamicPortal struct {
 			LevelUp      int64 `json:"level_up"`
 			NextExp      int   `json:"next_exp"`
 		} `json:"level_info"`
-		Mid      int    `json:"mid"`  // 账户mid
-		Name     string `json:"name"` // 账户名称
+		Mid      int      `json:"mid"`  // 账户mid
+		Name     string   `json:"name"` // 账户名称
 		Official struct { // 认证信息
 			Desc  string `json:"desc"`  // 认证备注
 			Role  int    `json:"role"`  // 认证类型，0：无，1 2 7：个人认证，3 4 5 6：机构认证
 			Title string `json:"title"` // 认证信息
 			Type  int    `json:"type"`  // 是否认证，-1：无，0：认证
 		} `json:"official"`
-		SpaceBg string `json:"space_bg"` // 账户个人中心的背景横幅url
+		SpaceBg string   `json:"space_bg"` // 账户个人中心的背景横幅url
 		Vip     struct { // vip信息
-			AvatarSubscript    int    `json:"avatar_subscript"`     // 是否显示会员图标，0：不显示，1：显示
-			AvatarSubscriptUrl string `json:"avatar_subscript_url"` // 大会员角标地址
-			DueDate            int64  `json:"due_date"`             // 会员过期时间，Unix时间戳（毫秒）
+			AvatarSubscript    int      `json:"avatar_subscript"`     // 是否显示会员图标，0：不显示，1：显示
+			AvatarSubscriptUrl string   `json:"avatar_subscript_url"` // 大会员角标地址
+			DueDate            int64    `json:"due_date"`             // 会员过期时间，Unix时间戳（毫秒）
 			Label              struct { // 会员标签
 				BgColor               string `json:"bg_color"`                  // 会员标签背景颜色，颜色码，一般为#FB7299，曾用于愚人节改变大会员配色
 				BgStyle               int    `json:"bg_style"`                  // 固定值1，作用尚不明确

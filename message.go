@@ -197,9 +197,9 @@ type SessionMessages struct {
 		NotifyCode     string `json:"notify_code"`                // 作用尚不明确
 		NewFaceVersion int    `json:"new_face_version,omitempty"` // 作用尚不明确
 	} `json:"messages"`
-	HasMore  int   `json:"has_more"`  // 固定值0
-	MinSeqno int64 `json:"min_seqno"` // 作用尚不明确
-	MaxSeqno int64 `json:"max_seqno"` // 作用尚不明确
+	HasMore  int        `json:"has_more"`  // 固定值0
+	MinSeqno int64      `json:"min_seqno"` // 作用尚不明确
+	MaxSeqno int64      `json:"max_seqno"` // 作用尚不明确
 	EInfos   []struct { // 聊天表情列表
 		Text string `json:"text"` // 表情名称
 		Url  string `json:"url"`  // 表情链接

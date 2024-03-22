@@ -24,7 +24,7 @@ type Article struct {
 		ParentId int    `json:"parent_id"`
 		Name     string `json:"name"`
 	} `json:"categories"`
-	Summary string `json:"summary"` // 文章摘要
+	Summary string   `json:"summary"` // 文章摘要
 	Stats   struct { // 文章状态数信息
 		View     int `json:"view"`     // 阅读数
 		Favorite int `json:"favorite"` // 收藏数
@@ -57,7 +57,7 @@ type ArticlesInfo struct {
 		CheckTime     string `json:"check_time"`     // 空，作用尚不明确
 	} `json:"list"`
 	Articles []Article `json:"articles"` // 文集内的文章列表
-	Author   struct { // 文集作者信息
+	Author   struct {  // 文集作者信息
 		Mid            int            `json:"mid"`  // 作者mid
 		Name           string         `json:"name"` // 作者昵称
 		Face           string         `json:"face"` // 作者头像url
@@ -87,10 +87,10 @@ func (c *Client) GetArticlesInfo(id int) (*ArticlesInfo, error) {
 }
 
 type ArticleViewInfo struct {
-	Like      int  `json:"like"`      // 是否点赞，0：未点赞，1：已点赞
-	Attention bool `json:"attention"` // 是否关注文章作者
-	Favorite  bool `json:"favorite"`  // 是否收藏
-	Coin      int  `json:"coin"`      // 为文章投币数
+	Like      int      `json:"like"`      // 是否点赞，0：未点赞，1：已点赞
+	Attention bool     `json:"attention"` // 是否关注文章作者
+	Favorite  bool     `json:"favorite"`  // 是否收藏
+	Coin      int      `json:"coin"`      // 为文章投币数
 	Stats     struct { // 状态数信息
 		View     int `json:"view"`     // 阅读数
 		Favorite int `json:"favorite"` // 收藏数
@@ -101,19 +101,19 @@ type ArticleViewInfo struct {
 		Coin     int `json:"coin"`     // 投币数
 		Dynamic  int `json:"dynamic"`  // 动态转发数
 	} `json:"stats"`
-	Title           string   `json:"title"`             // 文章标题
-	BannerUrl       string   `json:"banner_url"`        // 文章头图url
-	Mid             int      `json:"mid"`               // 文章作者mid
-	AuthorName      string   `json:"author_name"`       // 文章作者昵称
-	IsAuthor        bool     `json:"is_author"`         // 固定值true，作用尚不明确
-	ImageUrls       []string `json:"image_urls"`        // 动态封面图片url
-	OriginImageUrls []string `json:"origin_image_urls"` // 文章封面图片url
-	Shareable       bool     `json:"shareable"`         // 固定值true，作用尚不明确
-	ShowLaterWatch  bool     `json:"show_later_watch"`  // 固定值true，作用尚不明确
-	ShowSmallWindow bool     `json:"show_small_window"` // 固定值true，作用尚不明确
-	InList          bool     `json:"in_list"`           // 是否收于文集
-	Pre             int      `json:"pre"`               // 上一篇文章cvid
-	Next            int      `json:"next"`              // 下一篇文章cvid
+	Title           string     `json:"title"`             // 文章标题
+	BannerUrl       string     `json:"banner_url"`        // 文章头图url
+	Mid             int        `json:"mid"`               // 文章作者mid
+	AuthorName      string     `json:"author_name"`       // 文章作者昵称
+	IsAuthor        bool       `json:"is_author"`         // 固定值true，作用尚不明确
+	ImageUrls       []string   `json:"image_urls"`        // 动态封面图片url
+	OriginImageUrls []string   `json:"origin_image_urls"` // 文章封面图片url
+	Shareable       bool       `json:"shareable"`         // 固定值true，作用尚不明确
+	ShowLaterWatch  bool       `json:"show_later_watch"`  // 固定值true，作用尚不明确
+	ShowSmallWindow bool       `json:"show_small_window"` // 固定值true，作用尚不明确
+	InList          bool       `json:"in_list"`           // 是否收于文集
+	Pre             int        `json:"pre"`               // 上一篇文章cvid
+	Next            int        `json:"next"`              // 下一篇文章cvid
 	ShareChannels   []struct { // 分享方式列表
 		Name         string `json:"name"`          // 分享名称：QQ，QQ空间，微信，朋友圈，微博
 		Picture      string `json:"picture"`       // 分享图片url
@@ -203,7 +203,7 @@ func (c *Client) FavourArticle(id int) error {
 
 type UserArticleList struct {
 	Articles []struct { // 专栏文章信息列表
-		Id       int `json:"id"` // 专栏文章id
+		Id       int      `json:"id"` // 专栏文章id
 		Category struct { // 分类
 			Id       int    `json:"id"`        // 	分类id
 			ParentId int    `json:"parent_id"` // 父级分类id
@@ -214,15 +214,15 @@ type UserArticleList struct {
 			ParentId int    `json:"parent_id"` // 父级分类id
 			Name     string `json:"name"`      // 分类名称
 		} `json:"categories"`
-		Title      string `json:"title"`      // 标题
-		Summary    string `json:"summary"`    // 摘要
-		BannerUrl  string `json:"banner_url"` // 封面图
-		TemplateId int    `json:"template_id"`
-		State      int    `json:"state"`
+		Title      string   `json:"title"`      // 标题
+		Summary    string   `json:"summary"`    // 摘要
+		BannerUrl  string   `json:"banner_url"` // 封面图
+		TemplateId int      `json:"template_id"`
+		State      int      `json:"state"`
 		Author     struct { // UP主信息
-			Mid     int    `json:"mid"`  // 用户uid
-			Name    string `json:"name"` // 用户名
-			Face    string `json:"face"` // 头像
+			Mid     int      `json:"mid"`  // 用户uid
+			Name    string   `json:"name"` // 用户名
+			Face    string   `json:"face"` // 头像
 			Pendant struct { // 头像框信息
 				Pid    int    `json:"pid"`    // 头像框id
 				Name   string `json:"name"`   // 头像框名称
@@ -242,11 +242,11 @@ type UserArticleList struct {
 				Condition  string `json:"condition"`   // 获取条件
 			} `json:"nameplate"`
 			Vip struct { // 大会员信息
-				Type       int `json:"type"`         // 大会员类型，0：无，1：月大会员，2：年度及以上大会员
-				Status     int `json:"status"`       // 大会员状态，0：无，1：有
-				DueDate    int `json:"due_date"`     // 大会员过期时间时间戳，单位：毫秒
-				VipPayType int `json:"vip_pay_type"` // 支付类型
-				ThemeType  int `json:"theme_type"`   // 固定值0
+				Type       int      `json:"type"`         // 大会员类型，0：无，1：月大会员，2：年度及以上大会员
+				Status     int      `json:"status"`       // 大会员状态，0：无，1：有
+				DueDate    int      `json:"due_date"`     // 大会员过期时间时间戳，单位：毫秒
+				VipPayType int      `json:"vip_pay_type"` // 支付类型
+				ThemeType  int      `json:"theme_type"`   // 固定值0
 				Label      struct { // 大会员标签
 					Path       string `json:"path"`        // 空串
 					Text       string `json:"text"`        // 会员类型文案，大会员，年度大会员，十年大会员，百年大会员，最强绿鲤鱼
@@ -284,12 +284,12 @@ type UserArticleList struct {
 			TypeName string `json:"type_name"`
 			Spoiler  int    `json:"spoiler"`
 		} `json:"media"`
-		ApplyTime string `json:"apply_time"`
-		CheckTime string `json:"check_time"`
-		Original  int    `json:"original"`
-		ActId     int    `json:"act_id"`
-		CoverAvid int    `json:"cover_avid"`
-		Type      int    `json:"type"`
+		ApplyTime string     `json:"apply_time"`
+		CheckTime string     `json:"check_time"`
+		Original  int        `json:"original"`
+		ActId     int        `json:"act_id"`
+		CoverAvid int        `json:"cover_avid"`
+		Type      int        `json:"type"`
 		Tags      []struct { // 标签
 			Tid  int    `json:"tid"`  // 标签id
 			Name string `json:"name"` // 标签名称

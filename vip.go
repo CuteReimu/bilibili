@@ -90,12 +90,12 @@ type VipCenterInfo struct {
 			IsSeniorMember int    `json:"is_senior_member"` // 是否转正，0：未转正，1：正式会员
 		} `json:"account"`
 		Vip struct { // 账号会员信息
-			Mid        int   `json:"mid"`          // 用户mid
-			VipType    int   `json:"vip_type"`     // 会员类型，0：无，1：月大会员，2：年度及以上大会员
-			VipStatus  int   `json:"vip_status"`   // 会员状态，0：无，1：有
-			VipDueDate int64 `json:"vip_due_date"` // 会员过期时间戳，单位：毫秒
-			VipPayType int   `json:"vip_pay_type"` // 支付类型，0：未支付（常见于官方账号），1：已支付（以正常渠道获取的大会员均为此值）
-			ThemeType  int   `json:"theme_type"`
+			Mid        int      `json:"mid"`          // 用户mid
+			VipType    int      `json:"vip_type"`     // 会员类型，0：无，1：月大会员，2：年度及以上大会员
+			VipStatus  int      `json:"vip_status"`   // 会员状态，0：无，1：有
+			VipDueDate int64    `json:"vip_due_date"` // 会员过期时间戳，单位：毫秒
+			VipPayType int      `json:"vip_pay_type"` // 支付类型，0：未支付（常见于官方账号），1：已支付（以正常渠道获取的大会员均为此值）
+			ThemeType  int      `json:"theme_type"`
 			Label      struct { // 会员标签
 				Text                  string `json:"text"`          // 会员类型文案，大会员，年度大会员，十年大会员，百年大会员，最强绿鲤鱼
 				LabelTheme            string `json:"label_theme"`   // 会员标签，vip，annual_vip，ten_annual_vip，hundred_annual_vip，fools_day_hundred_annual_vip
@@ -121,10 +121,10 @@ type VipCenterInfo struct {
 			Status     int   `json:"status"`       // 电视大会员状态，0：无，1：有
 			DueDate    int64 `json:"due_date"`     // 电视大会员过期时间戳，单位：毫秒
 		} `json:"tv"`
-		BackgroundImageSmall string `json:"background_image_small"`
-		BackgroundImageBig   string `json:"background_image_big"`
-		PanelTitle           string `json:"panel_title"` // 用户昵称
-		PanelSubTitle        string `json:"panel_sub_title"`
+		BackgroundImageSmall string   `json:"background_image_small"`
+		BackgroundImageBig   string   `json:"background_image_big"`
+		PanelTitle           string   `json:"panel_title"` // 用户昵称
+		PanelSubTitle        string   `json:"panel_sub_title"`
 		AvatarPendant        struct { // 用户头像框信息
 			Image             string `json:"image"`               // 头像框url
 			ImageEnhance      string `json:"image_enhance"`       // 头像框url，动态图
@@ -156,8 +156,8 @@ type VipCenterInfo struct {
 		PrivilegeReceived bool `json:"privilege_received"`
 	} `json:"wallet"`
 	Privileges []struct { // 会员特权信息列表
-		Id              int    `json:"id"`   // 特权父类id
-		Name            string `json:"name"` // 类型名称
+		Id              int        `json:"id"`   // 特权父类id
+		Name            string     `json:"name"` // 类型名称
 		ChildPrivileges []struct { // 特权子类列表
 			FirstId            int    `json:"first_id"`             // 特权父类id
 			ReportId           string `json:"report_id"`            // 上报id
@@ -176,7 +176,7 @@ type VipCenterInfo struct {
 		} `json:"child_privileges"`
 	} `json:"privileges"`
 	Welfare struct { // 福利信息
-		Count int `json:"count"` // 福利数
+		Count int        `json:"count"` // 福利数
 		List  []struct { // 福利项目列表
 			Id          int    `json:"id"`           // 福利id
 			Name        string `json:"name"`         // 福利名称
@@ -209,7 +209,7 @@ type VipCenterInfo struct {
 		Key  string `json:"key"`  // 扩展row字段名
 		Sort int    `json:"sort"` // 排列顺序
 	} `json:"sort"`
-	InReview bool `json:"in_review"`
+	InReview bool     `json:"in_review"`
 	BigPoint struct { // 大积分信息
 		PointInfo struct { // 点数信息
 			Point       int `json:"point"`        // 当前拥有大积分数量
@@ -267,7 +267,7 @@ type GoodsSku struct {
 		Picture          string   `json:"picture"`           // 商品图片url
 		RotationPictures []string `json:"rotation_pictures"` // 商品图片组
 		Price            struct { // 价格信息
-			Origin    int `json:"origin"` // 商品原价，单位为积分
+			Origin    int       `json:"origin"` // 商品原价，单位为积分
 			Promotion *struct { // 折扣信息
 				Price    int    `json:"price"`    // 折后价格，单位为积分
 				Type     int    `json:"type"`     // 折扣类型，1：普通折扣，2：秒杀

@@ -9,7 +9,7 @@ import (
 	"encoding/pem"
 	"strconv"
 	"time"
-	
+
 	"github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/pkg/errors"
 	"github.com/skip2/go-qrcode"
@@ -252,7 +252,7 @@ func (c *Client) LoginWithQRCode(qrCode *QRCode) error {
 	if qrCode == nil {
 		return errors.New("请先获取二维码")
 	}
-	
+
 	for {
 		ok, err := c.qrCodeSuccess(qrCode)
 		if err != nil {

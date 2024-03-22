@@ -145,9 +145,9 @@ func (c *Client) UpdateLive(roomId int, title string) error {
 }
 
 type StartLiveResult struct {
-	Change   int    `json:"change"`    // 是否改变状态，0：未改变，1：改变
-	Status   string `json:"status"`    // 固定值LIVE
-	RoomType int    `json:"room_type"` // 固定值0，作用尚不明确
+	Change   int      `json:"change"`    // 是否改变状态，0：未改变，1：改变
+	Status   string   `json:"status"`    // 固定值LIVE
+	RoomType int      `json:"room_type"` // 固定值0，作用尚不明确
 	Rtmp     struct { // RTMP推流地址信息
 		Addr     string `json:"addr"`     // RTMP推流（发送）地址，重要
 		Code     string `json:"code"`     // RTMP推流参数（密钥），重要
@@ -161,8 +161,8 @@ type StartLiveResult struct {
 		NewLink  string `json:"new_link"` // 获取CDN推流ip地址重定向信息的url
 		Provider string `json:"provider"` // 固定值txy，作用尚不明确
 	} `json:"protocols"`
-	TryTime string `json:"try_time"` // 作用尚不明确
-	LiveKey string `json:"live_key"` // 作用尚不明确
+	TryTime string   `json:"try_time"` // 作用尚不明确
+	LiveKey string   `json:"live_key"` // 作用尚不明确
 	Notice  struct { // 作用尚不明确
 		Type       int    `json:"type"`        // 固定值1，作用尚不明确
 		Status     int    `json:"status"`      // 固定值0，作用尚不明确

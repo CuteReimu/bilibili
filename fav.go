@@ -206,12 +206,12 @@ func (c *Client) CleanFavourResources(mediaId int) error {
 }
 
 type FavourFolderInfo struct {
-	Id    int    `json:"id"`    // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
-	Fid   int    `json:"fid"`   // 收藏夹原始id
-	Mid   int    `json:"mid"`   // 创建者mid
-	Attr  int    `json:"attr"`  // 属性位（？）
-	Title string `json:"title"` // 收藏夹标题
-	Cover string `json:"cover"` // 	收藏夹封面图片url
+	Id    int      `json:"id"`    // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
+	Fid   int      `json:"fid"`   // 收藏夹原始id
+	Mid   int      `json:"mid"`   // 创建者mid
+	Attr  int      `json:"attr"`  // 属性位（？）
+	Title string   `json:"title"` // 收藏夹标题
+	Cover string   `json:"cover"` // 	收藏夹封面图片url
 	Upper struct { // 创建者信息
 		Mid       int    `json:"mid"`        // 创建者mid
 		Name      string `json:"name"`       // 创建者昵称
@@ -220,7 +220,7 @@ type FavourFolderInfo struct {
 		VipType   int    `json:"vip_type"`   // 会员类别，0：无，1：月大会员，2：年度及以上大会员
 		VipStatue int    `json:"vip_statue"` // 0：无，1：有
 	} `json:"upper"`
-	CoverType int `json:"cover_type"` // 封面图类别（？）
+	CoverType int      `json:"cover_type"` // 封面图类别（？）
 	CntInfo   struct { // 收藏夹状态数
 		Collect int `json:"collect"`  // 收藏数
 		Play    int `json:"play"`     // 播放数
@@ -255,7 +255,7 @@ func (c *Client) GetFavourFolderInfo(mediaId int) (*FavourFolderInfo, error) {
 }
 
 type AllFavourFolderInfo struct {
-	Count int `json:"count"` // 创建的收藏夹总数
+	Count int        `json:"count"` // 创建的收藏夹总数
 	List  []struct { // 创建的收藏夹列表
 		Id         int    `json:"id"`          // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
 		Fid        int    `json:"fid"`         // 收藏夹原始id
@@ -344,12 +344,12 @@ func (c *Client) GetFavourInfo(resources []Resource, platform string) ([]*Favour
 
 type FavourList struct {
 	Info struct { // 收藏夹元数据
-		Id    int    `json:"id"`    // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
-		Fid   int    `json:"fid"`   // 收藏夹原始id
-		Mid   int    `json:"mid"`   // 创建者mid
-		Attr  int    `json:"attr"`  // 属性，0：正常，1：失效
-		Title string `json:"title"` // 收藏夹标题
-		Cover string `json:"cover"` // 收藏夹封面图片url
+		Id    int      `json:"id"`    // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
+		Fid   int      `json:"fid"`   // 收藏夹原始id
+		Mid   int      `json:"mid"`   // 创建者mid
+		Attr  int      `json:"attr"`  // 属性，0：正常，1：失效
+		Title string   `json:"title"` // 收藏夹标题
+		Cover string   `json:"cover"` // 收藏夹封面图片url
 		Upper struct { // 创建者信息
 			Mid       int    `json:"mid"`        // 创建者mid
 			Name      string `json:"name"`       // 创建者昵称
@@ -358,7 +358,7 @@ type FavourList struct {
 			VipType   int    `json:"vip_type"`   // 会员类别，0：无，1：月大会员，2：年度及以上大会员
 			VipStatue int    `json:"vip_statue"` // 会员开通状态，0：无，1：有
 		} `json:"upper"`
-		CoverType int `json:"cover_type"` // 封面图类别（？）
+		CoverType int      `json:"cover_type"` // 封面图类别（？）
 		CntInfo   struct { // 收藏夹状态数
 			Collect int `json:"collect"`  // 收藏数
 			Play    int `json:"play"`     // 播放数
@@ -375,19 +375,19 @@ type FavourList struct {
 		MediaCount int    `json:"media_count"` // 收藏夹内容数量
 	} `json:"info"`
 	Medias []struct { // 收藏夹内容
-		Id       int    `json:"id"`       // 内容id，视频稿件：视频稿件avid，音频：音频auid，视频合集：视频合集id
-		Type     int    `json:"type"`     // 内容类型，2：视频稿件，12：音频，21：视频合集
-		Title    string `json:"title"`    // 标题
-		Cover    string `json:"cover"`    // 封面url
-		Intro    string `json:"intro"`    // 简介
-		Page     int    `json:"page"`     // 视频分P数
-		Duration int    `json:"duration"` // 音频/视频时长
+		Id       int      `json:"id"`       // 内容id，视频稿件：视频稿件avid，音频：音频auid，视频合集：视频合集id
+		Type     int      `json:"type"`     // 内容类型，2：视频稿件，12：音频，21：视频合集
+		Title    string   `json:"title"`    // 标题
+		Cover    string   `json:"cover"`    // 封面url
+		Intro    string   `json:"intro"`    // 简介
+		Page     int      `json:"page"`     // 视频分P数
+		Duration int      `json:"duration"` // 音频/视频时长
 		Upper    struct { // UP主信息
 			Mid  int    `json:"mid"`  // UP主mid
 			Name string `json:"name"` // UP主昵称
 			Face string `json:"face"` // UP主头像url
 		} `json:"upper"`
-		Attr    int `json:"attr"` // 属性位（？）
+		Attr    int      `json:"attr"` // 属性位（？）
 		CntInfo struct { // 状态数
 			Collect int `json:"collect"` // 收藏数
 			Play    int `json:"play"`    // 播放数

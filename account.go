@@ -20,9 +20,9 @@ type AccountInformation struct {
 // GetAccountInformation 获取我的信息 无参数
 func (c *Client) GetAccountInformation() (*AccountInformation, error) {
 	request := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("version", "1")
-	
+
 	var accountInfo AccountInformation
-	
+
 	resp, err := request.Get("https://api.bilibili.com/x/member/web/account")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -31,8 +31,8 @@ func (c *Client) GetAccountInformation() (*AccountInformation, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	err = json.Unmarshal(data, &accountInfo)
-	
+
 	return &accountInfo, err
 }
