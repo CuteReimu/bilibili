@@ -2,8 +2,8 @@
 
 # 哔哩哔哩-API-Go版本
 
-![](https://img.shields.io/github/go-mod/go-version/CuteReimu/bilibili "语言")
-[![](https://img.shields.io/github/actions/workflow/status/CuteReimu/bilibili/golangci-lint.yml?branch=v2)](https://github.com/CuteReimu/bilibili/actions/workflows/golangci-lint.yml "代码分析")
+![](https://img.shields.io/github/go-mod/go-version/CuteReimu/bilibili/v2?label=Go "语言")
+[![](https://img.shields.io/github/actions/workflow/status/CuteReimu/bilibili/build-v2.yml?branch=v2)](https://github.com/CuteReimu/bilibili/actions/workflows/golangci-lint.yml "代码分析")
 [![](https://img.shields.io/github/contributors/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/graphs/contributors "贡献者")
 [![](https://img.shields.io/github/license/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/blob/master/LICENSE "许可协议")
 </div>
