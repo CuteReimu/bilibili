@@ -12,9 +12,7 @@ import (
 var regLive = regexp.MustCompile(`^https://live.bilibili.com/(\d+)`)
 
 // GetRoomidByShortUrl 通过直播短链接获取直播间id
-func GetRoomidByShortUrl(shortUrl string) (int, error) {
-	return std.GetRoomidByShortUrl(shortUrl)
-}
+
 func (c *Client) GetRoomidByShortUrl(shortUrl string) (int, error) {
 	resp, err := c.resty().SetRedirectPolicy(resty.NoRedirectPolicy()).R().Get(shortUrl)
 	if resp == nil {
@@ -107,9 +105,6 @@ type RoomInfo struct {
 //
 // SocialSisterYi/bilibili-API-collect 文档中的接口已经无法使用了。下面的实现是参照
 // https://github.com/SocialSisterYi/bilibili-API-collect/issues/272 的接口，已验证，可以使用。
-func GetRoomInfo(roomId int) (*RoomInfo, error) {
-	return std.GetRoomInfo(roomId)
-}
 func (c *Client) GetRoomInfo(roomId int) (*RoomInfo, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("id", strconv.Itoa(roomId)).Get("https://api.live.bilibili.com/room/v1/Room/get_info")
 	if err != nil {
@@ -131,9 +126,7 @@ type UpdateLiveResult struct {
 }
 
 // UpdateLive 更新直播间标题
-func UpdateLive(roomId int, title string) error {
-	return std.UpdateLive(roomId, title)
-}
+
 func (c *Client) UpdateLive(roomId int, title string) error {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -152,9 +145,9 @@ func (c *Client) UpdateLive(roomId int, title string) error {
 }
 
 type StartLiveResult struct {
-	Change   int      `json:"change"`    // 是否改变状态，0：未改变，1：改变
-	Status   string   `json:"status"`    // 固定值LIVE
-	RoomType int      `json:"room_type"` // 固定值0，作用尚不明确
+	Change   int    `json:"change"`    // 是否改变状态，0：未改变，1：改变
+	Status   string `json:"status"`    // 固定值LIVE
+	RoomType int    `json:"room_type"` // 固定值0，作用尚不明确
 	Rtmp     struct { // RTMP推流地址信息
 		Addr     string `json:"addr"`     // RTMP推流（发送）地址，重要
 		Code     string `json:"code"`     // RTMP推流参数（密钥），重要
@@ -168,8 +161,8 @@ type StartLiveResult struct {
 		NewLink  string `json:"new_link"` // 获取CDN推流ip地址重定向信息的url
 		Provider string `json:"provider"` // 固定值txy，作用尚不明确
 	} `json:"protocols"`
-	TryTime string   `json:"try_time"` // 作用尚不明确
-	LiveKey string   `json:"live_key"` // 作用尚不明确
+	TryTime string `json:"try_time"` // 作用尚不明确
+	LiveKey string `json:"live_key"` // 作用尚不明确
 	Notice  struct { // 作用尚不明确
 		Type       int    `json:"type"`        // 固定值1，作用尚不明确
 		Status     int    `json:"status"`      // 固定值0，作用尚不明确
@@ -181,9 +174,7 @@ type StartLiveResult struct {
 }
 
 // StartLive 开始直播
-func StartLive(roomId, area int) (*StartLiveResult, error) {
-	return std.StartLive(roomId, area)
-}
+
 func (c *Client) StartLive(roomId, area int) (*StartLiveResult, error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -208,9 +199,7 @@ func (c *Client) StartLive(roomId, area int) (*StartLiveResult, error) {
 }
 
 // StopLive 关闭直播，返回true：状态改变，返回false：状态未改变
-func StopLive(roomId int) (bool, error) {
-	return std.StopLive(roomId)
-}
+
 func (c *Client) StopLive(roomId int) (bool, error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -240,9 +229,7 @@ type LiveAreaData struct {
 }
 
 // GetLiveAreaList 获取直播分区列表
-func GetLiveAreaList() ([]LiveAreaData, error) {
-	return std.GetLiveAreaList()
-}
+
 func (c *Client) GetLiveAreaList() ([]LiveAreaData, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.live.bilibili.com/room/v1/Area/getList")
 	if err != nil {

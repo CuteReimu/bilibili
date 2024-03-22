@@ -9,7 +9,7 @@ import (
 	"encoding/pem"
 	"strconv"
 	"time"
-
+	
 	"github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/pkg/errors"
 	"github.com/skip2/go-qrcode"
@@ -29,9 +29,6 @@ type CaptchaResult struct {
 }
 
 // Captcha 申请验证码参数
-func Captcha() (*CaptchaResult, error) {
-	return std.Captcha()
-}
 func (c *Client) Captcha() (*CaptchaResult, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetQueryParam("source", "main_web").Get("https://passport.bilibili.com/x/passport-login/captcha")
@@ -69,9 +66,6 @@ func encrypt(publicKey, data string) (string, error) {
 }
 
 // LoginWithPassword 账号密码登录
-func LoginWithPassword(userName, password string, captchaResult *CaptchaResult, validate, seccode string) error {
-	return std.LoginWithPassword(userName, password, captchaResult, validate, seccode)
-}
 func (c *Client) LoginWithPassword(userName, password string, captchaResult *CaptchaResult, validate, seccode string) error {
 	if captchaResult == nil {
 		return errors.New("请先进行极验人机验证")
@@ -131,9 +125,7 @@ type CountryInfo struct {
 }
 
 // ListCountry 获取国际地区代码
-func ListCountry() (common []CountryInfo, others []CountryInfo, err error) {
-	return std.ListCountry()
-}
+
 func (c *Client) ListCountry() (common []CountryInfo, others []CountryInfo, err error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		Get("https://passport.bilibili.com/web/generic/country/list")
@@ -163,9 +155,7 @@ func (c *Client) ListCountry() (common []CountryInfo, others []CountryInfo, err 
 }
 
 // SendSMS 发送短信验证码
-func SendSMS(tel, cid int, captchaResult *CaptchaResult, validate, seccode string) (captchaKey string, err error) {
-	return std.SendSMS(tel, cid, captchaResult, validate, seccode)
-}
+
 func (c *Client) SendSMS(tel, cid int, captchaResult *CaptchaResult, validate, seccode string) (captchaKey string, err error) {
 	if captchaResult == nil {
 		return "", errors.New("请先进行极验人机验证")
@@ -190,9 +180,7 @@ func (c *Client) SendSMS(tel, cid int, captchaResult *CaptchaResult, validate, s
 }
 
 // LoginWithSMS 使用短信验证码登录
-func LoginWithSMS(tel, cid, code int, captchaKey string) error {
-	return std.LoginWithSMS(tel, cid, code, captchaKey)
-}
+
 func (c *Client) LoginWithSMS(tel, cid, code int, captchaKey string) error {
 	if len(captchaKey) == 0 {
 		return errors.New("请先发送短信")
@@ -242,9 +230,7 @@ func (result *QRCode) Print() {
 }
 
 // GetQRCode 申请二维码URL及扫码密钥
-func GetQRCode() (*QRCode, error) {
-	return std.GetQRCode()
-}
+
 func (c *Client) GetQRCode() (*QRCode, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		Get("https://passport.bilibili.com/x/passport-login/web/qrcode/generate")
@@ -261,14 +247,12 @@ func (c *Client) GetQRCode() (*QRCode, error) {
 }
 
 // LoginWithQRCode 使用扫码登录
-func LoginWithQRCode(qrCode *QRCode) error {
-	return std.LoginWithQRCode(qrCode)
-}
+
 func (c *Client) LoginWithQRCode(qrCode *QRCode) error {
 	if qrCode == nil {
 		return errors.New("请先获取二维码")
 	}
-
+	
 	for {
 		ok, err := c.qrCodeSuccess(qrCode)
 		if err != nil {

@@ -11,9 +11,6 @@ import (
 //
 // title：收藏夹标题，必填。intro：收藏夹简介，非必填。
 // privacy：是否为私密收藏夹。cover：封面图url。
-func AddFavourFolder(title, intro string, privacy bool, cover string) (*FavourFolderInfo, error) {
-	return std.AddFavourFolder(title, intro, privacy, cover)
-}
 func (c *Client) AddFavourFolder(title, intro string, privacy bool, cover string) (*FavourFolderInfo, error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -50,9 +47,6 @@ func (c *Client) AddFavourFolder(title, intro string, privacy bool, cover string
 // media_id：目标收藏夹mdid，必填。
 // title：收藏夹标题，必填。intro：收藏夹简介，非必填。
 // privacy：是否为私密收藏夹。cover：封面图url。
-func EditFavourFolder(mediaId int, title, intro string, privacy bool, cover string) (*FavourFolderInfo, error) {
-	return std.EditFavourFolder(mediaId, title, intro, privacy, cover)
-}
 func (c *Client) EditFavourFolder(mediaId int, title, intro string, privacy bool, cover string) (*FavourFolderInfo, error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -88,9 +82,7 @@ func (c *Client) EditFavourFolder(mediaId int, title, intro string, privacy bool
 // DeleteFavourFolder 删除收藏夹
 //
 // media_ids：目标收藏夹mdid列表，必填。
-func DeleteFavourFolder(mediaIds []int) error {
-	return std.DeleteFavourFolder(mediaIds)
-}
+
 func (c *Client) DeleteFavourFolder(mediaIds []int) error {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -112,9 +104,6 @@ func (c *Client) DeleteFavourFolder(mediaIds []int) error {
 }
 
 // CopyFavourResources 批量复制收藏内容
-func CopyFavourResources(srcMediaId, tarMediaId, mid int, resources []Resource, platform string) error {
-	return std.CopyFavourResources(srcMediaId, tarMediaId, mid, resources, platform)
-}
 func (c *Client) CopyFavourResources(srcMediaId, tarMediaId, mid int, resources []Resource, platform string) error {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -143,9 +132,7 @@ func (c *Client) CopyFavourResources(srcMediaId, tarMediaId, mid int, resources 
 }
 
 // MoveFavourResources 批量移动收藏内容
-func MoveFavourResources(srcMediaId, tarMediaId, mid int, resources []Resource, platform string) error {
-	return std.MoveFavourResources(srcMediaId, tarMediaId, mid, resources, platform)
-}
+
 func (c *Client) MoveFavourResources(srcMediaId, tarMediaId, mid int, resources []Resource, platform string) error {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -174,9 +161,7 @@ func (c *Client) MoveFavourResources(srcMediaId, tarMediaId, mid int, resources 
 }
 
 // DeleteFavourResources 批量删除收藏内容
-func DeleteFavourResources(mediaId int, resources []Resource, platform string) error {
-	return std.DeleteFavourResources(mediaId, resources, platform)
-}
+
 func (c *Client) DeleteFavourResources(mediaId int, resources []Resource, platform string) error {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -203,9 +188,7 @@ func (c *Client) DeleteFavourResources(mediaId int, resources []Resource, platfo
 }
 
 // CleanFavourResources 清空所有失效收藏内容
-func CleanFavourResources(mediaId int) error {
-	return std.CleanFavourResources(mediaId)
-}
+
 func (c *Client) CleanFavourResources(mediaId int) error {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -223,12 +206,12 @@ func (c *Client) CleanFavourResources(mediaId int) error {
 }
 
 type FavourFolderInfo struct {
-	Id    int      `json:"id"`    // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
-	Fid   int      `json:"fid"`   // 收藏夹原始id
-	Mid   int      `json:"mid"`   // 创建者mid
-	Attr  int      `json:"attr"`  // 属性位（？）
-	Title string   `json:"title"` // 收藏夹标题
-	Cover string   `json:"cover"` // 	收藏夹封面图片url
+	Id    int    `json:"id"`    // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
+	Fid   int    `json:"fid"`   // 收藏夹原始id
+	Mid   int    `json:"mid"`   // 创建者mid
+	Attr  int    `json:"attr"`  // 属性位（？）
+	Title string `json:"title"` // 收藏夹标题
+	Cover string `json:"cover"` // 	收藏夹封面图片url
 	Upper struct { // 创建者信息
 		Mid       int    `json:"mid"`        // 创建者mid
 		Name      string `json:"name"`       // 创建者昵称
@@ -237,7 +220,7 @@ type FavourFolderInfo struct {
 		VipType   int    `json:"vip_type"`   // 会员类别，0：无，1：月大会员，2：年度及以上大会员
 		VipStatue int    `json:"vip_statue"` // 0：无，1：有
 	} `json:"upper"`
-	CoverType int      `json:"cover_type"` // 封面图类别（？）
+	CoverType int `json:"cover_type"` // 封面图类别（？）
 	CntInfo   struct { // 收藏夹状态数
 		Collect int `json:"collect"`  // 收藏数
 		Play    int `json:"play"`     // 播放数
@@ -255,9 +238,7 @@ type FavourFolderInfo struct {
 }
 
 // GetFavourFolderInfo 获取收藏夹元数据
-func GetFavourFolderInfo(mediaId int) (*FavourFolderInfo, error) {
-	return std.GetFavourFolderInfo(mediaId)
-}
+
 func (c *Client) GetFavourFolderInfo(mediaId int) (*FavourFolderInfo, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetQueryParam("media_id", strconv.Itoa(mediaId)).Get("https://api.bilibili.com/x/v3/fav/folder/info")
@@ -274,7 +255,7 @@ func (c *Client) GetFavourFolderInfo(mediaId int) (*FavourFolderInfo, error) {
 }
 
 type AllFavourFolderInfo struct {
-	Count int        `json:"count"` // 创建的收藏夹总数
+	Count int `json:"count"` // 创建的收藏夹总数
 	List  []struct { // 创建的收藏夹列表
 		Id         int    `json:"id"`          // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
 		Fid        int    `json:"fid"`         // 收藏夹原始id
@@ -287,9 +268,7 @@ type AllFavourFolderInfo struct {
 }
 
 // GetAllFavourFolderInfo 获取指定用户创建的所有收藏夹信息
-func GetAllFavourFolderInfo(upMid, attrType, rid int) (*AllFavourFolderInfo, error) {
-	return std.GetAllFavourFolderInfo(upMid, attrType, rid)
-}
+
 func (c *Client) GetAllFavourFolderInfo(upMid, attrType, rid int) (*AllFavourFolderInfo, error) {
 	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"up_mid": strconv.Itoa(upMid),
@@ -340,9 +319,7 @@ type FavourInfo struct {
 }
 
 // GetFavourInfo 获取收藏内容
-func GetFavourInfo(resources []Resource, platform string) ([]*FavourInfo, error) {
-	return std.GetFavourInfo(resources, platform)
-}
+
 func (c *Client) GetFavourInfo(resources []Resource, platform string) ([]*FavourInfo, error) {
 	resourcesStr := make([]string, 0, len(resources))
 	for _, resource := range resources {
@@ -367,12 +344,12 @@ func (c *Client) GetFavourInfo(resources []Resource, platform string) ([]*Favour
 
 type FavourList struct {
 	Info struct { // 收藏夹元数据
-		Id    int      `json:"id"`    // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
-		Fid   int      `json:"fid"`   // 收藏夹原始id
-		Mid   int      `json:"mid"`   // 创建者mid
-		Attr  int      `json:"attr"`  // 属性，0：正常，1：失效
-		Title string   `json:"title"` // 收藏夹标题
-		Cover string   `json:"cover"` // 收藏夹封面图片url
+		Id    int    `json:"id"`    // 收藏夹mlid（完整id），收藏夹原始id+创建者mid尾号2位
+		Fid   int    `json:"fid"`   // 收藏夹原始id
+		Mid   int    `json:"mid"`   // 创建者mid
+		Attr  int    `json:"attr"`  // 属性，0：正常，1：失效
+		Title string `json:"title"` // 收藏夹标题
+		Cover string `json:"cover"` // 收藏夹封面图片url
 		Upper struct { // 创建者信息
 			Mid       int    `json:"mid"`        // 创建者mid
 			Name      string `json:"name"`       // 创建者昵称
@@ -381,7 +358,7 @@ type FavourList struct {
 			VipType   int    `json:"vip_type"`   // 会员类别，0：无，1：月大会员，2：年度及以上大会员
 			VipStatue int    `json:"vip_statue"` // 会员开通状态，0：无，1：有
 		} `json:"upper"`
-		CoverType int      `json:"cover_type"` // 封面图类别（？）
+		CoverType int `json:"cover_type"` // 封面图类别（？）
 		CntInfo   struct { // 收藏夹状态数
 			Collect int `json:"collect"`  // 收藏数
 			Play    int `json:"play"`     // 播放数
@@ -398,19 +375,19 @@ type FavourList struct {
 		MediaCount int    `json:"media_count"` // 收藏夹内容数量
 	} `json:"info"`
 	Medias []struct { // 收藏夹内容
-		Id       int      `json:"id"`       // 内容id，视频稿件：视频稿件avid，音频：音频auid，视频合集：视频合集id
-		Type     int      `json:"type"`     // 内容类型，2：视频稿件，12：音频，21：视频合集
-		Title    string   `json:"title"`    // 标题
-		Cover    string   `json:"cover"`    // 封面url
-		Intro    string   `json:"intro"`    // 简介
-		Page     int      `json:"page"`     // 视频分P数
-		Duration int      `json:"duration"` // 音频/视频时长
+		Id       int    `json:"id"`       // 内容id，视频稿件：视频稿件avid，音频：音频auid，视频合集：视频合集id
+		Type     int    `json:"type"`     // 内容类型，2：视频稿件，12：音频，21：视频合集
+		Title    string `json:"title"`    // 标题
+		Cover    string `json:"cover"`    // 封面url
+		Intro    string `json:"intro"`    // 简介
+		Page     int    `json:"page"`     // 视频分P数
+		Duration int    `json:"duration"` // 音频/视频时长
 		Upper    struct { // UP主信息
 			Mid  int    `json:"mid"`  // UP主mid
 			Name string `json:"name"` // UP主昵称
 			Face string `json:"face"` // UP主头像url
 		} `json:"upper"`
-		Attr    int      `json:"attr"` // 属性位（？）
+		Attr    int `json:"attr"` // 属性位（？）
 		CntInfo struct { // 状态数
 			Collect int `json:"collect"` // 收藏数
 			Play    int `json:"play"`    // 播放数
@@ -427,9 +404,7 @@ type FavourList struct {
 }
 
 // GetFavourList 获取收藏夹内容明细列表
-func GetFavourList(mediaId, tid int, keyword, order string, searchType, ps, pn int, platform string) (*FavourList, error) {
-	return std.GetFavourList(mediaId, tid, keyword, order, searchType, ps, pn, platform)
-}
+
 func (c *Client) GetFavourList(mediaId, tid int, keyword, order string, searchType, ps, pn int, platform string) (*FavourList, error) {
 	if pn == 0 {
 		pn = 1
@@ -471,9 +446,7 @@ type FavourId struct {
 }
 
 // GetFavourIds 获取收藏夹全部内容id
-func GetFavourIds(mediaId int, platform string) ([]*FavourId, error) {
-	return std.GetFavourIds(mediaId, platform)
-}
+
 func (c *Client) GetFavourIds(mediaId int, platform string) ([]*FavourId, error) {
 	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("media_id", strconv.Itoa(mediaId))
 	if len(platform) > 0 {

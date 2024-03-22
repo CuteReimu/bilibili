@@ -24,7 +24,7 @@ type Article struct {
 		ParentId int    `json:"parent_id"`
 		Name     string `json:"name"`
 	} `json:"categories"`
-	Summary string   `json:"summary"` // 文章摘要
+	Summary string `json:"summary"` // 文章摘要
 	Stats   struct { // 文章状态数信息
 		View     int `json:"view"`     // 阅读数
 		Favorite int `json:"favorite"` // 收藏数
@@ -57,7 +57,7 @@ type ArticlesInfo struct {
 		CheckTime     string `json:"check_time"`     // 空，作用尚不明确
 	} `json:"list"`
 	Articles []Article `json:"articles"` // 文集内的文章列表
-	Author   struct {  // 文集作者信息
+	Author   struct { // 文集作者信息
 		Mid            int            `json:"mid"`  // 作者mid
 		Name           string         `json:"name"` // 作者昵称
 		Face           string         `json:"face"` // 作者头像url
@@ -71,9 +71,6 @@ type ArticlesInfo struct {
 }
 
 // GetArticlesInfo 获取文集基本信息
-func GetArticlesInfo(id int) (*ArticlesInfo, error) {
-	return std.GetArticlesInfo(id)
-}
 func (c *Client) GetArticlesInfo(id int) (*ArticlesInfo, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetQueryParam("id", strconv.Itoa(id)).Get("https://api.bilibili.com/x/article/list/web/articles")
@@ -90,10 +87,10 @@ func (c *Client) GetArticlesInfo(id int) (*ArticlesInfo, error) {
 }
 
 type ArticleViewInfo struct {
-	Like      int      `json:"like"`      // 是否点赞，0：未点赞，1：已点赞
-	Attention bool     `json:"attention"` // 是否关注文章作者
-	Favorite  bool     `json:"favorite"`  // 是否收藏
-	Coin      int      `json:"coin"`      // 为文章投币数
+	Like      int  `json:"like"`      // 是否点赞，0：未点赞，1：已点赞
+	Attention bool `json:"attention"` // 是否关注文章作者
+	Favorite  bool `json:"favorite"`  // 是否收藏
+	Coin      int  `json:"coin"`      // 为文章投币数
 	Stats     struct { // 状态数信息
 		View     int `json:"view"`     // 阅读数
 		Favorite int `json:"favorite"` // 收藏数
@@ -104,19 +101,19 @@ type ArticleViewInfo struct {
 		Coin     int `json:"coin"`     // 投币数
 		Dynamic  int `json:"dynamic"`  // 动态转发数
 	} `json:"stats"`
-	Title           string     `json:"title"`             // 文章标题
-	BannerUrl       string     `json:"banner_url"`        // 文章头图url
-	Mid             int        `json:"mid"`               // 文章作者mid
-	AuthorName      string     `json:"author_name"`       // 文章作者昵称
-	IsAuthor        bool       `json:"is_author"`         // 固定值true，作用尚不明确
-	ImageUrls       []string   `json:"image_urls"`        // 动态封面图片url
-	OriginImageUrls []string   `json:"origin_image_urls"` // 文章封面图片url
-	Shareable       bool       `json:"shareable"`         // 固定值true，作用尚不明确
-	ShowLaterWatch  bool       `json:"show_later_watch"`  // 固定值true，作用尚不明确
-	ShowSmallWindow bool       `json:"show_small_window"` // 固定值true，作用尚不明确
-	InList          bool       `json:"in_list"`           // 是否收于文集
-	Pre             int        `json:"pre"`               // 上一篇文章cvid
-	Next            int        `json:"next"`              // 下一篇文章cvid
+	Title           string   `json:"title"`             // 文章标题
+	BannerUrl       string   `json:"banner_url"`        // 文章头图url
+	Mid             int      `json:"mid"`               // 文章作者mid
+	AuthorName      string   `json:"author_name"`       // 文章作者昵称
+	IsAuthor        bool     `json:"is_author"`         // 固定值true，作用尚不明确
+	ImageUrls       []string `json:"image_urls"`        // 动态封面图片url
+	OriginImageUrls []string `json:"origin_image_urls"` // 文章封面图片url
+	Shareable       bool     `json:"shareable"`         // 固定值true，作用尚不明确
+	ShowLaterWatch  bool     `json:"show_later_watch"`  // 固定值true，作用尚不明确
+	ShowSmallWindow bool     `json:"show_small_window"` // 固定值true，作用尚不明确
+	InList          bool     `json:"in_list"`           // 是否收于文集
+	Pre             int      `json:"pre"`               // 上一篇文章cvid
+	Next            int      `json:"next"`              // 下一篇文章cvid
 	ShareChannels   []struct { // 分享方式列表
 		Name         string `json:"name"`          // 分享名称：QQ，QQ空间，微信，朋友圈，微博
 		Picture      string `json:"picture"`       // 分享图片url
@@ -125,9 +122,6 @@ type ArticleViewInfo struct {
 }
 
 // GetArticleViewInfo 获取专栏文章基本信息
-func GetArticleViewInfo(id int) (*ArticleViewInfo, error) {
-	return std.GetArticleViewInfo(id)
-}
 func (c *Client) GetArticleViewInfo(id int) (*ArticleViewInfo, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetQueryParam("id", strconv.Itoa(id)).Get("https://api.bilibili.com/x/article/viewinfo")
@@ -144,9 +138,6 @@ func (c *Client) GetArticleViewInfo(id int) (*ArticleViewInfo, error) {
 }
 
 // LikeArticle 点赞文章，like为false表示取消点赞
-func LikeArticle(id int, like bool) error {
-	return std.LikeArticle(id, like)
-}
 func (c *Client) LikeArticle(id int, like bool) error {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -171,9 +162,6 @@ func (c *Client) LikeArticle(id int, like bool) error {
 }
 
 // CoinArticle 投币文章，id为文章cvid，upid为作者mid，mutiply为投币数量。返回的bool值为是否附加点赞成功，若已赞过则附加点赞失败
-func CoinArticle(id, upid, multiply int) (bool, error) {
-	return std.CoinArticle(id, upid, multiply)
-}
 func (c *Client) CoinArticle(id, upid, multiply int) (bool, error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -197,9 +185,6 @@ func (c *Client) CoinArticle(id, upid, multiply int) (bool, error) {
 }
 
 // FavourArticle 收藏文章
-func FavourArticle(id int) error {
-	return std.FavourArticle(id)
-}
 func (c *Client) FavourArticle(id int) error {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -218,7 +203,7 @@ func (c *Client) FavourArticle(id int) error {
 
 type UserArticleList struct {
 	Articles []struct { // 专栏文章信息列表
-		Id       int      `json:"id"` // 专栏文章id
+		Id       int `json:"id"` // 专栏文章id
 		Category struct { // 分类
 			Id       int    `json:"id"`        // 	分类id
 			ParentId int    `json:"parent_id"` // 父级分类id
@@ -229,15 +214,15 @@ type UserArticleList struct {
 			ParentId int    `json:"parent_id"` // 父级分类id
 			Name     string `json:"name"`      // 分类名称
 		} `json:"categories"`
-		Title      string   `json:"title"`      // 标题
-		Summary    string   `json:"summary"`    // 摘要
-		BannerUrl  string   `json:"banner_url"` // 封面图
-		TemplateId int      `json:"template_id"`
-		State      int      `json:"state"`
+		Title      string `json:"title"`      // 标题
+		Summary    string `json:"summary"`    // 摘要
+		BannerUrl  string `json:"banner_url"` // 封面图
+		TemplateId int    `json:"template_id"`
+		State      int    `json:"state"`
 		Author     struct { // UP主信息
-			Mid     int      `json:"mid"`  // 用户uid
-			Name    string   `json:"name"` // 用户名
-			Face    string   `json:"face"` // 头像
+			Mid     int    `json:"mid"`  // 用户uid
+			Name    string `json:"name"` // 用户名
+			Face    string `json:"face"` // 头像
 			Pendant struct { // 头像框信息
 				Pid    int    `json:"pid"`    // 头像框id
 				Name   string `json:"name"`   // 头像框名称
@@ -257,11 +242,11 @@ type UserArticleList struct {
 				Condition  string `json:"condition"`   // 获取条件
 			} `json:"nameplate"`
 			Vip struct { // 大会员信息
-				Type       int      `json:"type"`         // 大会员类型，0：无，1：月大会员，2：年度及以上大会员
-				Status     int      `json:"status"`       // 大会员状态，0：无，1：有
-				DueDate    int      `json:"due_date"`     // 大会员过期时间时间戳，单位：毫秒
-				VipPayType int      `json:"vip_pay_type"` // 支付类型
-				ThemeType  int      `json:"theme_type"`   // 固定值0
+				Type       int `json:"type"`         // 大会员类型，0：无，1：月大会员，2：年度及以上大会员
+				Status     int `json:"status"`       // 大会员状态，0：无，1：有
+				DueDate    int `json:"due_date"`     // 大会员过期时间时间戳，单位：毫秒
+				VipPayType int `json:"vip_pay_type"` // 支付类型
+				ThemeType  int `json:"theme_type"`   // 固定值0
 				Label      struct { // 大会员标签
 					Path       string `json:"path"`        // 空串
 					Text       string `json:"text"`        // 会员类型文案，大会员，年度大会员，十年大会员，百年大会员，最强绿鲤鱼
@@ -299,12 +284,12 @@ type UserArticleList struct {
 			TypeName string `json:"type_name"`
 			Spoiler  int    `json:"spoiler"`
 		} `json:"media"`
-		ApplyTime string     `json:"apply_time"`
-		CheckTime string     `json:"check_time"`
-		Original  int        `json:"original"`
-		ActId     int        `json:"act_id"`
-		CoverAvid int        `json:"cover_avid"`
-		Type      int        `json:"type"`
+		ApplyTime string `json:"apply_time"`
+		CheckTime string `json:"check_time"`
+		Original  int    `json:"original"`
+		ActId     int    `json:"act_id"`
+		CoverAvid int    `json:"cover_avid"`
+		Type      int    `json:"type"`
 		Tags      []struct { // 标签
 			Tid  int    `json:"tid"`  // 标签id
 			Name string `json:"name"` // 标签名称
@@ -316,9 +301,6 @@ type UserArticleList struct {
 }
 
 // GetUserArticleList 获取用户专栏文章列表。sort可选值"publish_time"，"view"，"fav"，不填默认"publish_time"。
-func GetUserArticleList(mid, pn, ps int, sort string) (*UserArticleList, error) {
-	return std.GetUserArticleList(mid, pn, ps, sort)
-}
 func (c *Client) GetUserArticleList(mid, pn, ps int, sort string) (*UserArticleList, error) {
 	if len(sort) == 0 {
 		sort = "publish_time"
@@ -363,9 +345,6 @@ type UserArticlesList struct {
 }
 
 // GetUserArticlesList 获取用户专栏文集列表。sort可选值，0：最近更新，1：最多阅读。
-func GetUserArticlesList(mid, sort int) (*UserArticlesList, error) {
-	return std.GetUserArticlesList(mid, sort)
-}
 func (c *Client) GetUserArticlesList(mid, sort int) (*UserArticlesList, error) {
 	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
 		"mid":  strconv.Itoa(mid),

@@ -57,9 +57,6 @@ type GetUserVideosResult struct {
 }
 
 // GetUserVideos 获取用户投稿视频明细
-func GetUserVideos(mid int, order OrderType, tid int, keyword string, pn int, ps int) (*GetUserVideosResult, error) {
-	return std.GetUserVideos(mid, order, tid, keyword, pn, ps)
-}
 func (c *Client) GetUserVideos(mid int, order OrderType, tid int, keyword string, pn int, ps int) (*GetUserVideosResult, error) {
 	postData := map[string]string{
 		"mid": strconv.Itoa(mid),
