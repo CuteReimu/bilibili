@@ -41,6 +41,10 @@ go get -u github.com/CuteReimu/bilibili/v2
 
 ```go
 import "github.com/CuteReimu/bilibili/v2"
+
+func main()  {
+    client := bilibili.New()
+}
 ```
 
 ### 首次登录
@@ -50,7 +54,7 @@ import "github.com/CuteReimu/bilibili/v2"
 首先获取二维码：
 
 ```go
-qrCode, _ := bilibili.GetQRCode()
+qrCode, _ := client.GetQRCode()
 buf, _ := qrCode.Encode()
 img, _ := png.Decode(buf) // 或者写入文件 os.WriteFile("qrcode.png", buf, 0644)
 // 也可以调用 qrCode.Print() 将二维码打印在控制台
@@ -59,7 +63,7 @@ img, _ := png.Decode(buf) // 或者写入文件 os.WriteFile("qrcode.png", buf, 
 扫码并确认成功后，发送登录请求：
 
 ```go
-err := bilibili.LoginWithQRCode(qrCode)
+err := client.LoginWithQRCode(qrCode)
 if err == nil {
     log.Println("登录成功")
 }
@@ -70,13 +74,13 @@ if err == nil {
 首先获取人机验证参数：
 
 ```go
-captchaResult, _ := bilibili.Captcha()
+captchaResult, _ := client.Captcha()
 ```
 
 将`captchaResult`中的`gt`和`challenge`值保存下来，自行使用 [手动验证器](https://kuresaru.github.io/geetest-validator/) 进行人机验证，并获得`validate`和`seccode`。然后使用账号密码进行登录即可：
 
 ```go
-err := bilibili.LoginWithPassword(userName, password, captchaResult, validate, seccode)
+err := client.LoginWithPassword(userName, password, captchaResult, validate, seccode)
 if err == nil {
     log.Println("登录成功")
 }
@@ -87,7 +91,7 @@ if err == nil {
 首先用上述方法二相同的方式获取人机验证参数并进行人机验证。然后获取国际地区代码：
 
 ```go
-common, others, _ := bilibili.ListCountry()
+common, others, _ := client.ListCountry()
 ```
 
 当然，如果你已经确定`cid`的值，这一步可以跳过。中国大陆的`cid`就是1。
@@ -95,13 +99,13 @@ common, others, _ := bilibili.ListCountry()
 然后发送短信验证码：
 
 ```go
-captchaKey, _ := bilibili.SendSMS(tel, cid, captchaResult, validate, seccode)
+captchaKey, _ := client.SendSMS(tel, cid, captchaResult, validate, seccode)
 ```
 
 然后就可以使用手机验证码登录了：
 
 ```go
-err := bilibili.LoginWithSMS(tel, cid, code, captchaKey) // 其中code是短信验证码
+err := client.LoginWithSMS(tel, cid, code, captchaKey) // 其中code是短信验证码
 if err == nil {
     log.Println("登录成功")
 }
@@ -113,26 +117,17 @@ if err == nil {
 
 ```go
 // 获取cookiesString，自行存储，方便下次启动程序时不需要重新登录
-cookiesString := bilibili.GetCookiesString()
+cookiesString := client.GetCookiesString()
 
 // 设置cookiesString，就不需要登录操作了
-bilibili.SetCookiesString(cookiesString)
-```
-
-### 同时登录多个账号
-
-可以新建多个client，每个登录不同的账号。用这种方法使用的函数与直接调用`bilibili`包下的函数是完全一样的。
-
-```go
-client := bilibili.New()
-err := client.LoginWithQRCode(result)
+client.SetCookiesString(cookiesString)
 ```
 
 ### 设置超时时间和logger
 
 ```go
-bilibili.SetTimeout(20 * time.Second) // 设置超时时间
-bilibili.SetLogger(logger) // 自定义logger
+client.SetTimeout(20 * time.Second) // 设置超时时间
+client.SetLogger(logger) // 自定义logger
 ```
 
 ## 进度
