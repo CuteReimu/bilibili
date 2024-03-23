@@ -26,9 +26,15 @@ func execute[In, Out any](c *Client, method, url string, in In, handlers ...para
 	if err != nil {
 		return out, errors.WithStack(err)
 	}
+	if resp.StatusCode() != 200 {
+		return out, errors.Errorf("status code: %d", resp.StatusCode())
+	}
 	var cr commonResp[Out]
 	if err = json.Unmarshal(resp.Body(), &cr); err != nil {
 		return out, errors.WithStack(err)
+	}
+	if cr.Code != 0 {
+		return out, errors.Errorf("错误码: %d, msg: %s, message: %s", cr.Code, cr.Msg, cr.Message)
 	}
 	return cr.Data, errors.WithStack(err)
 }
