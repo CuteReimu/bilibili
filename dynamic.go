@@ -540,7 +540,7 @@ func (c *Client) UploadDynamicBfs(fileName string, file io.Reader, category stri
 		ImageHeight int    `json:"image_height"`
 	}
 	err = json.Unmarshal(ret, &data)
-	return data.ImageUrl, Size{Width: data.ImageWidth, Height: data.ImageHeight}, err
+	return data.ImageUrl, Size{Width: data.ImageWidth, Height: data.ImageHeight}, errors.WithStack(err)
 }
 
 // CreateDynamic 发表纯文本动态

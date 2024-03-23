@@ -84,7 +84,7 @@ type VideoInfo struct {
 		NoShare       int `json:"no_share"`
 		ArcPay        int `json:"arc_pay"`
 		FreeWatch     int `json:"free_watch"`
-	}
+	} `json:"rights"`
 	Owner struct { // 视频UP主信息
 		Mid  int    `json:"mid"`  // UP主mid
 		Name string `json:"name"` // UP主昵称
@@ -743,10 +743,11 @@ func (c *Client) FavourVideoByAvid(avid int, addMediaIds, delMediaIds []int) (bo
 	if len(biliJct) == 0 {
 		return false, errors.New("B站登录过期")
 	}
-	var addMediaIdStr, delMediaIdStr []string
+	addMediaIdStr := make([]string, 0, len(addMediaIds))
 	for _, id := range addMediaIds {
 		addMediaIdStr = append(addMediaIdStr, strconv.Itoa(id))
 	}
+	delMediaIdStr := make([]string, 0, len(delMediaIds))
 	for _, id := range delMediaIds {
 		delMediaIdStr = append(delMediaIdStr, strconv.Itoa(id))
 	}
@@ -773,10 +774,11 @@ func (c *Client) FavourVideoByBvid(bvid string, addMediaIds, delMediaIds []int) 
 	if len(biliJct) == 0 {
 		return false, errors.New("B站登录过期")
 	}
-	var addMediaIdStr, delMediaIdStr []string
+	addMediaIdStr := make([]string, 0, len(addMediaIds))
 	for _, id := range addMediaIds {
 		addMediaIdStr = append(addMediaIdStr, strconv.Itoa(id))
 	}
+	delMediaIdStr := make([]string, 0, len(delMediaIds))
 	for _, id := range delMediaIds {
 		delMediaIdStr = append(delMediaIdStr, strconv.Itoa(id))
 	}

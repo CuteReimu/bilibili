@@ -30,7 +30,7 @@ func (c *Client) GetUnreadMessage() (*UnreadMessage, error) {
 	}
 	var ret *UnreadMessage
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }
 
 type UnreadPrivateMessage struct {
@@ -51,7 +51,7 @@ func (c *Client) GetUnreadPrivateMessage() (*UnreadPrivateMessage, error) {
 	}
 	var ret *UnreadPrivateMessage
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }
 
 var deviceId string
@@ -229,7 +229,7 @@ func (c *Client) GetSessionMessages(talkerId, sessionType, size int, mobiApp str
 	}
 	var ret *SessionMessages
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }
 
 type SessionList struct {
@@ -301,5 +301,5 @@ func (c *Client) GetSessions(sessionType int, mobiApp string) (*SessionList, err
 	}
 	var ret *SessionList
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }

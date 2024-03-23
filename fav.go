@@ -39,7 +39,7 @@ func (c *Client) AddFavourFolder(title, intro string, privacy bool, cover string
 	}
 	var ret *FavourFolderInfo
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }
 
 // EditFavourFolder 修改收藏夹
@@ -76,7 +76,7 @@ func (c *Client) EditFavourFolder(mediaId int, title, intro string, privacy bool
 	}
 	var ret *FavourFolderInfo
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }
 
 // DeleteFavourFolder 删除收藏夹
@@ -251,7 +251,7 @@ func (c *Client) GetFavourFolderInfo(mediaId int) (*FavourFolderInfo, error) {
 	}
 	var ret *FavourFolderInfo
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }
 
 type AllFavourFolderInfo struct {
@@ -287,7 +287,7 @@ func (c *Client) GetAllFavourFolderInfo(upMid, attrType, rid int) (*AllFavourFol
 	}
 	var ret *AllFavourFolderInfo
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }
 
 type FavourInfo struct {
@@ -339,7 +339,7 @@ func (c *Client) GetFavourInfo(resources []Resource, platform string) ([]*Favour
 	}
 	var ret []*FavourInfo
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }
 
 type FavourList struct {
@@ -435,7 +435,7 @@ func (c *Client) GetFavourList(mediaId, tid int, keyword, order string, searchTy
 	}
 	var ret *FavourList
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }
 
 type FavourId struct {
@@ -462,5 +462,5 @@ func (c *Client) GetFavourIds(mediaId int, platform string) ([]*FavourId, error)
 	}
 	var ret []*FavourId
 	err = json.Unmarshal(data, &ret)
-	return ret, err
+	return ret, errors.WithStack(err)
 }

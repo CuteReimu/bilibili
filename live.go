@@ -75,7 +75,7 @@ type RoomInfo struct {
 			BgPic      string `json:"bg_pic"`
 			UseOldArea bool   `json:"use_old_area"`
 		} `json:"frame"`
-		//Badge       interface{} `json:"badge"`
+		// Badge       interface{} `json:"badge"`
 		MobileFrame struct {
 			Name       string `json:"name"`
 			Value      string `json:"value"`

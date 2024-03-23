@@ -71,7 +71,7 @@ func (c *Client) GetCookies() []*http.Cookie {
 // SetCookies 设置Cookies。有些功能必须登录之后才能使用，设置Cookies可以代替登录。
 func (c *Client) SetCookies(cookies []*http.Cookie) {
 	c.cookies = cookies
-	var cookieStrings []string
+	cookieStrings := make([]string, 0, len(cookies))
 	for _, cookie := range c.cookies {
 		cookieStrings = append(cookieStrings, cookie.String())
 	}

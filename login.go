@@ -220,7 +220,8 @@ type QRCode struct {
 
 // Encode a QRCode and return a raw PNG image.
 func (result *QRCode) Encode() ([]byte, error) {
-	return qrcode.Encode(result.Url, qrcode.Medium, 256)
+	buf, err := qrcode.Encode(result.Url, qrcode.Medium, 256)
+	return buf, errors.WithStack(err)
 }
 
 // Print the QRCode in the console
