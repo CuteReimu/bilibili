@@ -10,6 +10,7 @@ def snake_to_camel(snake_str):
 head_mapping = {
 	'参数名': 'name',
 	'字段': 'name',
+	'字段名': 'name',
 	'类型': 'type',
 	'内容': 'content',
 	'必要性': 'notnull',
@@ -72,7 +73,7 @@ if __name__ == '__main__':
 				m['type'] = '[]bool'
 			elif m['type'] == 'obj':
 				m['type'] = name
-			if m.get('notnull', '必要') == '必要':
+			if m.get('notnull', '必要') in ('必要', '√'):
 				m['notnull'] = ''
 			else:
 				m['notnull'] = ',omitempty'
