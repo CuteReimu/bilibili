@@ -29,6 +29,7 @@ if __name__ == '__main__':
 				sys.exit(0)
 			if line.strip() == 'ok':
 				break
+			line = line.replace('`', '')
 			if len(head) == 0:
 				head = line.split('|')
 				for i in range(len(head)):
@@ -59,7 +60,7 @@ if __name__ == '__main__':
 				m['type'] = 'string'
 			elif m['type'] == 'bool':
 				pass
-			elif m['type'] == 'array':
+			elif m['type'] == 'array' or m['type'] == 'Array':
 				m['type'] = '[]' + name
 			elif m['type'] == 'obj':
 				m['type'] = name

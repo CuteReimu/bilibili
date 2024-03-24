@@ -72,7 +72,7 @@ type ArticlesInfo struct {
 
 // GetArticlesInfo 获取文集基本信息
 func (c *Client) GetArticlesInfo(id int) (*ArticlesInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("id", strconv.Itoa(id)).Get("https://api.bilibili.com/x/article/list/web/articles")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -123,7 +123,7 @@ type ArticleViewInfo struct {
 
 // GetArticleViewInfo 获取专栏文章基本信息
 func (c *Client) GetArticleViewInfo(id int) (*ArticleViewInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("id", strconv.Itoa(id)).Get("https://api.bilibili.com/x/article/viewinfo")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -149,7 +149,7 @@ func (c *Client) LikeArticle(id int, like bool) error {
 	} else {
 		typeNum = "2"
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"id":   strconv.Itoa(id),
 		"type": typeNum,
 		"csrf": biliJct,
@@ -167,7 +167,7 @@ func (c *Client) CoinArticle(id, upid, multiply int) (bool, error) {
 	if len(biliJct) == 0 {
 		return false, errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"aid":      strconv.Itoa(id),
 		"upid":     strconv.Itoa(upid),
 		"multiply": strconv.Itoa(multiply),
@@ -190,7 +190,7 @@ func (c *Client) FavourArticle(id int) error {
 	if len(biliJct) == 0 {
 		return errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"id":   strconv.Itoa(id),
 		"csrf": biliJct,
 	}).Post("https://api.bilibili.com/x/article/favorites/add")
@@ -305,7 +305,7 @@ func (c *Client) GetUserArticleList(mid, pn, ps int, sort string) (*UserArticleL
 	if len(sort) == 0 {
 		sort = "publish_time"
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"mid":  strconv.Itoa(mid),
 		"pn":   strconv.Itoa(pn),
 		"ps":   strconv.Itoa(ps),
@@ -346,7 +346,7 @@ type UserArticlesList struct {
 
 // GetUserArticlesList 获取用户专栏文集列表。sort可选值，0：最近更新，1：最多阅读。
 func (c *Client) GetUserArticlesList(mid, sort int) (*UserArticlesList, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"mid":  strconv.Itoa(mid),
 		"sort": strconv.Itoa(sort),
 	}).Get("https://api.bilibili.com/x/article/up/lists")

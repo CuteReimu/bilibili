@@ -20,7 +20,7 @@ type UnreadMessage struct {
 
 // GetUnreadMessage 获取未读消息数
 func (c *Client) GetUnreadMessage() (*UnreadMessage, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.bilibili.com/x/msgfeed/unread")
+	resp, err := c.resty.R().Get("https://api.bilibili.com/x/msgfeed/unread")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -41,7 +41,7 @@ type UnreadPrivateMessage struct {
 
 // GetUnreadPrivateMessage 获取未读私信数
 func (c *Client) GetUnreadPrivateMessage() (*UnreadPrivateMessage, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread")
+	resp, err := c.resty.R().Get("https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -85,7 +85,7 @@ func (c *Client) SendPrivateMessageText(senderUid, receiverId int, content strin
 	if err != nil {
 		return 0, "", errors.WithStack(err)
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"msg[sender_uid]":    strconv.Itoa(senderUid),
 		"msg[receiver_id]":   strconv.Itoa(receiverId),
 		"msg[receiver_type]": "1",
@@ -122,7 +122,7 @@ func (c *Client) SendPrivateMessageImage(senderUid, receiverId int, url string) 
 	if err != nil {
 		return 0, "", errors.WithStack(err)
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"msg[sender_uid]":    strconv.Itoa(senderUid),
 		"msg[receiver_id]":   strconv.Itoa(receiverId),
 		"msg[receiver_type]": "1",
@@ -155,7 +155,7 @@ func (c *Client) SendPrivateMessageRecall(senderUid, receiverId, msgKey int) (in
 	if len(biliJct) == 0 {
 		return 0, "", errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"msg[sender_uid]":    strconv.Itoa(senderUid),
 		"msg[receiver_id]":   strconv.Itoa(receiverId),
 		"msg[receiver_type]": "1",
@@ -209,7 +209,7 @@ type SessionMessages struct {
 
 // GetSessionMessages 获取私信消息记录
 func (c *Client) GetSessionMessages(talkerId, sessionType, size int, mobiApp string) (*SessionMessages, error) {
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty.R().SetQueryParams(map[string]string{
 		"talker_id":    strconv.Itoa(talkerId),
 		"session_type": strconv.Itoa(sessionType),
 	})
@@ -287,7 +287,7 @@ type SessionList struct {
 //
 // 参照 https://github.com/CuteReimu/bilibili/issues/8
 func (c *Client) GetSessions(sessionType int, mobiApp string) (*SessionList, error) {
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("session_type", strconv.Itoa(sessionType))
+	r := c.resty.R().SetQueryParam("session_type", strconv.Itoa(sessionType))
 	if len(mobiApp) > 0 {
 		r = r.SetQueryParam("mobi_app", mobiApp)
 	}

@@ -16,7 +16,7 @@ func (c *Client) AddFavourFolder(title, intro string, privacy bool, cover string
 	if len(biliJct) == 0 {
 		return nil, errors.New("B站登录过期")
 	}
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty.R().SetQueryParams(map[string]string{
 		"title": title,
 		"csrf":  biliJct,
 	})
@@ -52,7 +52,7 @@ func (c *Client) EditFavourFolder(mediaId int, title, intro string, privacy bool
 	if len(biliJct) == 0 {
 		return nil, errors.New("B站登录过期")
 	}
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty.R().SetQueryParams(map[string]string{
 		"media_id": strconv.Itoa(mediaId),
 		"title":    title,
 		"csrf":     biliJct,
@@ -92,7 +92,7 @@ func (c *Client) DeleteFavourFolder(mediaIds []int) error {
 	for _, mediaId := range mediaIds {
 		mediaIdsStr = append(mediaIdsStr, strconv.Itoa(mediaId))
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"media_ids": strings.Join(mediaIdsStr, ","),
 		"csrf":      biliJct,
 	}).Post("https://api.bilibili.com/x/v3/fav/folder/del")
@@ -113,7 +113,7 @@ func (c *Client) CopyFavourResources(srcMediaId, tarMediaId, mid int, resources 
 	for _, resource := range resources {
 		resourcesStr = append(resourcesStr, resource.String())
 	}
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty.R().SetQueryParams(map[string]string{
 		"src_media_id": strconv.Itoa(srcMediaId),
 		"tar_media_id": strconv.Itoa(tarMediaId),
 		"mid":          strconv.Itoa(mid),
@@ -142,7 +142,7 @@ func (c *Client) MoveFavourResources(srcMediaId, tarMediaId, mid int, resources 
 	for _, resource := range resources {
 		resourcesStr = append(resourcesStr, resource.String())
 	}
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty.R().SetQueryParams(map[string]string{
 		"src_media_id": strconv.Itoa(srcMediaId),
 		"tar_media_id": strconv.Itoa(tarMediaId),
 		"mid":          strconv.Itoa(mid),
@@ -171,7 +171,7 @@ func (c *Client) DeleteFavourResources(mediaId int, resources []Resource, platfo
 	for _, resource := range resources {
 		resourcesStr = append(resourcesStr, resource.String())
 	}
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty.R().SetQueryParams(map[string]string{
 		"media_id":  strconv.Itoa(mediaId),
 		"resources": strings.Join(resourcesStr, ","),
 		"csrf":      biliJct,
@@ -194,7 +194,7 @@ func (c *Client) CleanFavourResources(mediaId int) error {
 	if len(biliJct) == 0 {
 		return errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"media_id": strconv.Itoa(mediaId),
 		"csrf":     biliJct,
 	}).Post("https://api.bilibili.com/x/v3/fav/resource/clean")
@@ -240,7 +240,7 @@ type FavourFolderInfo struct {
 // GetFavourFolderInfo 获取收藏夹元数据
 
 func (c *Client) GetFavourFolderInfo(mediaId int) (*FavourFolderInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("media_id", strconv.Itoa(mediaId)).Get("https://api.bilibili.com/x/v3/fav/folder/info")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -270,7 +270,7 @@ type AllFavourFolderInfo struct {
 // GetAllFavourFolderInfo 获取指定用户创建的所有收藏夹信息
 
 func (c *Client) GetAllFavourFolderInfo(upMid, attrType, rid int) (*AllFavourFolderInfo, error) {
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty.R().SetQueryParams(map[string]string{
 		"up_mid": strconv.Itoa(upMid),
 		"type":   strconv.Itoa(attrType),
 	})
@@ -325,7 +325,7 @@ func (c *Client) GetFavourInfo(resources []Resource, platform string) ([]*Favour
 	for _, resource := range resources {
 		resourcesStr = append(resourcesStr, resource.String())
 	}
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("resources", strings.Join(resourcesStr, ","))
+	r := c.resty.R().SetQueryParam("resources", strings.Join(resourcesStr, ","))
 	if len(platform) > 0 {
 		r = r.SetQueryParam("platform", platform)
 	}
@@ -409,7 +409,7 @@ func (c *Client) GetFavourList(mediaId, tid int, keyword, order string, searchTy
 	if pn == 0 {
 		pn = 1
 	}
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty.R().SetQueryParams(map[string]string{
 		"media_id": strconv.Itoa(mediaId),
 		"tid":      strconv.Itoa(tid),
 		"type":     strconv.Itoa(searchType),
@@ -448,7 +448,7 @@ type FavourId struct {
 // GetFavourIds 获取收藏夹全部内容id
 
 func (c *Client) GetFavourIds(mediaId int, platform string) ([]*FavourId, error) {
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("media_id", strconv.Itoa(mediaId))
+	r := c.resty.R().SetQueryParam("media_id", strconv.Itoa(mediaId))
 	if len(platform) > 0 {
 		r = r.SetQueryParam("platform", platform)
 	}

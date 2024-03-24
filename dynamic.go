@@ -27,7 +27,7 @@ type SearchDynamicAtResult struct {
 // SearchDynamicAt 根据关键字搜索用户(at别人时的填充列表)
 
 func (c *Client) SearchDynamicAt(uid int, keyword string) (*SearchDynamicAtResult, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"uid":     strconv.Itoa(uid),
 		"keyword": keyword,
 	}).Get("https://api.vc.bilibili.com/dynamic_mix/v1/dynamic_mix/at_search")
@@ -200,7 +200,7 @@ type DynamicRepostDetail struct {
 // GetDynamicRepostDetail 获取动态转发列表
 
 func (c *Client) GetDynamicRepostDetail(dynamicId, offset int) (*DynamicRepostDetail, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"dynamic_id": strconv.Itoa(dynamicId),
 		"offset":     strconv.Itoa(offset),
 	}).Get("https://api.vc.bilibili.com/dynamic_repost/v1/dynamic_repost/repost_detail")
@@ -273,7 +273,7 @@ type DynamicLikeList struct {
 // GetDynamicLikeList 获取动态点赞列表。offset是非必填项
 
 func (c *Client) GetDynamicLikeList(dynamicId, offset int) (*DynamicLikeList, error) {
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	r := c.resty.R().
 		SetQueryParam("dynamic_id", strconv.Itoa(dynamicId))
 	if offset != 0 {
 		r = r.SetQueryParam("offset", strconv.Itoa(offset))
@@ -307,7 +307,7 @@ type DynamicLiveUserList struct {
 // GetDynamicLiveUserList 获取正在直播的已关注者。size是非必填项
 
 func (c *Client) GetDynamicLiveUserList(size int) (*DynamicLiveUserList, error) {
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded")
+	r := c.resty.R()
 	if size != 0 {
 		r = r.SetQueryParam("size", strconv.Itoa(size))
 	}
@@ -375,7 +375,7 @@ type DynamicUpList struct {
 // GetDynamicUpList 获取发布新动态的已关注者。size参数，0：不开启青少年模式，1：开启青少年模式
 
 func (c *Client) GetDynamicUpList(size int) (*DynamicUpList, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("size", strconv.Itoa(size)).Get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -396,7 +396,7 @@ func (c *Client) RemoveDynamic(dynamicId int) error {
 	if len(biliJct) == 0 {
 		return errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"dynamic_id": strconv.Itoa(dynamicId),
 		"csrf":       biliJct,
 	}).Post("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/rm_dynamic")
@@ -426,7 +426,7 @@ type DynamicDetail struct {
 // GetDynamicDetail 获取特定动态卡片信息
 
 func (c *Client) GetDynamicDetail(dynamicId int) (*DynamicDetail, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("dynamic_id", strconv.Itoa(dynamicId)).Get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -502,7 +502,7 @@ type DynamicPortal struct {
 
 // GetDynamicPortal 获取最近更新UP主列表（其实就是获取自己的动态门户）
 func (c *Client) GetDynamicPortal() (*DynamicPortal, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.bilibili.com/x/polymer/web-dynamic/v1/portal")
+	resp, err := c.resty.R().Get("https://api.bilibili.com/x/polymer/web-dynamic/v1/portal")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -522,7 +522,7 @@ func (c *Client) UploadDynamicBfs(fileName string, file io.Reader, category stri
 	if len(biliJct) == 0 {
 		return "", Size{}, errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetFileReader("file_up", fileName, file).SetQueryParams(map[string]string{
 		"category": category,
 		"csrf":     biliJct,
@@ -560,7 +560,7 @@ func (c *Client) CreateDynamic(content, extension string, atUids []int, ctrl []*
 	for _, atUid := range atUids {
 		atUidsStr = append(atUidsStr, strconv.Itoa(atUid))
 	}
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	r := c.resty.R().SetQueryParams(map[string]string{
 		"dynamic_id":        "0",
 		"type":              "4",
 		"rid":               "0",
@@ -601,7 +601,7 @@ type DynamicList struct {
 // FetchDynamics 获取包含置顶及热门的动态列表，topicId与topicName任选一个
 
 func (c *Client) FetchDynamics(topicId int, topicName string, sortby, offset int) (*DynamicList, error) {
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded")
+	r := c.resty.R()
 	if topicId != 0 {
 		r = r.SetQueryParam("topic_id", strconv.Itoa(topicId))
 	} else {
@@ -629,7 +629,7 @@ func (c *Client) FetchDynamics(topicId int, topicName string, sortby, offset int
 // GetTopicHistory 获取历史动态列表，topicId与topicName任选一个
 
 func (c *Client) GetTopicHistory(topicId int, topicName string, offsetDynamicId int) (*DynamicList, error) {
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("offset_dynamic_id", strconv.Itoa(offsetDynamicId))
+	r := c.resty.R().SetQueryParam("offset_dynamic_id", strconv.Itoa(offsetDynamicId))
 	if topicId != 0 {
 		r = r.SetQueryParam("topic_id", strconv.Itoa(topicId))
 	} else {
@@ -1067,7 +1067,7 @@ type DynamicInfo struct {
 // 返回结构较为繁琐，见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/dynamic/space.md
 
 func (c *Client) GetUserSpaceDynamic(mid int, offset string) (*DynamicInfo, error) {
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("host_mid", strconv.Itoa(mid))
+	r := c.resty.R().SetQueryParam("host_mid", strconv.Itoa(mid))
 	if len(offset) > 0 {
 		r = r.SetQueryParam("offset", offset)
 	}

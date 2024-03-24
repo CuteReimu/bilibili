@@ -14,7 +14,7 @@ var regBv = regexp.MustCompile(`(?i)bv([\dA-Za-z]{10})`)
 
 // GetBvidByShortUrl 通过视频短链接获取bvid
 func (c *Client) GetBvidByShortUrl(shortUrl string) (string, error) {
-	resp, err := c.resty().SetRedirectPolicy(resty.NoRedirectPolicy()).R().Get(shortUrl)
+	resp, err := c.resty.SetRedirectPolicy(resty.NoRedirectPolicy()).R().Get(shortUrl)
 	if resp == nil {
 		return "", errors.WithStack(err)
 	}
@@ -172,7 +172,7 @@ type VideoInfo struct {
 
 // GetVideoInfoByAvid 通过Avid获取视频信息
 func (c *Client) GetVideoInfoByAvid(avid int) (*VideoInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/web-interface/view")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -188,7 +188,7 @@ func (c *Client) GetVideoInfoByAvid(avid int) (*VideoInfo, error) {
 
 // GetVideoInfoByBvid 通过Bvid获取视频信息
 func (c *Client) GetVideoInfoByBvid(bvid string) (*VideoInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/web-interface/view")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -214,7 +214,7 @@ func (c *Client) GetVideoInfoByShortUrl(shortUrl string) (*VideoInfo, error) {
 
 // GetRecommendVideoByAvid 通过Avid获取推荐视频
 func (c *Client) GetRecommendVideoByAvid(avid int) ([]*VideoInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/web-interface/archive/related")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -230,7 +230,7 @@ func (c *Client) GetRecommendVideoByAvid(avid int) ([]*VideoInfo, error) {
 
 // GetRecommendVideoByBvid 通过Bvid获取推荐视频
 func (c *Client) GetRecommendVideoByBvid(bvid string) ([]*VideoInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/web-interface/archive/related")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -357,7 +357,7 @@ type VideoDetailInfo struct {
 
 // GetVideoDetailInfoByAvid 通过Avid获取视频超详细信息
 func (c *Client) GetVideoDetailInfoByAvid(avid int) (*VideoDetailInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/web-interface/view/detail")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -373,7 +373,7 @@ func (c *Client) GetVideoDetailInfoByAvid(avid int) (*VideoDetailInfo, error) {
 
 // GetVideoDetailInfoByBvid 通过Bvid获取视频超详细信息
 func (c *Client) GetVideoDetailInfoByBvid(bvid string) (*VideoDetailInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/web-interface/view/detail")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -398,7 +398,7 @@ func (c *Client) GetVideoDetailInfoByShortUrl(shortUrl string) (*VideoDetailInfo
 
 // GetVideoDescByAvid 通过Avid获取视频简介
 func (c *Client) GetVideoDescByAvid(avid int) (string, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/archive/desc")
 	if err != nil {
 		return "", errors.WithStack(err)
@@ -419,7 +419,7 @@ func (c *Client) GetVideoDescByAvid(avid int) (string, error) {
 
 // GetVideoDescByBvid 通过Bvid获取视频简介
 func (c *Client) GetVideoDescByBvid(bvid string) (string, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/archive/desc")
 	if err != nil {
 		return "", errors.WithStack(err)
@@ -464,7 +464,7 @@ type VideoPage struct {
 
 // GetVideoPageListByAvid 通过Avid获取视频分P列表(Avid转cid)
 func (c *Client) GetVideoPageListByAvid(avid int) ([]*VideoPage, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/player/pagelist")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -480,7 +480,7 @@ func (c *Client) GetVideoPageListByAvid(avid int) ([]*VideoPage, error) {
 
 // GetVideoPageListByBvid 通过Bvid获取视频分P列表(Bvid转cid)
 func (c *Client) GetVideoPageListByBvid(bvid string) ([]*VideoPage, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/player/pagelist")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -540,7 +540,7 @@ type VideoTag []struct {
 
 // GetVideoTagsByAvid 通过Avid获取视频TAG
 func (c *Client) GetVideoTagsByAvid(avid int) ([]*VideoTag, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/tag/archive/tags")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -556,7 +556,7 @@ func (c *Client) GetVideoTagsByAvid(avid int) ([]*VideoTag, error) {
 
 // GetVideoTagsByBvid 通过Bvid获取视频TAG
 func (c *Client) GetVideoTagsByBvid(bvid string) ([]*VideoTag, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/tag/archive/tags")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -585,7 +585,7 @@ func (c *Client) LikeVideoTag(avid, tagId int) error {
 	if len(biliJct) == 0 {
 		return errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"aid":    strconv.Itoa(avid),
 		"tag_id": strconv.Itoa(tagId),
 		"csrf":   biliJct,
@@ -603,7 +603,7 @@ func (c *Client) HateVideoTag(avid, tagId int) error {
 	if len(biliJct) == 0 {
 		return errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"aid":    strconv.Itoa(avid),
 		"tag_id": strconv.Itoa(tagId),
 		"csrf":   biliJct,
@@ -627,7 +627,7 @@ func (c *Client) LikeVideoByAvid(avid int, like bool) error {
 	} else {
 		likeNum = "2"
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"aid":  strconv.Itoa(avid),
 		"like": likeNum,
 		"csrf": biliJct,
@@ -651,7 +651,7 @@ func (c *Client) LikeVideoByBvid(bvid string, like bool) error {
 	} else {
 		likeNum = "2"
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"bvid": bvid,
 		"like": likeNum,
 		"csrf": biliJct,
@@ -684,7 +684,7 @@ func (c *Client) CoinVideoByAvid(avid int, multiply int, like bool) (bool, error
 	} else {
 		likeNum = "0"
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"aid":         strconv.Itoa(avid),
 		"select_like": likeNum,
 		"multiply":    strconv.Itoa(multiply),
@@ -712,7 +712,7 @@ func (c *Client) CoinVideoByBvid(bvid string, multiply int, like bool) (bool, er
 	} else {
 		likeNum = "0"
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"bvid":        bvid,
 		"select_like": likeNum,
 		"multiply":    strconv.Itoa(multiply),
@@ -751,7 +751,7 @@ func (c *Client) FavourVideoByAvid(avid int, addMediaIds, delMediaIds []int) (bo
 	for _, id := range delMediaIds {
 		delMediaIdStr = append(delMediaIdStr, strconv.Itoa(id))
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"rid":           strconv.Itoa(avid),
 		"type":          "2",
 		"add_media_ids": strings.Join(addMediaIdStr, ","),
@@ -782,7 +782,7 @@ func (c *Client) FavourVideoByBvid(bvid string, addMediaIds, delMediaIds []int) 
 	for _, id := range delMediaIds {
 		delMediaIdStr = append(delMediaIdStr, strconv.Itoa(id))
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"rid":           bvid,
 		"type":          "2",
 		"add_media_ids": strings.Join(addMediaIdStr, ","),
@@ -821,7 +821,7 @@ func (c *Client) LikeCoinFavourVideoByAvid(avid int) (*LikeCoinFavourResult, err
 	if len(biliJct) == 0 {
 		return nil, errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"aid":  strconv.Itoa(avid),
 		"csrf": biliJct,
 	}).Post("https://api.bilibili.com/x/web-interface/archive/like/triple")
@@ -843,7 +843,7 @@ func (c *Client) LikeCoinFavourVideoByBvid(bvid string) (*LikeCoinFavourResult, 
 	if len(biliJct) == 0 {
 		return nil, errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"bvid": bvid,
 		"csrf": biliJct,
 	}).Post("https://api.bilibili.com/x/web-interface/archive/like/triple")
@@ -879,7 +879,7 @@ type VideoOnlineInfo struct {
 
 // GetVideoOnlineInfoByAvid 通过Avid获取视频在线人数
 func (c *Client) GetVideoOnlineInfoByAvid(avid, cid int) (*VideoOnlineInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"aid": strconv.Itoa(avid),
 		"cid": strconv.Itoa(cid),
 	}).Get("https://api.bilibili.com/x/player/online/total")
@@ -897,7 +897,7 @@ func (c *Client) GetVideoOnlineInfoByAvid(avid, cid int) (*VideoOnlineInfo, erro
 
 // GetVideoOnlineInfoByBvid 通过Bvid获取视频在线人数
 func (c *Client) GetVideoOnlineInfoByBvid(bvid string, cid int) (*VideoOnlineInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"bvid": bvid,
 		"cid":  strconv.Itoa(cid),
 	}).Get("https://api.bilibili.com/x/player/online/total")
@@ -933,7 +933,7 @@ type VideoPbPInfo struct {
 
 // GetVideoPbPInfo 获取视频弹幕趋势顶点列表（高能进度条）
 func (c *Client) GetVideoPbPInfo(cid int) (*VideoPbPInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("cid", strconv.Itoa(cid)).Get("https://api.bilibili.com/pbp/data")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -968,7 +968,7 @@ type VideoStatusNumber struct {
 
 // GetVideoStatusNumberByAvid 通过Avid获取视频状态数视频
 func (c *Client) GetVideoStatusNumberByAvid(avid int) (*VideoStatusNumber, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/web-interface/archive/stat")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -984,7 +984,7 @@ func (c *Client) GetVideoStatusNumberByAvid(avid int) (*VideoStatusNumber, error
 
 // GetVideoStatusNumberByBvid 通过Bvid获取视频状态数
 func (c *Client) GetVideoStatusNumberByBvid(bvid string) (*VideoStatusNumber, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
+	resp, err := c.resty.R().
 		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/web-interface/archive/stat")
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -1002,7 +1002,7 @@ func (c *Client) GetVideoStatusNumberByBvid(bvid string) (*VideoStatusNumber, er
 
 // GetTopRecommendVideo 获取首页视频推荐列表，freshType相关性（默认为3），ps单页返回的记录条数（默认为8）
 func (c *Client) GetTopRecommendVideo(freshType, ps int) ([]*VideoInfo, error) {
-	request := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("version", "1")
+	request := c.resty.R().SetQueryParam("version", "1")
 	if freshType != 0 {
 		request.SetQueryParam("fresh_type", strconv.Itoa(freshType))
 	}

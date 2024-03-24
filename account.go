@@ -19,7 +19,7 @@ type AccountInformation struct {
 
 // GetAccountInformation 获取我的信息 无参数
 func (c *Client) GetAccountInformation() (*AccountInformation, error) {
-	request := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("version", "1")
+	request := c.resty.R().SetQueryParam("version", "1")
 
 	var accountInfo AccountInformation
 

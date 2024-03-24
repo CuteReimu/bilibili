@@ -13,7 +13,7 @@ func (c *Client) ReceiveVipPrivilege(privilegeType int) error {
 	if len(biliJct) == 0 {
 		return errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"type": strconv.Itoa(privilegeType),
 		"csrf": biliJct,
 	}).Post("https://api.bilibili.com/x/vip/privilege/receive")
@@ -30,7 +30,7 @@ func (c *Client) SignVipScore() error {
 	if len(biliJct) == 0 {
 		return errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeaders(map[string]string{
+	resp, err := c.resty.R().SetHeaders(map[string]string{
 		"Content-Type": "application/x-www-form-urlencoded",
 		"Referer":      "https://www.bilibili.com",
 	}).SetQueryParam("csrf", biliJct).Post("https://api.bilibili.com/pgc/activity/score/task/sign")
@@ -61,7 +61,7 @@ func (c *Client) GetVipPrivilege() (*VipPrivilege, error) {
 	if len(biliJct) == 0 {
 		return nil, errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.bilibili.com/x/vip/privilege/my")
+	resp, err := c.resty.R().Get("https://api.bilibili.com/x/vip/privilege/my")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -247,7 +247,7 @@ func (c *Client) GetVipCenterInfo() (*VipCenterInfo, error) {
 	if len(biliJct) == 0 {
 		return nil, errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.bilibili.com/x/vip/web/vip_center/combine")
+	resp, err := c.resty.R().Get("https://api.bilibili.com/x/vip/web/vip_center/combine")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

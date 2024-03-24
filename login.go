@@ -5,43 +5,33 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
-	"encoding/json"
 	"encoding/pem"
-	"strconv"
-	"time"
-
 	"github.com/Baozisoftware/qrcode-terminal-go"
+	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"github.com/skip2/go-qrcode"
-	"github.com/tidwall/gjson"
+	"time"
 )
 
+type Geetest struct {
+	Gt        string `json:"gt"`        // 极验id。一般为固定值
+	Challenge string `json:"challenge"` // 极验KEY。由B站后端产生用于人机验证
+}
+
 type CaptchaResult struct {
-	Geetest struct {
-		Gt        string `json:"gt"`        // 极验id
-		Challenge string `json:"challenge"` // 极验KEY
-	} `json:"geetest"`
-	Tencent struct { // 作用不明确
-		Appid string `json:"appid"`
-	} `json:"tencent"`
-	Token string `json:"token"` // 极验token
-	Type  string `json:"type"`  // 验证方式
+	Geetest Geetest `json:"geetest"` // 极验captcha数据
+	Tencent any     `json:"tencent"` // (?)。**作用尚不明确**
+	Token   string  `json:"token"`   // 登录 API token。与 captcha 无关，与登录接口有关
+	Type    string  `json:"type"`    // 验证方式。用于判断使用哪一种验证方式，目前所见只有极验。geetest：极验
 }
 
 // Captcha 申请验证码参数
 func (c *Client) Captcha() (*CaptchaResult, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetQueryParam("source", "main_web").Get("https://passport.bilibili.com/x/passport-login/captcha")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "申请验证码参数")
-	if err != nil {
-		return nil, err
-	}
-	var result *CaptchaResult
-	err = json.Unmarshal(data, &result)
-	return result, errors.WithStack(err)
+	const (
+		method = resty.MethodGet
+		url    = "https://passport.bilibili.com/x/passport-login/captcha"
+	)
+	return execute[*CaptchaResult](c, method, url, nil, fillParam("source", "main_web"))
 }
 
 func encrypt(publicKey, data string) (string, error) {
@@ -65,157 +55,129 @@ func encrypt(publicKey, data string) (string, error) {
 	return base64.URLEncoding.EncodeToString(cipherText), nil
 }
 
-// LoginWithPassword 账号密码登录
-func (c *Client) LoginWithPassword(userName, password string, captchaResult *CaptchaResult, validate, seccode string) error {
-	if captchaResult == nil {
-		return errors.New("请先进行极验人机验证")
-	}
-	client := c.resty()
-	resp, err := client.R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetQueryParam("act", "getkey").Get("https://passport.bilibili.com/login")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	if resp.StatusCode() != 200 {
-		return errors.Errorf("获取密码盐值失败，status code: %d", resp.StatusCode())
-	}
-	if !gjson.ValidBytes(resp.Body()) {
-		return errors.Errorf("json invalid: %s", resp.String())
-	}
-	getKeyResp := gjson.ParseBytes(resp.Body())
-	encryptPwd, err := encrypt(getKeyResp.Get("key").String(), getKeyResp.Get("hash").String()+password)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	resp, err = client.R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
-		"source":    "main_web",
-		"username":  userName,
-		"password":  encryptPwd,
-		"keep":      "true",
-		"token":     captchaResult.Token,
-		"challenge": captchaResult.Geetest.Challenge,
-		"validate":  validate,
-		"seccode":   seccode,
-	}).Post("https://passport.bilibili.com/x/passport-login/web/login")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	if resp.StatusCode() != 200 {
-		return errors.New("登录bilibili失败")
-	}
-	if !gjson.ValidBytes(resp.Body()) {
-		return errors.Errorf("json invalid: %s", resp.String())
-	}
-	code := gjson.GetBytes(resp.Body(), "code").Int()
-	if code != 0 {
-		return errors.Errorf("登录bilibili失败，错误码：%d, 错误信息：%s", code, gjson.GetBytes(resp.Body(), "message").String())
-	}
-	status := gjson.GetBytes(resp.Body(), "data.status").Int()
-	if status != 0 {
-		return errors.Errorf("登录bilibili失败，错误码：%d，状态码：%d, 错误信息：%s", code, status, gjson.GetBytes(resp.Body(), "data.message").String())
-	}
-	c.SetCookies(resp.Cookies())
-	return nil
+type LoginWithPasswordParam struct {
+	Username  string `json:"username"`         // 用户登录账号。手机号或邮箱地址
+	Password  string `json:"password"`         // 参数传入原密码，下文会自动转为加密后的带盐密码
+	Keep      int    `json:"keep"`             // 0
+	Token     string `json:"token"`            // 登录 API token。使用 Captcha() 方法获取
+	Challenge string `json:"challenge"`        // 极验 challenge。使用 Captcha() 方法获取
+	Validate  string `json:"validate"`         // 极验 result。极验验证后得到
+	Seccode   string `json:"seccode"`          // 极验 result +jordan。极验验证后得到
+	GoUrl     string `json:"go_url,omitempty"` // 跳转 url。默认为 https://www.bilibili.com
+	Source    string `json:"source,omitempty"` // 登录来源。main_web：独立登录页。main_mini：小窗登录
 }
 
-type CountryInfo struct {
+type LoginWithPasswordResult struct {
+	Message      string `json:"message"`       // 扫码状态信息
+	RefreshToken string `json:"refresh_token"` // 刷新refresh_token
+	Status       int    `json:"status"`        // 成功为0
+	Timestamp    int    `json:"timestamp"`     // 登录时间。未登录为0。时间戳 单位为毫秒
+	Url          string `json:"url"`           // 游戏分站跨域登录 url
+}
+
+// LoginWithPassword 账号密码登录，其中validate, seccode字段需要在极验人机验证后获取
+func (c *Client) LoginWithPassword(param LoginWithPasswordParam) (*LoginWithPasswordResult, error) {
+	type getKeyResult struct {
+		Hash string `json:"hash"` // 密码盐值。有效时间为 20s。恒为 16 字符。需要拼接在明文密码之前
+		Key  string `json:"key"`  // rsa 公钥。PEM 格式编码。加密密码时需要使用
+	}
+
+	// 获取密码盐值
+	const (
+		method1 = resty.MethodGet
+		url1    = "https://passport.bilibili.com/x/passport-login/web/key"
+	)
+	getKey, err := execute[*getKeyResult](c, method1, url1, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// 密码加盐
+	encryptPwd, err := encrypt(getKey.Key, getKey.Hash+param.Password)
+	if err != nil {
+		return nil, err
+	}
+	param.Password = encryptPwd
+
+	// 登录操作(web端)
+	const (
+		method2 = resty.MethodPost
+		url2    = "https://passport.bilibili.com/x/passport-login/web/login"
+	)
+	return execute[*LoginWithPasswordResult](c, method2, url2, param)
+}
+
+type CountryCrown struct {
 	Id        int    `json:"id"`         // 国际代码值
 	Cname     string `json:"cname"`      // 国家或地区名
 	CountryId string `json:"country_id"` // 国家或地区区号
 }
 
-// ListCountry 获取国际地区代码
+type GetCountryCrownResult struct {
+	Common []CountryCrown `json:"common"` // 常用国家&地区
+	Others []CountryCrown `json:"others"` // 其他国家&地区
+}
 
-func (c *Client) ListCountry() (common []CountryInfo, others []CountryInfo, err error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		Get("https://passport.bilibili.com/web/generic/country/list")
-	if err != nil {
-		return nil, nil, errors.WithStack(err)
-	}
-	if resp.StatusCode() != 200 {
-		return nil, nil, errors.Errorf("获取国际地区代码失败，status code: %d", resp.StatusCode())
-	}
-	if !gjson.ValidBytes(resp.Body()) {
-		return nil, nil, errors.New("json解析失败：" + resp.String())
-	}
-	res := gjson.ParseBytes(resp.Body())
-	code := res.Get("code").Int()
-	if code != 0 {
-		return nil, nil, errors.Errorf("获取国际地区代码失败，返回值：%d", code)
-	}
-	err = json.Unmarshal([]byte(res.Get("data.common").Raw), &common)
-	if err != nil {
-		return nil, nil, errors.WithStack(err)
-	}
-	err = json.Unmarshal([]byte(res.Get("data.others").Raw), &others)
-	if err != nil {
-		return nil, nil, errors.WithStack(err)
-	}
-	return common, others, nil
+// GetCountryCrown 获取国际冠字码
+func (c *Client) GetCountryCrown() (*GetCountryCrownResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://passport.bilibili.com/web/generic/country/list"
+	)
+	return execute[*GetCountryCrownResult](c, method, url, nil)
+}
+
+type SendSMSParam struct {
+	Cid       int    `json:"cid"`       // 国际冠字码。使用 GetCountryCrown() 方法获取
+	Tel       int    `json:"tel"`       // 手机号码
+	Source    string `json:"source"`    // 登录来源。main_web：独立登录页。main_mini：小窗登录
+	Token     string `json:"token"`     // 登录 API token。使用 Captcha() 方法获取
+	Challenge string `json:"challenge"` // 极验 challenge。使用 Captcha() 方法获取
+	Validate  string `json:"validate"`  // 极验 result。极验验证后得到
+	Seccode   string `json:"seccode"`   // 极验 result +jordan。极验验证后得到
+}
+
+type SendSMSResult struct {
+	CaptchaKey string `json:"captcha_key"` // 短信登录 token。在下方传参时需要，请备用
 }
 
 // SendSMS 发送短信验证码
+func (c *Client) SendSMS(param SendSMSParam) (*SendSMSResult, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://passport.bilibili.com/x/passport-login/web/sms/send"
+	)
+	return execute[*SendSMSResult](c, method, url, param)
+}
 
-func (c *Client) SendSMS(tel, cid int, captchaResult *CaptchaResult, validate, seccode string) (captchaKey string, err error) {
-	if captchaResult == nil {
-		return "", errors.New("请先进行极验人机验证")
-	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
-		"tel":       strconv.Itoa(tel),
-		"cid":       strconv.Itoa(cid),
-		"source":    "main_web",
-		"token":     captchaResult.Token,
-		"challenge": captchaResult.Geetest.Challenge,
-		"validate":  validate,
-		"seccode":   seccode,
-	}).Post("https://passport.bilibili.com/x/passport-login/web/sms/send")
-	if err != nil {
-		return "", errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "发送短信验证码")
-	if err != nil {
-		return "", err
-	}
-	return gjson.GetBytes(data, "captcha_key").String(), nil
+type LoginWithSMSParam struct {
+	Cid        int    `json:"cid"`              // 国际冠字码。可以从 GetCountryCrown() 获取
+	Tel        int    `json:"tel"`              // 手机号码
+	Code       int    `json:"code"`             // 短信验证码。timeout 为 5min
+	Source     string `json:"source"`           // 登录来源。main_web：独立登录页。main_mini：小窗登录
+	CaptchaKey string `json:"captcha_key"`      // 短信登录 token。从 SendSMS() 请求成功后返回
+	GoUrl      string `json:"go_url,omitempty"` // 跳转url。默认为 https://www.bilibili.com
+	Keep       bool   `json:"keep,omitempty"`   // 是否记住登录。true：记住登录。false：不记住登录
+}
+
+type LoginWithSMSResult struct {
+	IsNew  bool   `json:"is_new"` // 是否为新注册用户。false：非新注册用户。true：新注册用户
+	Status int    `json:"status"` // 0。未知，可能0就是成功吧
+	Url    string `json:"url"`    // 跳转 url。默认为 https://www.bilibili.com
 }
 
 // LoginWithSMS 使用短信验证码登录
-
-func (c *Client) LoginWithSMS(tel, cid, code int, captchaKey string) error {
-	if len(captchaKey) == 0 {
-		return errors.New("请先发送短信")
-	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
-		"cid":         strconv.Itoa(cid),
-		"tel":         strconv.Itoa(tel),
-		"code":        strconv.Itoa(code),
-		"source":      "main_web",
-		"captcha_key": captchaKey,
-	}).Post("https://passport.bilibili.com/x/passport-login/web/login/sms")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	if resp.StatusCode() != 200 {
-		return errors.New("登录bilibili失败")
-	}
-	if !gjson.ValidBytes(resp.Body()) {
-		return errors.Errorf("json invalid: %s", resp.String())
-	}
-	retCode := gjson.GetBytes(resp.Body(), "code").Int()
-	if retCode != 0 {
-		return errors.Errorf("登录bilibili失败，错误码：%d，错误信息：%s", retCode, gjson.GetBytes(resp.Body(), "message").String())
-	}
-	status := gjson.GetBytes(resp.Body(), "data.status").Int()
-	if status != 0 {
-		return errors.Errorf("登录bilibili失败，错误码：%d，状态码：%d, 错误信息：%s", retCode, status, gjson.GetBytes(resp.Body(), "data.message").String())
-	}
-	c.SetCookies(resp.Cookies())
-	return nil
+func (c *Client) LoginWithSMS(param LoginWithSMSParam) (*LoginWithSMSResult, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://passport.bilibili.com/x/passport-login/web/login/sms"
+	)
+	return execute[*LoginWithSMSResult](c, method, url, param)
 }
 
 type QRCode struct {
-	Url       string `json:"url"`        // 二维码内容url
-	QrcodeKey string `json:"qrcode_key"` // 扫码登录秘钥
+	Url       string `json:"url"`        // 二维码内容 (登录页面 url)
+	QrcodeKey string `json:"qrcode_key"` // 扫码登录秘钥。恒为32字符
 }
 
 // Encode a QRCode and return a raw PNG image.
@@ -230,77 +192,45 @@ func (result *QRCode) Print() {
 	qrcodeTerminal.New2(front, back, qrcodeTerminal.QRCodeRecoveryLevels.Low).Get(result.Url).Print()
 }
 
-// GetQRCode 申请二维码URL及扫码密钥
-
+// GetQRCode 申请二维码
 func (c *Client) GetQRCode() (*QRCode, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		Get("https://passport.bilibili.com/x/passport-login/web/qrcode/generate")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "申请二维码")
-	if err != nil {
-		return nil, err
-	}
-	var result *QRCode
-	err = json.Unmarshal(data, &result)
-	return result, errors.WithStack(err)
+	const (
+		method = resty.MethodGet
+		url    = "https://passport.bilibili.com/x/passport-login/web/qrcode/generate"
+	)
+	return execute[*QRCode](c, method, url, nil)
 }
 
-// LoginWithQRCode 使用扫码登录
+type LoginWithQRCodeParam struct {
+	QrcodeKey string `json:"qrcode_key"` // 扫码登录秘钥
+}
 
-func (c *Client) LoginWithQRCode(qrCode *QRCode) error {
-	if qrCode == nil {
-		return errors.New("请先获取二维码")
-	}
+type LoginWithQRCodeResult struct {
+	Url          string `json:"url"`           // 游戏分站跨域登录 url。未登录为空
+	RefreshToken string `json:"refresh_token"` // 刷新refresh_token。未登录为空
+	Timestamp    int    `json:"timestamp"`     // 登录时间。未登录为0。时间戳 单位为毫秒
+	Code         int    `json:"code"`          // 0：扫码登录成功。86038：二维码已失效。86090：二维码已扫码未确认。86101：未扫码
+	Message      string `json:"message"`       // 扫码状态信息
+}
 
+// LoginWithQRCode 使用扫码登录。
+//
+// 该方法会阻塞直到扫码成功或者已经无法扫码。
+func (c *Client) LoginWithQRCode(param LoginWithQRCodeParam) (*LoginWithQRCodeResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://passport.bilibili.com/x/passport-login/web/qrcode/poll"
+	)
 	for {
-		ok, err := c.qrCodeSuccess(qrCode)
+		result, err := execute[*LoginWithQRCodeResult](c, method, url, param)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		if ok {
-			return nil
+		if result.Code != 86090 && result.Code != 86101 {
+			// 86090：二维码已扫码未确认
+			// 86101：未扫码
+			return result, nil
 		}
 		time.Sleep(3 * time.Second) // 主站 3s 一次请求
-	}
-}
-
-// qrCodeSuccess 是否扫码成功
-func (c *Client) qrCodeSuccess(qrCode *QRCode) (bool, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetQueryParam("qrcode_key", qrCode.QrcodeKey).Get("https://passport.bilibili.com/x/passport-login/web/qrcode/poll")
-	if err != nil {
-		return false, errors.WithStack(err)
-	}
-	if resp.StatusCode() != 200 {
-		return false, errors.New("登录bilibili失败")
-	}
-	if !gjson.ValidBytes(resp.Body()) {
-		return false, errors.Errorf("json invalid: %s", resp.String())
-	}
-	result := gjson.ParseBytes(resp.Body())
-	retCode := result.Get("code").Int()
-	if retCode != 0 {
-		return false, errors.Errorf("登录bilibili失败，错误码：%d，错误信息：%s", retCode, gjson.GetBytes(resp.Body(), "message").String())
-	} else {
-		codeValue := result.Get("data.code")
-		if !codeValue.Exists() || codeValue.Type != gjson.Number {
-			return false, errors.New("扫码登录未成功，返回异常")
-		}
-		code := codeValue.Int()
-		switch code {
-		case 86038: // 二维码已失效
-			return false, errors.New("扫码登录未成功，原因：二维码已失效")
-		case 86090: // 二维码已扫码未确认
-			return false, nil
-		case 86101: // 未扫码
-			return false, nil
-		case 0:
-			c.SetCookies(resp.Cookies())
-			return true, nil
-		default:
-			return false, errors.Errorf("由于未知原因，扫码登录未成功，错误码：%d", code)
-		}
 	}
 }

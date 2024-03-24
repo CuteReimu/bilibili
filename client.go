@@ -11,90 +11,54 @@ import (
 )
 
 type Client struct {
-	cookies       []*http.Cookie
-	cookiesString string
-	timeout       time.Duration
-	logger        resty.Logger
+	resty *resty.Client
 }
 
-// New 返回一个 bilibili.Client
+// New 返回一个默认的 bilibili.Client
 func New() *Client {
-	return &Client{}
+	restyClient := resty.New().
+		SetTimeout(20*time.Second).
+		SetHeader("Accept", "application/json").
+		SetHeader("Accept-Language", "zh-CN,zh;q=0.9").
+		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetHeader("Origin", "https://www.bilibili.com").
+		SetHeader("Referer", "https://www.bilibili.com/").
+		SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0")
+	return NewWithClient(restyClient)
 }
 
-func Default() *Client {
-	return &Client{timeout: 20 * time.Second}
+// NewWithClient 接收一个自定义的*resty.Client为参数
+func NewWithClient(restyClient *resty.Client) *Client {
+	return &Client{resty: restyClient}
 }
 
-// SetTimeout 设置http请求超时时间
-func (c *Client) SetTimeout(timeout time.Duration) {
-	c.timeout = timeout
-}
-
-// GetTimeout 获取http请求超时时间，默认20秒
-func (c *Client) GetTimeout() time.Duration {
-	if c.timeout == 0 {
-		return time.Second * 20
-	}
-	return c.timeout
-}
-
-// SetLogger 设置logger
-func (c *Client) SetLogger(logger resty.Logger) {
-	c.logger = logger
-}
-
-// GetLogger 获取logger，默认使用resty默认的logger
-func (c *Client) GetLogger() resty.Logger {
-	return c.logger
+func (c *Client) Resty() *resty.Client {
+	return c.resty
 }
 
 // GetCookiesString 获取字符串格式的cookies，方便自行存储后下次使用。配合下面的 SetCookiesString 使用。
 func (c *Client) GetCookiesString() string {
-	return c.cookiesString
+	cookies := c.resty.Cookies
+	cookieStrings := make([]string, 0, len(cookies))
+	for _, cookie := range c.resty.Cookies {
+		cookieStrings = append(cookieStrings, cookie.String())
+	}
+	return strings.Join(cookieStrings, "\n")
 }
 
 // SetCookiesString 设置Cookies，但是是字符串格式，配合 GetCookiesString 使用。有些功能必须登录或设置Cookies后才能使用。
-
 func (c *Client) SetCookiesString(cookiesString string) {
-	c.cookiesString = cookiesString
-	c.cookies = (&resty.Response{RawResponse: &http.Response{Header: http.Header{
+	c.resty.SetCookies((&resty.Response{RawResponse: &http.Response{Header: http.Header{
 		"Set-Cookie": strings.Split(cookiesString, "\n"),
-	}}}).Cookies()
-}
-
-// GetCookies 获取Cookies。配合下面的SetCookies使用。
-func (c *Client) GetCookies() []*http.Cookie {
-	return c.cookies
-}
-
-// SetCookies 设置Cookies。有些功能必须登录之后才能使用，设置Cookies可以代替登录。
-func (c *Client) SetCookies(cookies []*http.Cookie) {
-	c.cookies = cookies
-	cookieStrings := make([]string, 0, len(cookies))
-	for _, cookie := range c.cookies {
-		cookieStrings = append(cookieStrings, cookie.String())
-	}
-	c.cookiesString = strings.Join(cookieStrings, "\n")
-}
-
-// 获取resty的一个request
-func (c *Client) resty() *resty.Client {
-	client := resty.New().SetTimeout(c.GetTimeout()).SetHeader("user-agent", "go")
-	if c.logger != nil {
-		client.SetLogger(c.logger)
-	}
-	if c.cookies != nil {
-		client.SetCookies(c.cookies)
-	}
-	return client
+	}}}).Cookies())
 }
 
 // 根据key获取指定的cookie值
 func (c *Client) getCookie(name string) string {
 	now := time.Now()
-	for _, cookie := range c.cookies {
-		if cookie.Name == name && now.Before(cookie.Expires) {
+	// 查找指定name的cookie
+	for _, cookie := range c.resty.Cookies {
+		if cookie.Name == name && (cookie.Expires.IsZero() || cookie.Expires.After(now)) {
 			return cookie.Value
 		}
 	}

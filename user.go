@@ -72,7 +72,7 @@ func (c *Client) GetUserVideos(mid int, order OrderType, tid int, keyword string
 	if len(keyword) > 0 {
 		postData["keyword"] = keyword
 	}
-	resp, err := c.resty().R().SetQueryParams(postData).Get("https://api.bilibili.com/x/space/wbi/arc/search")
+	resp, err := c.resty.R().SetQueryParams(postData).Get("https://api.bilibili.com/x/space/wbi/arc/search")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

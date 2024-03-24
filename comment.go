@@ -230,7 +230,7 @@ func (c *Client) GetVideoComment(oidType, oid, sort, root int) (*HotReply, error
 	}
 
 	// 发送 HTTP GET 请求
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(params).Get(url)
+	resp, err := c.resty.R().SetQueryParams(params).Get(url)
 	if err != nil {
 		// 返回错误
 		return nil, errors.WithStack(err)

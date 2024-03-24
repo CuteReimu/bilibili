@@ -14,7 +14,7 @@ var regLive = regexp.MustCompile(`^https://live.bilibili.com/(\d+)`)
 // GetRoomidByShortUrl 通过直播短链接获取直播间id
 
 func (c *Client) GetRoomidByShortUrl(shortUrl string) (int, error) {
-	resp, err := c.resty().SetRedirectPolicy(resty.NoRedirectPolicy()).R().Get(shortUrl)
+	resp, err := c.resty.SetRedirectPolicy(resty.NoRedirectPolicy()).R().Get(shortUrl)
 	if resp == nil {
 		return 0, errors.WithStack(err)
 	}
@@ -106,7 +106,7 @@ type RoomInfo struct {
 // SocialSisterYi/bilibili-API-collect 文档中的接口已经无法使用了。下面的实现是参照
 // https://github.com/SocialSisterYi/bilibili-API-collect/issues/272 的接口，已验证，可以使用。
 func (c *Client) GetRoomInfo(roomId int) (*RoomInfo, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("id", strconv.Itoa(roomId)).Get("https://api.live.bilibili.com/room/v1/Room/get_info")
+	resp, err := c.resty.R().SetQueryParam("id", strconv.Itoa(roomId)).Get("https://api.live.bilibili.com/room/v1/Room/get_info")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -132,7 +132,7 @@ func (c *Client) UpdateLive(roomId int, title string) error {
 	if len(biliJct) == 0 {
 		return errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"room_id": strconv.Itoa(roomId),
 		"title":   title,
 		"csrf":    biliJct,
@@ -180,7 +180,7 @@ func (c *Client) StartLive(roomId, area int) (*StartLiveResult, error) {
 	if len(biliJct) == 0 {
 		return nil, errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"room_id":  strconv.Itoa(roomId),
 		"platform": "pc",
 		"area_v2":  strconv.Itoa(area),
@@ -205,7 +205,7 @@ func (c *Client) StopLive(roomId int) (bool, error) {
 	if len(biliJct) == 0 {
 		return false, errors.New("B站登录过期")
 	}
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParams(map[string]string{
+	resp, err := c.resty.R().SetQueryParams(map[string]string{
 		"room_id": strconv.Itoa(roomId),
 		"csrf":    biliJct,
 	}).Post("https://api.live.bilibili.com/room/v1/Room/stopLive")
@@ -231,7 +231,7 @@ type LiveAreaData struct {
 // GetLiveAreaList 获取直播分区列表
 
 func (c *Client) GetLiveAreaList() ([]LiveAreaData, error) {
-	resp, err := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").Get("https://api.live.bilibili.com/room/v1/Area/getList")
+	resp, err := c.resty.R().Get("https://api.live.bilibili.com/room/v1/Area/getList")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

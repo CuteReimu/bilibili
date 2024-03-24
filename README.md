@@ -42,9 +42,7 @@ go get -u github.com/CuteReimu/bilibili/v2
 ```go
 import "github.com/CuteReimu/bilibili/v2"
 
-func main()  {
-    client := bilibili.New()
-}
+var client = bilibili.New()
 ```
 
 ### 首次登录
@@ -63,8 +61,10 @@ img, _ := png.Decode(buf) // 或者写入文件 os.WriteFile("qrcode.png", buf, 
 扫码并确认成功后，发送登录请求：
 
 ```go
-err := client.LoginWithQRCode(qrCode)
-if err == nil {
+result, err := client.LoginWithQRCode(bilibili.LoginWithQRCodeParam{
+    QrcodeKey: qrCode.QrcodeKey,
+})
+if err == nil && result.Code == 0 {
     log.Println("登录成功")
 }
 ```
@@ -80,8 +80,15 @@ captchaResult, _ := client.Captcha()
 将`captchaResult`中的`gt`和`challenge`值保存下来，自行使用 [手动验证器](https://kuresaru.github.io/geetest-validator/) 进行人机验证，并获得`validate`和`seccode`。然后使用账号密码进行登录即可：
 
 ```go
-err := client.LoginWithPassword(userName, password, captchaResult, validate, seccode)
-if err == nil {
+result, err := client.LoginWithPassword(bilibili.LoginWithPasswordParam{
+    Username:  userName,
+    Password:  password,
+    Token:     captchaResult.Token,
+    Challenge: captchaResult.Geetest.Challenge,
+    Validate:  validate,
+    Seccode:   seccode,
+})
+if err == nil && result.Status == 0 {
     log.Println("登录成功")
 }
 ```
@@ -91,22 +98,36 @@ if err == nil {
 首先用上述方法二相同的方式获取人机验证参数并进行人机验证。然后获取国际地区代码：
 
 ```go
-common, others, _ := client.ListCountry()
+countryCrown, others, _ := client.GetCountryCrown()
 ```
 
-当然，如果你已经确定`cid`的值，这一步可以跳过。中国大陆的`cid`就是1。
+当然，如果你已经确定`cid`的值，这一步可以跳过。中国大陆的`cid`就是86。
 
-然后发送短信验证码：
+然后发送短信验证码：*（[这个接口大概率返回86103错误](https://github.com/SocialSisterYi/bilibili-API-collect/issues/756)）*
 
 ```go
-captchaKey, _ := client.SendSMS(tel, cid, captchaResult, validate, seccode)
+sendSMSResult, _ := client.SendSMS(bilibili.SendSMSParam{
+    Cid:       cid,
+    Tel:       tel,
+    Source:    "main_web",
+    Token:     captchaResult.Token,
+    Challenge: captchaResult.Geetest.Challenge,
+    Validate:  validate,
+    Seccode:   seccode,
+})
 ```
 
 然后就可以使用手机验证码登录了：
 
 ```go
-err := client.LoginWithSMS(tel, cid, code, captchaKey) // 其中code是短信验证码
-if err == nil {
+result, err := client.LoginWithSMS(bilibili.LoginWithSMSParam{
+    Cid:        cid,
+    Tel:        tel,
+    Code:       123456, // 短信验证码
+    Source:     "main_web",
+    CaptchaKey: sendSMSResult.CaptchaKey,
+})
+if err == nil && result.Status == 0 {
     log.Println("登录成功")
 }
 ```
@@ -123,11 +144,13 @@ cookiesString := client.GetCookiesString()
 client.SetCookiesString(cookiesString)
 ```
 
-### 设置超时时间和logger
+### 设置*resty.Client的一些参数
+
+调用`client.Resty()`就可以获取到`*resty.Client`，然后自行操作即可。**但是不要做一些离谱的操作**~~（比如把Cookies删了）~~
 
 ```go
-client.SetTimeout(20 * time.Second) // 设置超时时间
-client.SetLogger(logger) // 自定义logger
+client.Resty().SetTimeout(20 * time.Second) // 设置超时时间
+client.Resty().SetLogger(logger) // 自定义logger
 ```
 
 ## 进度
