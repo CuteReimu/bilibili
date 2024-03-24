@@ -234,3 +234,23 @@ func (c *Client) LoginWithQRCode(param LoginWithQRCodeParam) (*LoginWithQRCodeRe
 		time.Sleep(3 * time.Second) // 主站 3s 一次请求
 	}
 }
+
+type AccountInformation struct {
+	Mid      int    `json:"mid"`       // 我的mid
+	Uname    string `json:"uname"`     // 我的昵称
+	Userid   string `json:"userid"`    // 我的用户名
+	Sign     string `json:"sign"`      // 我的签名
+	Birthday string `json:"birthday"`  // 我的生日。YYYY-MM-DD
+	Sex      string `json:"sex"`       // 我的性别。男 女 保密
+	NickFree bool   `json:"nick_free"` // 是否未设置昵称。false：设置过昵称。true：未设置昵称
+	Rank     string `json:"rank"`      // 我的会员等级
+}
+
+// GetAccountInformation 获取我的信息
+func (c *Client) GetAccountInformation() (*AccountInformation, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/member/web/account"
+	)
+	return execute[*AccountInformation](c, method, url, nil)
+}
