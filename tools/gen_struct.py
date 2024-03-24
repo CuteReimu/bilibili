@@ -25,7 +25,9 @@ if __name__ == '__main__':
 		print('请输入Markdown表格，在最后一行之后输入ok表示结束：（退出请输入exit）')
 		while True:
 			line = input()
-			if not line or line.strip() == 'exit':
+			if not line:
+				continue
+			if line.strip() == 'exit':
 				sys.exit(0)
 			if line.strip() == 'ok':
 				break
@@ -60,8 +62,14 @@ if __name__ == '__main__':
 				m['type'] = 'string'
 			elif m['type'] == 'bool':
 				pass
-			elif m['type'] == 'array' or m['type'] == 'Array':
-				m['type'] = '[]' + name
+			elif m['type'] in ['array', 'Array', 'list', 'List', 'array(obj)', 'Array(obj)', 'list(obj)', 'List(obj)']:
+				m['type'] = '[]' + (name if not name.endswith('s') else name[:-1])
+			elif m['type'] in ['array(num)', 'Array(num)', 'list(num)', 'List(num)']:
+				m['type'] = '[]int'
+			elif m['type'] in ['array(str)', 'Array(str)', 'list(str)', 'List(str)']:
+				m['type'] = '[]string'
+			elif m['type'] in ['array(bool)', 'Array(bool)', 'list(bool)', 'List(bool)']:
+				m['type'] = '[]bool'
 			elif m['type'] == 'obj':
 				m['type'] = name
 			if m.get('notnull', '必要') == '必要':
