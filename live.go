@@ -185,17 +185,17 @@ type SubLiveArea struct {
 	AreaType   int    `json:"area_type"`
 }
 
-type LiveArea struct {
+type LiveAreaList struct {
 	Id   int           `json:"id"`   // 父分区id
 	Name string        `json:"name"` // 父分区名
 	List []SubLiveArea `json:"list"` // 子分区列表
 }
 
 // GetLiveAreaList 获取全部直播间分区列表
-func (c *Client) GetLiveAreaList() ([]LiveArea, error) {
+func (c *Client) GetLiveAreaList() ([]LiveAreaList, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.live.bilibili.com/room/v1/Area/getList"
 	)
-	return execute[[]LiveArea](c, method, url, nil)
+	return execute[[]LiveAreaList](c, method, url, nil)
 }
