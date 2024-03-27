@@ -89,15 +89,6 @@ type Article struct {
 	LikeState       int          `json:"like_state"` // 是否点赞。0：未点赞。1：已点赞。需要登录(Cookie) 。未登录为0
 }
 
-type Nameplate struct {
-	Nid        int    `json:"nid"`         // 勋章id
-	Name       string `json:"name"`        // 勋章名称
-	Image      string `json:"image"`       // 勋章图标
-	ImageSmall string `json:"image_small"` // 勋章图标（小）
-	Level      string `json:"level"`       // 勋章等级
-	Condition  string `json:"condition"`   // 获取条件
-}
-
 type Author struct {
 	Mid            int            `json:"mid"`             // 作者mid
 	Name           string         `json:"name"`            // 作者昵称

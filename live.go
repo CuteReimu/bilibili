@@ -2,33 +2,7 @@ package bilibili
 
 import (
 	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
-	"regexp"
-	"strconv"
 )
-
-var regLive = regexp.MustCompile(`^https://live.bilibili.com/(\d+)`)
-
-// GetLiveRoomidByShortUrl 通过直播短链接获取直播间id
-func (c *Client) GetLiveRoomidByShortUrl(shortUrl string) (int, error) {
-	resp, err := c.resty.SetRedirectPolicy(resty.NoRedirectPolicy()).R().Get(shortUrl)
-	if resp == nil {
-		return 0, errors.WithStack(err)
-	}
-	if resp.StatusCode() != 302 {
-		return 0, errors.Errorf("通过直播短链接获取直播间id，status code: %d", resp.StatusCode())
-	}
-	url := resp.Header().Get("Location")
-	ret := regLive.FindStringSubmatch(url)
-	if len(ret) == 0 {
-		return 0, errors.New("无法解析链接：" + url)
-	}
-	rid, err := strconv.Atoi(ret[1])
-	if err != nil {
-		return 0, errors.WithStack(err)
-	}
-	return rid, nil
-}
 
 type GetLiveRoomInfoParam struct {
 	RoomId int `json:"room_id"` // 直播间号。可以为短号

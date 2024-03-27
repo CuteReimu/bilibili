@@ -17,6 +17,7 @@ type Client struct {
 // New 返回一个默认的 bilibili.Client
 func New() *Client {
 	restyClient := resty.New().
+		SetRedirectPolicy(resty.NoRedirectPolicy()).
 		SetTimeout(20*time.Second).
 		SetHeader("Accept", "application/json").
 		SetHeader("Accept-Language", "zh-CN,zh;q=0.9").
