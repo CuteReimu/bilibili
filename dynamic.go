@@ -2,11 +2,12 @@ package bilibili
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 	"io"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 )
 
 type SearchDynamicAtResult struct {
@@ -1094,7 +1095,7 @@ func GetUserSpaceDynamic(mid int, offset string) (*DynamicInfo, error) {
 	return std.GetUserSpaceDynamic(mid, offset)
 }
 func (c *Client) GetUserSpaceDynamic(mid int, offset string) (*DynamicInfo, error) {
-	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetQueryParam("host_mid", strconv.Itoa(mid))
+	r := c.resty().R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0").SetQueryParam("host_mid", strconv.Itoa(mid))
 	if len(offset) > 0 {
 		r = r.SetQueryParam("offset", offset)
 	}

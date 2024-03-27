@@ -2,12 +2,13 @@ package bilibili
 
 import (
 	"encoding/json"
-	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 )
 
 var regBv = regexp.MustCompile(`(?i)bv([\dA-Za-z]{10})`)
@@ -1149,4 +1150,68 @@ func (c *Client) GetTopRecommendVideo(freshType, ps int) ([]*VideoInfo, error) {
 	var mixedRet MixedData
 	err = json.Unmarshal(data, &mixedRet)
 	return mixedRet.Item, errors.WithStack(err)
+}
+
+type ArchivesList struct {
+	Aids     []int `json:"aids"`
+	Archives []struct {
+		Aid              int    `json:"aid"`
+		Bvid             string `json:"bvid"`
+		Ctime            int    `json:"ctime"`
+		Duration         int    `json:"duration"`
+		EnableVt         bool   `json:"enable_vt"`
+		InteractiveVideo bool   `json:"interactive_video"`
+		Pic              string `json:"pic"`
+		PlaybackPosition int    `json:"playback_position"`
+		Pubdate          int    `json:"pubdate"`
+		Stat             struct {
+			View int `json:"view"`
+			Vt   int `json:"vt"`
+		} `json:"stat"`
+		State     int    `json:"state"`
+		Title     string `json:"title"`
+		UgcPay    int    `json:"ugc_pay"`
+		VtDisplay string `json:"vt_display"`
+	} `json:"archives"`
+	Meta struct {
+		Category    int    `json:"category"`
+		Cover       string `json:"cover"`
+		Description string `json:"description"`
+		Mid         int    `json:"mid"`
+		Name        string `json:"name"`
+		Ptime       int    `json:"ptime"`
+		SeasonID    int    `json:"season_id"`
+		Total       int    `json:"total"`
+	} `json:"meta"`
+	Page struct {
+		PageNum  int `json:"page_num"`
+		PageSize int `json:"page_size"`
+		Total    int `json:"total"`
+	} `json:"page"`
+}
+
+// GetArchivesList 获取视频合集信息 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md#%E8%8E%B7%E5%8F%96%E8%A7%86%E9%A2%91%E5%90%88%E9%9B%86%E4%BF%A1%E6%81%AF
+func GetArchivesList(mid int, sid int, pn int, ps int, sort_reverse bool) (*ArchivesList, error) {
+	return std.GetArchivesList(mid, sid, pn, ps, sort_reverse)
+}
+func (c *Client) GetArchivesList(mid int, sid int, pn int, ps int, sort_reverse bool) (*ArchivesList, error) {
+	postData := map[string]string{
+		"mid":          strconv.Itoa(mid),
+		"page_num":     strconv.Itoa(pn),
+		"page_size":    strconv.Itoa(ps),
+		"season_id":    strconv.Itoa(sid),
+		"sort_reverse": strconv.FormatBool(sort_reverse),
+	}
+	resp, err := c.resty().R().SetQueryParams(postData).Get("https://api.bilibili.com/x/polymer/web-space/seasons_archives_list")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	var ret *ArchivesList
+	data, err := getRespData(resp, "获取合集信息")
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
 }
