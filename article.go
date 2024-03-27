@@ -1,8 +1,6 @@
 package bilibili
 
-import (
-	"github.com/go-resty/resty/v2"
-)
+import "github.com/go-resty/resty/v2"
 
 type GetArticlesInfoParam struct {
 	Id int `json:"id"` // 文集rlid

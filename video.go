@@ -1095,18 +1095,15 @@ type ArchivesList struct {
 }
 
 // GetArchivesList 获取视频合集信息 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md#%E8%8E%B7%E5%8F%96%E8%A7%86%E9%A2%91%E5%90%88%E9%9B%86%E4%BF%A1%E6%81%AF
-func GetArchivesList(mid int, sid int, pn int, ps int, sort_reverse bool) (*ArchivesList, error) {
-	return std.GetArchivesList(mid, sid, pn, ps, sort_reverse)
-}
-func (c *Client) GetArchivesList(mid int, sid int, pn int, ps int, sort_reverse bool) (*ArchivesList, error) {
+func (c *Client) GetArchivesList(mid int, sid int, pn int, ps int, sortReverse bool) (*ArchivesList, error) {
 	postData := map[string]string{
 		"mid":          strconv.Itoa(mid),
 		"page_num":     strconv.Itoa(pn),
 		"page_size":    strconv.Itoa(ps),
 		"season_id":    strconv.Itoa(sid),
-		"sort_reverse": strconv.FormatBool(sort_reverse),
+		"sort_reverse": strconv.FormatBool(sortReverse),
 	}
-	resp, err := c.resty().R().SetQueryParams(postData).Get("https://api.bilibili.com/x/polymer/web-space/seasons_archives_list")
+	resp, err := c.resty.R().SetQueryParams(postData).Get("https://api.bilibili.com/x/polymer/web-space/seasons_archives_list")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

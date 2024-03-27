@@ -2,12 +2,11 @@ package bilibili
 
 import (
 	"encoding/json"
+	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 	"io"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 )
 
 type SearchDynamicAtResult struct {

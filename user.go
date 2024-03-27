@@ -2,9 +2,8 @@ package bilibili
 
 import (
 	"encoding/json"
-	"strconv"
-
 	"github.com/pkg/errors"
+	"strconv"
 )
 
 type OrderType string
@@ -191,12 +190,8 @@ func (c *Client) GetUserVideos(mid int, order OrderType, tid int, keyword string
 
 // GetUserCard 获取用户用户名片 免登录
 // https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/user/info.md#%E7%94%A8%E6%88%B7%E5%90%8D%E7%89%87%E4%BF%A1%E6%81%AF
-func GetUserCard(mid int, photo bool) (*UserCardResult, error) {
-	return std.GetUserCard(mid, photo)
-}
 func (c *Client) GetUserCard(mid int, photo bool) (*UserCardResult, error) {
-	r := c.resty().R().SetQueryParam("mid", strconv.Itoa(mid)).SetQueryParam("photo", strconv.FormatBool(photo))
-
+	r := c.resty.R().SetQueryParam("mid", strconv.Itoa(mid)).SetQueryParam("photo", strconv.FormatBool(photo))
 	resp, err := r.Get("https://api.bilibili.com/x/web-interface/card")
 	if err != nil {
 		return nil, errors.WithStack(err)
