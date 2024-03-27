@@ -2,11 +2,12 @@ package bilibili
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 	"io"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 )
 
 type SearchDynamicAtResult struct {
@@ -1067,7 +1068,7 @@ type DynamicInfo struct {
 // 返回结构较为繁琐，见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/dynamic/space.md
 
 func (c *Client) GetUserSpaceDynamic(mid int, offset string) (*DynamicInfo, error) {
-	r := c.resty.R().SetQueryParam("host_mid", strconv.Itoa(mid))
+	r := c.resty.R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0").SetQueryParam("host_mid", strconv.Itoa(mid))
 	if len(offset) > 0 {
 		r = r.SetQueryParam("offset", offset)
 	}

@@ -10,6 +10,8 @@
 
 本项目是基于Go语言编写的哔哩哔哩API调用。目前常用的接口已经基本完成，具体进度可以看[这里](#进度)
 
+[v2版本正在施工中。。。](https://github.com/CuteReimu/bilibili/issues/31)
+
 **声明**：
 
 1. 本项目遵守 AGPL 开源协议。

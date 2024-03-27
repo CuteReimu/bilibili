@@ -2,8 +2,9 @@ package bilibili
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 type OrderType string
@@ -56,6 +57,109 @@ type GetUserVideosResult struct {
 	} `json:"episodic_button"`
 }
 
+type UserCardResult struct {
+	Card struct {
+		Mid         string        `json:"mid"`
+		Name        string        `json:"name"`
+		Approve     bool          `json:"approve"`
+		Sex         string        `json:"sex"`
+		Rank        string        `json:"rank"`
+		Face        string        `json:"face"`
+		FaceNft     int           `json:"face_nft"`
+		FaceNftType int           `json:"face_nft_type"`
+		DisplayRank string        `json:"DisplayRank"`
+		Regtime     int           `json:"regtime"`
+		Spacesta    int           `json:"spacesta"`
+		Birthday    string        `json:"birthday"`
+		Place       string        `json:"place"`
+		Description string        `json:"description"`
+		Article     int           `json:"article"`
+		Attentions  []interface{} `json:"attentions"`
+		Fans        int           `json:"fans"`
+		Friend      int           `json:"friend"`
+		Attention   int           `json:"attention"`
+		Sign        string        `json:"sign"`
+		LevelInfo   struct {
+			CurrentLevel int `json:"current_level"`
+			CurrentMin   int `json:"current_min"`
+			CurrentExp   int `json:"current_exp"`
+			NextExp      int `json:"next_exp"`
+		} `json:"level_info"`
+		Pendant struct {
+			Pid               int    `json:"pid"`
+			Name              string `json:"name"`
+			Image             string `json:"image"`
+			Expire            int    `json:"expire"`
+			ImageEnhance      string `json:"image_enhance"`
+			ImageEnhanceFrame string `json:"image_enhance_frame"`
+			NPid              int    `json:"n_pid"`
+		} `json:"pendant"`
+		Nameplate struct {
+			Nid        int    `json:"nid"`
+			Name       string `json:"name"`
+			Image      string `json:"image"`
+			ImageSmall string `json:"image_small"`
+			Level      string `json:"level"`
+			Condition  string `json:"condition"`
+		} `json:"nameplate"`
+		Official struct {
+			Role  int    `json:"role"`
+			Title string `json:"title"`
+			Desc  string `json:"desc"`
+			Type  int    `json:"type"`
+		} `json:"Official"`
+		OfficialVerify struct {
+			Type int    `json:"type"`
+			Desc string `json:"desc"`
+		} `json:"official_verify"`
+		Vip struct {
+			Type       int   `json:"type"`
+			Status     int   `json:"status"`
+			DueDate    int64 `json:"due_date"`
+			VipPayType int   `json:"vip_pay_type"`
+			ThemeType  int   `json:"theme_type"`
+			Label      struct {
+				Path                  string `json:"path"`
+				Text                  string `json:"text"`
+				LabelTheme            string `json:"label_theme"`
+				TextColor             string `json:"text_color"`
+				BgStyle               int    `json:"bg_style"`
+				BgColor               string `json:"bg_color"`
+				BorderColor           string `json:"border_color"`
+				UseImgLabel           bool   `json:"use_img_label"`
+				ImgLabelURIHans       string `json:"img_label_uri_hans"`
+				ImgLabelURIHant       string `json:"img_label_uri_hant"`
+				ImgLabelURIHansStatic string `json:"img_label_uri_hans_static"`
+				ImgLabelURIHantStatic string `json:"img_label_uri_hant_static"`
+			} `json:"label"`
+			AvatarSubscript    int    `json:"avatar_subscript"`
+			NicknameColor      string `json:"nickname_color"`
+			Role               int    `json:"role"`
+			AvatarSubscriptURL string `json:"avatar_subscript_url"`
+			TvVipStatus        int    `json:"tv_vip_status"`
+			TvVipPayType       int    `json:"tv_vip_pay_type"`
+			TvDueDate          int    `json:"tv_due_date"`
+			AvatarIcon         struct {
+				IconType     int `json:"icon_type"`
+				IconResource struct {
+				} `json:"icon_resource"`
+			} `json:"avatar_icon"`
+			VipType   int `json:"vipType"`
+			VipStatus int `json:"vipStatus"`
+		} `json:"vip"`
+		IsSeniorMember int `json:"is_senior_member"`
+	} `json:"card"`
+	Space *struct {
+		SImg string `json:"s_img,omitempty"`
+		LImg string `json:"l_img,omitempty"`
+	} `json:"space,omitempty"`
+	Following    bool `json:"following"`
+	ArchiveCount int  `json:"archive_count"`
+	ArticleCount int  `json:"article_count"`
+	Follower     int  `json:"follower"`
+	LikeNum      int  `json:"like_num"`
+}
+
 // GetUserVideos 获取用户投稿视频明细
 func (c *Client) GetUserVideos(mid int, order OrderType, tid int, keyword string, pn int, ps int) (*GetUserVideosResult, error) {
 	postData := map[string]string{
@@ -81,6 +185,27 @@ func (c *Client) GetUserVideos(mid int, order OrderType, tid int, keyword string
 		return nil, err
 	}
 	var ret *GetUserVideosResult
+	err = json.Unmarshal(data, &ret)
+	return ret, errors.WithStack(err)
+}
+
+// GetUserCard 获取用户用户名片 免登录
+// https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/user/info.md#%E7%94%A8%E6%88%B7%E5%90%8D%E7%89%87%E4%BF%A1%E6%81%AF
+func GetUserCard(mid int, photo bool) (*UserCardResult, error) {
+	return std.GetUserCard(mid, photo)
+}
+func (c *Client) GetUserCard(mid int, photo bool) (*UserCardResult, error) {
+	r := c.resty().R().SetQueryParam("mid", strconv.Itoa(mid)).SetQueryParam("photo", strconv.FormatBool(photo))
+
+	resp, err := r.Get("https://api.bilibili.com/x/web-interface/card")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	data, err := getRespData(resp, "获取用户名片")
+	if err != nil {
+		return nil, err
+	}
+	var ret *UserCardResult
 	err = json.Unmarshal(data, &ret)
 	return ret, errors.WithStack(err)
 }
