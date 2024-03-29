@@ -113,6 +113,7 @@ func withParams(r *resty.Request, in any) error {
 	}
 
 	bodyMap := make(map[string]interface{}, 4)
+	contentType := ""
 	for i := 0; i < inType.NumField(); i++ {
 		fieldType := inType.Field(i)
 		fieldValue := inValue.Field(i)
@@ -140,7 +141,9 @@ func withParams(r *resty.Request, in any) error {
 			}
 			realVal = fieldValue.Elem().Interface()
 		} else {
-			if fieldValue.IsZero() {
+			if !fieldValue.IsZero() {
+				realVal = fieldValue.Interface()
+			} else {
 				// 设置了 omitempty 代表不传
 				if _, ok := tagMap["omitempty"]; ok {
 					continue
@@ -150,28 +153,27 @@ func withParams(r *resty.Request, in any) error {
 					realVal = v
 				} else {
 					// 否则使用零值
-					realVal = reflect.Zero(fieldType.Type).Interface()
+					realVal = fieldValue.Interface()
 				}
-			} else {
-				realVal = fieldValue.Interface()
 			}
 		}
 
-		for name, _ := range tagMap {
+		for name := range tagMap {
 			switch name {
 			case "query":
 				r.SetQueryParam(fieldName, cast.ToString(realVal))
 			case "json":
-				r.SetHeader("Content-Type", "application/json")
+				contentType = "application/json"
 				bodyMap[fieldName] = realVal
 			case "form-data":
-				r.SetHeader("Content-Type", "application/x-www-form-urlencoded")
+				contentType = "application/x-www-form-urlencoded"
 				bodyMap[fieldName] = realVal
 			}
 		}
 	}
 
 	if len(bodyMap) > 0 {
+		r.SetHeader("Content-Type", contentType)
 		r.SetBody(bodyMap)
 	}
 
