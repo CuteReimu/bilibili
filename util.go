@@ -3,6 +3,11 @@ package bilibili
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
+	"unicode"
+
+	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
 )
@@ -84,4 +89,127 @@ func structToMap(s any, handlers ...paramHandler) (map[string]string, error) {
 		}
 	}
 	return m2, nil
+}
+
+func withParams(r *resty.Request, in any) error {
+	if in == nil {
+		return nil
+	}
+
+	inType := reflect.TypeOf(in)
+	inValue := reflect.ValueOf(in)
+
+	switch inType.Kind() {
+	case reflect.Ptr:
+		// 如果是空指针，直接返回
+		if inValue.IsNil() {
+			return nil
+		}
+		inType = inType.Elem()
+		inValue = inValue.Elem()
+	case reflect.Struct:
+	default:
+		return errors.New("参数类型错误")
+	}
+
+	bodyMap := make(map[string]interface{}, 4)
+	contentType := ""
+	for i := 0; i < inType.NumField(); i++ {
+		fieldType := inType.Field(i)
+		fieldValue := inValue.Field(i)
+		tValue := fieldType.Tag.Get("request")
+
+		if tValue == "" || tValue == "-" {
+			continue
+		}
+
+		// 获取字段名
+		var fieldName string
+
+		tagMap := parseTag(tValue)
+		if name, ok := tagMap["field"]; ok {
+			fieldName = name
+		} else {
+			fieldName = toSnakeCase(fieldType.Name)
+		}
+
+		var realVal interface{}
+		if fieldType.Type.Kind() == reflect.Ptr {
+			// 设置 Ptr == nil 代表不传
+			if fieldValue.IsNil() {
+				continue
+			}
+			realVal = fieldValue.Elem().Interface()
+		} else {
+			if !fieldValue.IsZero() {
+				realVal = fieldValue.Interface()
+			} else {
+				// 设置了 omitempty 代表不传
+				if _, ok := tagMap["omitempty"]; ok {
+					continue
+				}
+				// 设置了 default 代表使用默认值
+				if v, ok := tagMap["default"]; ok {
+					realVal = v
+				} else {
+					// 否则使用零值
+					realVal = fieldValue.Interface()
+				}
+			}
+		}
+
+		for name := range tagMap {
+			switch name {
+			case "query":
+				r.SetQueryParam(fieldName, cast.ToString(realVal))
+			case "json":
+				contentType = "application/json"
+				bodyMap[fieldName] = realVal
+			case "form-data":
+				contentType = "application/x-www-form-urlencoded"
+				bodyMap[fieldName] = realVal
+			}
+		}
+	}
+
+	if len(bodyMap) > 0 {
+		r.SetHeader("Content-Type", contentType)
+		r.SetBody(bodyMap)
+	}
+
+	return nil
+}
+
+func parseTag(tag string) map[string]string {
+	parts := strings.Split(tag, ",")
+
+	pMap := make(map[string]string, 10)
+	for _, part := range parts {
+		kv := strings.Split(part, "=")
+		if len(kv) == 1 {
+			pMap[kv[0]] = ""
+		} else {
+			pMap[kv[0]] = kv[1]
+		}
+	}
+
+	return pMap
+}
+
+func toSnakeCase(s string) string {
+	var result strings.Builder
+	result.Grow(len(s) * 2)
+
+	for i, r := range s {
+		if unicode.IsUpper(r) {
+			if i > 0 {
+				result.WriteRune('_')
+			}
+			result.WriteRune(unicode.ToLower(r))
+		} else {
+			result.WriteRune(r)
+		}
+	}
+
+	return result.String()
 }
