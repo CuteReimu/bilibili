@@ -39,31 +39,27 @@ func TestStructToMap(t *testing.T) {
 	}
 }
 
-func TestWithParams(t *testing.T) {
-	type GetVideoCommentParams struct {
-		AccessKey string `json:"access_key,omitempty" request:"query"`       // APP 登录 Token，不是APP方式可以填空
-		Type      int    `json:"type" request:"query,default=1"`             // 评论区类型代码
-		Oid       int    `json:"oid" request:"query,default=2"`              // 目标评论区 id
-		Sort      int    `json:"sort,omitempty" request:"query,default=3"`   // 排序方式
-		Nohot     int    `json:"nohot,omitempty" request:"query,default=-1"` // 是否不显示热评
-		Ps        int    `json:"ps,omitempty" request:"query,default=20"`    // 每页项数
-		Pn        int    `json:"pn,omitempty" request:"query,default=1"`     // 页码
-
-		TestA string `json:"test_a,omitempty" request:"json,default=1"`
-		TestB string `json:"test_b,omitempty" request:"json,omitempty"`
-		TestC string `json:"test_c,omitempty" request:"form-data,field=TC"`
-		TestD string `json:"test_d,omitempty" request:"-"`
-		TestE string `json:"test_e,omitempty" request:"json"`
+func TestQuery(t *testing.T) {
+	type Test struct {
+		TestA string `request:"query"`
+		TestB string `request:"query,field=tb,default=1"`
+		TestC string `request:"query,omitempty"`
+		TestD string `request:"-"`
+		TestE int    `request:"query,default=1"`
+		TestF *int   `request:"query,default=1"`
+		TestG *int   `request:"query,default=1"`
+		TestH *int   `request:"query,omitempty"`
+		TestI *int   `request:"query,omitempty"`
+		TestJ *int   `request:"query"`
+		TestK int    `request:"query"`
 	}
 
-	params := GetVideoCommentParams{
-		AccessKey: "abc",
-		Type:      1,
-		Oid:       2,
-		Sort:      3,
-
-		TestC: "test_c",
+	f, i := 10, 0
+	params := Test{
 		TestD: "test_d",
+		TestE: 0,
+		TestF: &f,
+		TestI: &i,
 	}
 
 	r := resty.New().R()
@@ -74,56 +70,49 @@ func TestWithParams(t *testing.T) {
 		return
 	}
 
+	if r.Header.Get("Content-Type") != "application/x-www-form-urlencoded" {
+		t.Fatal("withParams content type not correct ", r.Header.Get("Content-Type"))
+	}
+
 	query := make(map[string]string)
 	for k := range r.QueryParam {
 		query[k] = r.QueryParam.Get(k)
 	}
 	if !maps.Equal(query, map[string]string{
-		"access_key": "abc",
-		"type":       "1",
-		"oid":        "2",
-		"sort":       "3",
-		"nohot":      "-1",
-		"ps":         "20",
-		"pn":         "1",
+		"test_a": "",
+		"tb":     "1",
+		"test_e": "1",
+		"test_f": "10",
+		"test_g": "1",
+		"test_i": "0",
+		"test_j": "",
+		"test_k": "0",
 	}) {
 		t.Fatal("withParams query result not correct ", r.QueryParam)
 	}
-
-	if !maps.Equal(r.Body.(map[string]interface{}), map[string]interface{}{
-		"test_a": "1",
-		"TC":     "test_c",
-		"test_e": "",
-	}) {
-		t.Fatal("withParams body result not correct ", r.Body)
-	}
 }
 
-func TestWithParams2(t *testing.T) {
-	type GetVideoCommentParams struct {
-		AccessKey string `json:"access_key,omitempty" request:"query"`       // APP 登录 Token，不是APP方式可以填空
-		Type      int    `json:"type" request:"query,default=1"`             // 评论区类型代码
-		Oid       int    `json:"oid" request:"query,default=2"`              // 目标评论区 id
-		Sort      int    `json:"sort,omitempty" request:"query,default=3"`   // 排序方式
-		Nohot     int    `json:"nohot,omitempty" request:"query,default=-1"` // 是否不显示热评
-		Ps        int    `json:"ps,omitempty" request:"query,default=20"`    // 每页项数
-		Pn        int    `json:"pn,omitempty" request:"query,default=1"`     // 页码
-
-		TestA string `json:"test_a,omitempty" request:"json,default=1"`
-		TestB string `json:"test_b,omitempty" request:"json,omitempty"`
-		TestC string `json:"test_c,omitempty" request:"form-data,field=TC"`
-		TestD string `json:"test_d,omitempty" request:"-"`
-		TestE string `json:"test_e,omitempty" request:"json"`
+func TestJson(t *testing.T) {
+	type Test struct {
+		TestA string `request:"json"`
+		TestB string `request:"json,field=tb,default=1"`
+		TestC string `request:"json,omitempty"`
+		TestD string `request:"-"`
+		TestE int    `request:"json,default=1"`
+		TestF *int   `request:"json,default=1"`
+		TestG *int   `request:"json,default=1"`
+		TestH *int   `request:"json,omitempty"`
+		TestI *int   `request:"json,omitempty"`
+		TestJ *int   `request:"json"`
+		TestK int    `request:"json"`
 	}
 
-	params := &GetVideoCommentParams{
-		AccessKey: "abc",
-		Type:      1,
-		Oid:       2,
-		Sort:      3,
-
-		TestC: "test_c",
+	f, i := 10, 0
+	params := Test{
 		TestD: "test_d",
+		TestE: 0,
+		TestF: &f,
+		TestI: &i,
 	}
 
 	r := resty.New().R()
@@ -134,32 +123,74 @@ func TestWithParams2(t *testing.T) {
 		return
 	}
 
-	query := make(map[string]string)
-	for k := range r.QueryParam {
-		query[k] = r.QueryParam.Get(k)
-	}
-	if !maps.Equal(query, map[string]string{
-		"access_key": "abc",
-		"type":       "1",
-		"oid":        "2",
-		"sort":       "3",
-		"nohot":      "-1",
-		"ps":         "20",
-		"pn":         "1",
-	}) {
-		t.Fatal("withParams query result not correct ", r.QueryParam)
+	if r.Header.Get("Content-Type") != "application/json" {
+		t.Fatal("withParams content type not correct ", r.Header.Get("Content-Type"))
 	}
 
-	if !maps.Equal(r.Body.(map[string]interface{}), map[string]interface{}{
-		"test_a": "1",
-		"TC":     "test_c",
-		"test_e": "",
+	if !maps.Equal(r.Body.(map[string]interface{}), map[string]any{
+		"test_a": "",
+		"tb":     "1",
+		"test_e": "1",
+		"test_f": &f,
+		"test_g": "1",
+		"test_i": &i,
+		"test_j": (*int)(nil),
+		"test_k": 0,
 	}) {
 		t.Fatal("withParams body result not correct ", r.Body)
 	}
 }
 
-func TestWithParams3(t *testing.T) {
+func TestFormData(t *testing.T) {
+	type Test struct {
+		TestA string `request:"form-data"`
+		TestB string `request:"form-data,field=tb,default=1"`
+		TestC string `request:"form-data,omitempty"`
+		TestD string `request:"-"`
+		TestE int    `request:"form-data,default=1"`
+		TestF *int   `request:"form-data,default=1"`
+		TestG *int   `request:"form-data,default=1"`
+		TestH *int   `request:"form-data,omitempty"`
+		TestI *int   `request:"form-data,omitempty"`
+		TestJ *int   `request:"form-data"`
+		TestK int    `request:"form-data"`
+	}
+
+	f, i := 10, 0
+	params := Test{
+		TestD: "test_d",
+		TestE: 0,
+		TestF: &f,
+		TestI: &i,
+	}
+
+	r := resty.New().R()
+	err := withParams(r, params)
+
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	if r.Header.Get("Content-Type") != "multipart/form-data" {
+		t.Fatal("withParams content type not correct ", r.Header.Get("Content-Type"))
+	}
+
+	if !maps.Equal(r.Body.(map[string]interface{}), map[string]any{
+		"test_a": "",
+		"tb":     "1",
+		"test_e": "1",
+		"test_f": &f,
+		"test_g": "1",
+		"test_i": &i,
+		"test_j": (*int)(nil),
+		"test_k": 0,
+	}) {
+		t.Fatal("withParams body result not correct ", r.Body)
+	}
+}
+
+func TestWithParamsNil(t *testing.T) {
 	r := resty.New().R()
 	err := withParams(r, []int{1, 2, 3})
 
@@ -168,6 +199,11 @@ func TestWithParams3(t *testing.T) {
 	}
 
 	err = withParams(r, nil)
+	if err != nil {
+		t.Fatal("nil params should not return error")
+	}
+
+	err = withParams(r, (*int)(nil))
 	if err != nil {
 		t.Fatal("nil params should not return error")
 	}
