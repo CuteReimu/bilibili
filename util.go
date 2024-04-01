@@ -133,47 +133,40 @@ func withParams(r *resty.Request, in any) error {
 			fieldName = toSnakeCase(fieldType.Name)
 		}
 
-		var realVal interface{}
-		if fieldType.Type.Kind() == reflect.Ptr {
-			// 设置 Ptr == nil 代表不传
-			if fieldValue.IsNil() {
+		var realVal any
+		if !fieldValue.IsZero() {
+			realVal = fieldValue.Interface()
+		} else {
+			// 设置了 omitempty 代表不传
+			if _, ok := tagMap["omitempty"]; ok {
 				continue
 			}
-			realVal = fieldValue.Elem().Interface()
-		} else {
-			if !fieldValue.IsZero() {
-				realVal = fieldValue.Interface()
+			// 设置了 default 代表使用默认值
+			if v, ok := tagMap["default"]; ok {
+				realVal = v
 			} else {
-				// 设置了 omitempty 代表不传
-				if _, ok := tagMap["omitempty"]; ok {
-					continue
-				}
-				// 设置了 default 代表使用默认值
-				if v, ok := tagMap["default"]; ok {
-					realVal = v
-				} else {
-					// 否则使用零值
-					realVal = fieldValue.Interface()
-				}
+				// 否则使用零值
+				realVal = fieldValue.Interface()
 			}
 		}
 
 		for name := range tagMap {
 			switch name {
 			case "query":
+				contentType = "application/x-www-form-urlencoded"
 				r.SetQueryParam(fieldName, cast.ToString(realVal))
 			case "json":
 				contentType = "application/json"
 				bodyMap[fieldName] = realVal
 			case "form-data":
-				contentType = "application/x-www-form-urlencoded"
+				contentType = "multipart/form-data"
 				bodyMap[fieldName] = realVal
 			}
 		}
 	}
 
+	r.SetHeader("Content-Type", contentType)
 	if len(bodyMap) > 0 {
-		r.SetHeader("Content-Type", contentType)
 		r.SetBody(bodyMap)
 	}
 
