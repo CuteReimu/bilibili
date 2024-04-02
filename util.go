@@ -116,6 +116,9 @@ func withParams(r *resty.Request, in any) error {
 	contentType := ""
 	for i := 0; i < inType.NumField(); i++ {
 		fieldType := inType.Field(i)
+		if !fieldType.IsExported() {
+			continue
+		}
 		fieldValue := inValue.Field(i)
 		tValue := fieldType.Tag.Get("request")
 
@@ -150,18 +153,21 @@ func withParams(r *resty.Request, in any) error {
 			}
 		}
 
+		contentType = "application/x-www-form-urlencoded"
 		for name := range tagMap {
 			switch name {
 			case "query":
 				contentType = "application/x-www-form-urlencoded"
-				r.SetQueryParam(fieldName, cast.ToString(realVal))
 			case "json":
 				contentType = "application/json"
-				bodyMap[fieldName] = realVal
 			case "form-data":
 				contentType = "multipart/form-data"
-				bodyMap[fieldName] = realVal
 			}
+		}
+		if contentType == "application/x-www-form-urlencoded" {
+			r.SetQueryParam(fieldName, cast.ToString(realVal))
+		} else {
+			bodyMap[fieldName] = realVal
 		}
 	}
 
