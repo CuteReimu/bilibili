@@ -2,7 +2,6 @@ package bilibili
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"strings"
 	"unicode"
@@ -12,22 +11,22 @@ import (
 	"github.com/spf13/cast"
 )
 
-type paramHandler func(map[string]string) error
+type paramHandler func(*resty.Request) error
 
 func fillCsrf(c *Client) paramHandler {
-	return func(m map[string]string) error {
+	return func(r *resty.Request) error {
 		csrf := c.getCookie("bili_jct")
 		if len(csrf) == 0 {
 			return errors.New("B站登录过期")
 		}
-		m["csrf"] = csrf
+		r.SetQueryParam("csrf", csrf)
 		return nil
 	}
 }
 
 func fillParam(key, value string) paramHandler {
-	return func(params map[string]string) error {
-		params[key] = value
+	return func(r *resty.Request) error {
+		r.SetQueryParam(key, value)
 		return nil
 	}
 }
@@ -35,15 +34,14 @@ func fillParam(key, value string) paramHandler {
 // execute 发起请求
 func execute[Out any](c *Client, method, url string, in any, handlers ...paramHandler) (out Out, err error) {
 	r := c.resty.R()
-	if in != nil {
-		var params map[string]string
-		params, err = structToMap(in, handlers...)
-		if err != nil {
+	if err = withParams(r, in); err != nil {
+		return
+	}
+	for _, handler := range handlers {
+		if err = handler(r); err != nil {
 			return
 		}
-		r = r.SetQueryParams(params)
 	}
-	fmt.Println(r.Header)
 	resp, err := r.Execute(method, url)
 	if err != nil {
 		return out, errors.WithStack(err)
@@ -68,29 +66,6 @@ type commonResp[T any] struct {
 	Data    T      `json:"data"`
 }
 
-func structToMap(s any, handlers ...paramHandler) (map[string]string, error) {
-	// TODO 后续优化一下这个算法，改成使用反射的方式实现
-	buf, err := json.Marshal(s)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	var m map[string]any
-	err = json.Unmarshal(buf, &m)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	m2 := make(map[string]string, len(m))
-	for k, v := range m {
-		m2[k] = cast.ToString(v)
-	}
-	for _, handler := range handlers {
-		if err = handler(m2); err != nil {
-			return nil, err
-		}
-	}
-	return m2, nil
-}
-
 func withParams(r *resty.Request, in any) error {
 	if in == nil {
 		return nil
@@ -112,7 +87,7 @@ func withParams(r *resty.Request, in any) error {
 		return errors.New("参数类型错误")
 	}
 
-	bodyMap := make(map[string]interface{}, 4)
+	bodyMap := make(map[string]any, 4)
 	contentType := ""
 	for i := 0; i < inType.NumField(); i++ {
 		fieldType := inType.Field(i)
@@ -122,7 +97,7 @@ func withParams(r *resty.Request, in any) error {
 		fieldValue := inValue.Field(i)
 		tValue := fieldType.Tag.Get("request")
 
-		if tValue == "" || tValue == "-" {
+		if tValue == "-" {
 			continue
 		}
 

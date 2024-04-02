@@ -56,15 +56,15 @@ func encrypt(publicKey, data string) (string, error) {
 }
 
 type LoginWithPasswordParam struct {
-	Username  string `json:"username"`         // 用户登录账号。手机号或邮箱地址
-	Password  string `json:"password"`         // 参数传入原密码，下文会自动转为加密后的带盐密码
-	Keep      int    `json:"keep"`             // 0
-	Token     string `json:"token"`            // 登录 API token。使用 Captcha() 方法获取
-	Challenge string `json:"challenge"`        // 极验 challenge。使用 Captcha() 方法获取
-	Validate  string `json:"validate"`         // 极验 result。极验验证后得到
-	Seccode   string `json:"seccode"`          // 极验 result +jordan。极验验证后得到
-	GoUrl     string `json:"go_url,omitempty"` // 跳转 url。默认为 https://www.bilibili.com
-	Source    string `json:"source,omitempty"` // 登录来源。main_web：独立登录页。main_mini：小窗登录
+	Username  string `json:"username"`                                   // 用户登录账号。手机号或邮箱地址
+	Password  string `json:"password"`                                   // 参数传入原密码，下文会自动转为加密后的带盐密码
+	Keep      int    `json:"keep"`                                       // 0
+	Token     string `json:"token"`                                      // 登录 API token。使用 Captcha() 方法获取
+	Challenge string `json:"challenge"`                                  // 极验 challenge。使用 Captcha() 方法获取
+	Validate  string `json:"validate"`                                   // 极验 result。极验验证后得到
+	Seccode   string `json:"seccode"`                                    // 极验 result +jordan。极验验证后得到
+	GoUrl     string `json:"go_url,omitempty" request:"query,omitempty"` // 跳转 url。默认为 https://www.bilibili.com
+	Source    string `json:"source,omitempty" request:"query,omitempty"` // 登录来源。main_web：独立登录页。main_mini：小窗登录
 }
 
 type LoginWithPasswordResult struct {
@@ -151,13 +151,13 @@ func (c *Client) SendSMS(param SendSMSParam) (*SendSMSResult, error) {
 }
 
 type LoginWithSMSParam struct {
-	Cid        int    `json:"cid"`              // 国际冠字码。可以从 GetCountryCrown() 获取
-	Tel        int    `json:"tel"`              // 手机号码
-	Code       int    `json:"code"`             // 短信验证码。timeout 为 5min
-	Source     string `json:"source"`           // 登录来源。main_web：独立登录页。main_mini：小窗登录
-	CaptchaKey string `json:"captcha_key"`      // 短信登录 token。从 SendSMS() 请求成功后返回
-	GoUrl      string `json:"go_url,omitempty"` // 跳转url。默认为 https://www.bilibili.com
-	Keep       bool   `json:"keep,omitempty"`   // 是否记住登录。true：记住登录。false：不记住登录
+	Cid        int    `json:"cid"`                                        // 国际冠字码。可以从 GetCountryCrown() 获取
+	Tel        int    `json:"tel"`                                        // 手机号码
+	Code       int    `json:"code"`                                       // 短信验证码。timeout 为 5min
+	Source     string `json:"source"`                                     // 登录来源。main_web：独立登录页。main_mini：小窗登录
+	CaptchaKey string `json:"captcha_key"`                                // 短信登录 token。从 SendSMS() 请求成功后返回
+	GoUrl      string `json:"go_url,omitempty" request:"query,omitempty"` // 跳转url。默认为 https://www.bilibili.com
+	Keep       bool   `json:"keep,omitempty" request:"query,omitempty"`   // 是否记住登录。true：记住登录。false：不记住登录
 }
 
 type LoginWithSMSResult struct {

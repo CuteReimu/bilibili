@@ -89,8 +89,8 @@ func (c *Client) GetLiveRoomInfo(param GetLiveRoomInfoParam) (*RoomInfo, error) 
 }
 
 type UpdateLiveRoomTitleParam struct {
-	RoomId int    `json:"room_id"`         // 直播间id。必须为自己的直播间id
-	Title  string `json:"title,omitempty"` // 直播间标题。最大20字符
+	RoomId int    `json:"room_id"`                                   // 直播间id。必须为自己的直播间id
+	Title  string `json:"title,omitempty" request:"query,omitempty"` // 直播间标题。最大20字符
 }
 
 // UpdateLiveRoomTitle 更新直播间标题

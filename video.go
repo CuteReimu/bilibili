@@ -227,8 +227,8 @@ func (c *Client) GetRecommendVideoByBvid(bvid string) ([]*VideoInfo, error) {
 }
 
 type GetVideoDetailInfoParam struct {
-	Aid  int    `json:"aid,omitempty"`  // 稿件avid。avid与bvid任选一个
-	Bvid string `json:"bvid,omitempty"` // 稿件bvid。avid与bvid任选一个
+	Aid  int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件avid。avid与bvid任选一个
+	Bvid string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件bvid。avid与bvid任选一个
 }
 
 type DescV2 struct {

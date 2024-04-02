@@ -63,26 +63,26 @@ if __name__ == '__main__':
 				m['type'] = 'string'
 			elif m['type'] == 'bool':
 				pass
-			elif m['type'] in ['array', 'Array', 'list', 'List', 'array(obj)', 'Array(obj)', 'list(obj)', 'List(obj)']:
+			elif m['type'] in ('array', 'Array', 'list', 'List', 'array(obj)', 'Array(obj)', 'list(obj)', 'List(obj)'):
 				m['type'] = '[]' + (name if not name.endswith('s') else name[:-1])
-			elif m['type'] in ['array(num)', 'Array(num)', 'list(num)', 'List(num)']:
+			elif m['type'] in ('array(num)', 'Array(num)', 'list(num)', 'List(num)'):
 				m['type'] = '[]int'
-			elif m['type'] in ['array(str)', 'Array(str)', 'list(str)', 'List(str)']:
+			elif m['type'] in ('array(str)', 'Array(str)', 'list(str)', 'List(str)'):
 				m['type'] = '[]string'
-			elif m['type'] in ['array(bool)', 'Array(bool)', 'list(bool)', 'List(bool)']:
+			elif m['type'] in ('array(bool)', 'Array(bool)', 'list(bool)', 'List(bool)'):
 				m['type'] = '[]bool'
 			elif m['type'] == 'obj':
 				m['type'] = name
 			if m.get('notnull', '必要') in ('必要', '√'):
-				m['notnull'] = ''
+				m['notnull'] = '"'
 			else:
-				m['notnull'] = ',omitempty'
+				m['notnull'] = ',omitempty" request:"query,omitempty"'
 			content = m.get('content', '')
 			comment = m.get('comment', '')
 			if content or comment:
 				sep = '。' if content and comment else ''
 				comment = ' // %s%s%s' % (content, sep, comment)
 				comment = comment.replace('<br>', '。').replace('<br/>', '。').replace('<br />', '。')
-			print('\t%s %s `json:"%s%s"`%s' % (name, m['type'], m['name'], m['notnull'], comment))
+			print('\t%s %s `json:"%s%s`%s' % (name, m['type'], m['name'], m['notnull'], comment))
 		print('}')
 

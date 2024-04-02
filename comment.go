@@ -3,13 +3,13 @@ package bilibili
 import "github.com/go-resty/resty/v2"
 
 type GetCommentsDetailParam struct {
-	AccessKey string `json:"access_key,omitempty"` // APP 登录 Token
-	Type      int    `json:"type"`                 // 评论区类型代码，见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/readme.md
-	Oid       int    `json:"oid"`                  // 目标评论区 id
-	Sort      int    `json:"sort,omitempty"`       // 排序方式。默认为0。0：按时间。1：按点赞数。2：按回复数
-	Nohot     int    `json:"nohot,omitempty"`      // 是否不显示热评。默认为0。1：不显示。0：显示
-	Ps        int    `json:"ps,omitempty"`         // 每页项数。默认为20。定义域：1-20
-	Pn        int    `json:"pn,omitempty"`         // 页码。默认为1
+	AccessKey string `json:"access_key,omitempty" request:"query,omitempty"` // APP 登录 Token
+	Type      int    `json:"type"`                                           // 评论区类型代码，见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/readme.md
+	Oid       int    `json:"oid"`                                            // 目标评论区 id
+	Sort      int    `json:"sort,omitempty" request:"query,omitempty"`       // 排序方式。默认为0。0：按时间。1：按点赞数。2：按回复数
+	Nohot     int    `json:"nohot,omitempty" request:"query,omitempty"`      // 是否不显示热评。默认为0。1：不显示。0：显示
+	Ps        int    `json:"ps,omitempty" request:"query,omitempty"`         // 每页项数。默认为20。定义域：1-20
+	Pn        int    `json:"pn,omitempty" request:"query,omitempty"`         // 页码。默认为1
 }
 
 type CommentsPage struct {
@@ -162,12 +162,12 @@ func (c *Client) GetCommentsDetail(param GetCommentsDetailParam) (*CommentsDetai
 }
 
 type GetCommentReplyParam struct {
-	AccessKey string `json:"access_key,omitempty"` // APP登录 Token
-	Type      int    `json:"type"`                 // 评论区类型代码，见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/readme.md
-	Oid       int    `json:"oid"`                  // 目标评论区 id
-	Root      int    `json:"root"`                 // 根回复 rpid
-	Ps        int    `json:"ps,omitempty"`         // 每页项数。默认为20。定义域：1-49 。 但 data_replies 的最大内容数为20,因此设置为49其实也只会有20条回复被返回
-	Pn        int    `json:"pn,omitempty"`         // 页码。默认为1
+	AccessKey string `json:"access_key,omitempty" request:"query,omitempty"` // APP登录 Token
+	Type      int    `json:"type"`                                           // 评论区类型代码，见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/readme.md
+	Oid       int    `json:"oid"`                                            // 目标评论区 id
+	Root      int    `json:"root"`                                           // 根回复 rpid
+	Ps        int    `json:"ps,omitempty" request:"query,omitempty"`         // 每页项数。默认为20。定义域：1-49 。 但 data_replies 的最大内容数为20,因此设置为49其实也只会有20条回复被返回
+	Pn        int    `json:"pn,omitempty" request:"query,omitempty"`         // 页码。默认为1
 }
 
 type CommentReply struct {

@@ -205,10 +205,10 @@ func (c *Client) FavoritesArticle(param FavoritesArticleParam) error {
 }
 
 type GetUserArticleListParam struct {
-	Mid  int    `json:"mid"`            // 用户uid
-	Pn   int    `json:"pn,omitempty"`   // 默认：1
-	Ps   int    `json:"ps,omitempty"`   // 默认：30。范围：[1,30]
-	Sort string `json:"sort,omitempty"` // publish_time：最新发布。view：最多阅读。fav：最多收藏。默认：publish_time
+	Mid  int    `json:"mid"`                                      // 用户uid
+	Pn   int    `json:"pn,omitempty" request:"query,omitempty"`   // 默认：1
+	Ps   int    `json:"ps,omitempty" request:"query,omitempty"`   // 默认：30。范围：[1,30]
+	Sort string `json:"sort,omitempty" request:"query,omitempty"` // publish_time：最新发布。view：最多阅读。fav：最多收藏。默认：publish_time
 }
 
 type UserArticleList struct {
@@ -228,10 +228,10 @@ func (c *Client) GetUserArticleList(param GetUserArticleListParam) (*UserArticle
 }
 
 type GetUserArticlesListParam struct {
-	Mid      int    `json:"mid"`            // 用户uid
-	Sort     int    `json:"sort,omitempty"` // 排序方式。0：最近更新。1：最多阅读
-	Jsonp    string `json:"jsonp,omitempty"`
-	Callback string `json:"callback,omitempty"`
+	Mid      int    `json:"mid"`                                      // 用户uid
+	Sort     int    `json:"sort,omitempty" request:"query,omitempty"` // 排序方式。0：最近更新。1：最多阅读
+	Jsonp    string `json:"jsonp,omitempty" request:"query,omitempty"`
+	Callback string `json:"callback,omitempty" request:"query,omitempty"`
 }
 
 type UserArticlesList struct {
