@@ -1,15 +1,10 @@
 package bilibili
 
 import (
-	"encoding/json"
 	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
-	"strconv"
-	"strings"
 )
 
-type GetVideoDetailInfoParam struct {
+type VideoParam struct {
 	Aid  int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件avid。avid与bvid任选一个
 	Bvid string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件bvid。avid与bvid任选一个
 }
@@ -102,7 +97,7 @@ type VideoDetailInfo struct {
 }
 
 // GetVideoDetailInfo 获取视频超详细信息
-func (c *Client) GetVideoDetailInfo(param GetVideoDetailInfoParam) (*VideoDetailInfo, error) {
+func (c *Client) GetVideoDetailInfo(param VideoParam) (*VideoDetailInfo, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/web-interface/view/detail"
@@ -110,23 +105,13 @@ func (c *Client) GetVideoDetailInfo(param GetVideoDetailInfoParam) (*VideoDetail
 	return execute[*VideoDetailInfo](c, method, url, param)
 }
 
-type GetVideoRecommendListParam struct {
-	Aid  int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件avid。avid与bvid任选一个
-	Bvid string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件bvid。avid与bvid任选一个
-}
-
 // GetVideoRecommendList 获取单视频推荐列表
-func (c *Client) GetVideoRecommendList(param GetVideoRecommendListParam) ([]VideoInfo, error) {
+func (c *Client) GetVideoRecommendList(param VideoParam) ([]VideoInfo, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/web-interface/archive/related"
 	)
 	return execute[[]VideoInfo](c, method, url, param)
-}
-
-type GetVideoInfoParam struct {
-	Aid  int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件avid。avid与bvid任选一个
-	Bvid string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件bvid。avid与bvid任选一个
 }
 
 type DescV2 struct {
@@ -290,7 +275,7 @@ type VideoInfo struct {
 }
 
 // GetVideoInfo 获取视频详细信息
-func (c *Client) GetVideoInfo(param GetVideoInfoParam) (*VideoInfo, error) {
+func (c *Client) GetVideoInfo(param VideoParam) (*VideoInfo, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/web-interface/view"
@@ -298,58 +283,13 @@ func (c *Client) GetVideoInfo(param GetVideoInfoParam) (*VideoInfo, error) {
 	return execute[*VideoInfo](c, method, url, param)
 }
 
-// GetVideoDescByAvid 通过Avid获取视频简介
-func (c *Client) GetVideoDescByAvid(avid int) (string, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/archive/desc")
-	if err != nil {
-		return "", errors.WithStack(err)
-	}
-	if resp.StatusCode() != 200 {
-		return "", errors.Errorf("获取视频简介失败，status code: %d", resp.StatusCode())
-	}
-	if !gjson.ValidBytes(resp.Body()) {
-		return "", errors.New("json解析失败：" + resp.String())
-	}
-	res := gjson.ParseBytes(resp.Body())
-	code := res.Get("code").Int()
-	if code != 0 {
-		return "", formatError("获取视频简介", code, res.Get("message").String())
-	}
-	return res.Get("data").String(), errors.WithStack(err)
-}
-
-// GetVideoDescByBvid 通过Bvid获取视频简介
-func (c *Client) GetVideoDescByBvid(bvid string) (string, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/archive/desc")
-	if err != nil {
-		return "", errors.WithStack(err)
-	}
-	if resp.StatusCode() != 200 {
-		return "", errors.Errorf("获取视频简介失败，status code: %d", resp.StatusCode())
-	}
-	if !gjson.ValidBytes(resp.Body()) {
-		return "", errors.New("json解析失败：" + resp.String())
-	}
-	res := gjson.ParseBytes(resp.Body())
-	code := res.Get("code").Int()
-	if code != 0 {
-		return "", formatError("获取视频简介", code, res.Get("message").String())
-	}
-	return res.Get("data").String(), errors.WithStack(err)
-}
-
-// GetVideoDescByShortUrl 通过短链接获取视频简介
-func (c *Client) GetVideoDescByShortUrl(shortUrl string) (string, error) {
-	typ, bvid, err := c.UnwrapShortUrl(shortUrl)
-	if typ != "bvid" {
-		return "", errors.New("短链接不是视频链接")
-	}
-	if err != nil {
-		return "", err
-	}
-	return c.GetVideoDescByBvid(bvid.(string))
+// GetVideoDesc 获取视频简介
+func (c *Client) GetVideoDesc(param VideoParam) (string, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/web-interface/archive/desc"
+	)
+	return execute[string](c, method, url, param)
 }
 
 type Dimension struct {
@@ -359,58 +299,24 @@ type Dimension struct {
 }
 
 type VideoPage struct {
-	Cid       int       `json:"cid"`       // 分P cid
-	Page      int       `json:"page"`      // 分P序号。从1开始
-	From      string    `json:"from"`      // 视频来源。vupload：普通上传（B站）。hunan：芒果TV。qq：腾讯
-	Part      string    `json:"part"`      // 分P标题
-	Duration  int       `json:"duration"`  // 分P持续时间。单位为秒
-	Vid       string    `json:"vid"`       // 站外视频vid。仅站外视频有效
-	Weblink   string    `json:"weblink"`   // 站外视频跳转url。仅站外视频有效
-	Dimension Dimension `json:"dimension"` // 当前分P分辨率。部分较老视频无分辨率值
+	Cid        int       `json:"cid"`         // 当前分P cid
+	Page       int       `json:"page"`        // 当前分P
+	From       string    `json:"from"`        // 视频来源。vupload：普通上传（B站）。hunan：芒果TV。qq：腾讯
+	Part       string    `json:"part"`        // 当前分P标题
+	Duration   int       `json:"duration"`    // 当前分P持续时间。单位为秒
+	Vid        string    `json:"vid"`         // 站外视频vid
+	Weblink    string    `json:"weblink"`     // 站外视频跳转url
+	Dimension  Dimension `json:"dimension"`   // 当前分P分辨率。有部分视频无法获取分辨率
+	FirstFrame string    `json:"first_frame"` // 分P封面
 }
 
-// GetVideoPageListByAvid 通过Avid获取视频分P列表(Avid转cid)
-func (c *Client) GetVideoPageListByAvid(avid int) ([]*VideoPage, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/player/pagelist")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频分P列表")
-	if err != nil {
-		return nil, err
-	}
-	var ret []*VideoPage
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
-}
-
-// GetVideoPageListByBvid 通过Bvid获取视频分P列表(Bvid转cid)
-func (c *Client) GetVideoPageListByBvid(bvid string) ([]*VideoPage, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/player/pagelist")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频分P列表")
-	if err != nil {
-		return nil, err
-	}
-	var ret []*VideoPage
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
-}
-
-// GetVideoPageListByShortUrl 通过短链接获取视频分P列表
-func (c *Client) GetVideoPageListByShortUrl(shortUrl string) ([]*VideoPage, error) {
-	typ, bvid, err := c.UnwrapShortUrl(shortUrl)
-	if typ != "bvid" {
-		return nil, errors.New("短链接不是视频链接")
-	}
-	if err != nil {
-		return nil, err
-	}
-	return c.GetVideoPageListByBvid(bvid.(string))
+// GetVideoPageList 获取视频分P列表
+func (c *Client) GetVideoPageList(param VideoParam) ([]VideoPage, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/player/pagelist"
+	)
+	return execute[[]VideoPage](c, method, url, param)
 }
 
 type StatusCount struct {
@@ -419,7 +325,6 @@ type StatusCount struct {
 	Atten int `json:"atten"` // TAG关注
 }
 
-// VideoTag 视频TAG信息
 type VideoTag struct {
 	TagId        int         `json:"tag_id"`        // tag_id
 	TagName      string      `json:"tag_name"`      // TAG名称
@@ -440,568 +345,242 @@ type VideoTag struct {
 	ExtraAttr    int         `json:"extra_attr"`    // ? ? ?
 }
 
-// GetVideoTagsByAvid 通过Avid获取视频TAG
-func (c *Client) GetVideoTagsByAvid(avid int) ([]*VideoTag, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/tag/archive/tags")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频TAG")
-	if err != nil {
-		return nil, err
-	}
-	var ret []*VideoTag
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+// GetVideoTags 获取视频TAG
+func (c *Client) GetVideoTags(param VideoParam) ([]VideoTag, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/tag/archive/tags"
+	)
+	return execute[[]VideoTag](c, method, url, param)
 }
 
-// GetVideoTagsByBvid 通过Bvid获取视频TAG
-func (c *Client) GetVideoTagsByBvid(bvid string) ([]*VideoTag, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/tag/archive/tags")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频TAG")
-	if err != nil {
-		return nil, err
-	}
-	var ret []*VideoTag
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+type VideoTagParam struct {
+	Aid   int `json:"aid"`    // 稿件avid
+	TagId int `json:"tag_id"` // tag_id
 }
 
-// GetVideoTagsByShortUrl 通过短链接获取视频TAG
-func (c *Client) GetVideoTagsByShortUrl(shortUrl string) ([]*VideoTag, error) {
-	typ, bvid, err := c.UnwrapShortUrl(shortUrl)
-	if typ != "bvid" {
-		return nil, errors.New("短链接不是视频链接")
-	}
-	if err != nil {
-		return nil, err
-	}
-	return c.GetVideoTagsByBvid(bvid.(string))
-}
-
-// LikeVideoTag 点赞视频TAG，重复访问为取消
-func (c *Client) LikeVideoTag(avid, tagId int) error {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return errors.New("B站登录过期")
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"aid":    strconv.Itoa(avid),
-		"tag_id": strconv.Itoa(tagId),
-		"csrf":   biliJct,
-	}).Post("https://api.bilibili.com/x/tag/archive/like2")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	_, err = getRespData(resp, "点赞视频TAG")
+// LikeVideoTag 点赞视频TAG，重复请求为取消
+func (c *Client) LikeVideoTag(param VideoTagParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/tag/archive/like2"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
 
 // HateVideoTag 点踩视频TAG，重复访问为取消
-func (c *Client) HateVideoTag(avid, tagId int) error {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return errors.New("B站登录过期")
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"aid":    strconv.Itoa(avid),
-		"tag_id": strconv.Itoa(tagId),
-		"csrf":   biliJct,
-	}).Post("https://api.bilibili.com/x/tag/archive/hate2")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	_, err = getRespData(resp, "点踩视频TAG")
+func (c *Client) HateVideoTag(param VideoTagParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/tag/archive/hate2"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
 
-// LikeVideoByAvid 通过Avid点赞视频，like为false表示取消点赞
-func (c *Client) LikeVideoByAvid(avid int, like bool) error {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return errors.New("B站登录过期")
-	}
-	var likeNum string
-	if like {
-		likeNum = "1"
-	} else {
-		likeNum = "2"
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"aid":  strconv.Itoa(avid),
-		"like": likeNum,
-		"csrf": biliJct,
-	}).Post("https://api.bilibili.com/x/web-interface/archive/like")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	_, err = getRespData(resp, "点赞视频")
+type LikeVideoParam struct {
+	Aid  int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件 avid。avid 与 bvid 任选一个
+	Bvid string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件 bvid。avid 与 bvid 任选一个
+	Like int    `json:"like"`                                     // 操作方式。1：点赞。2：取消赞
+}
+
+// LikeVideo 点赞视频
+func (c *Client) LikeVideo(param LikeVideoParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/web-interface/archive/like"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
 
-// LikeVideoByBvid 通过Bvid点赞视频，like为false表示取消点赞
-func (c *Client) LikeVideoByBvid(bvid string, like bool) error {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return errors.New("B站登录过期")
-	}
-	var likeNum string
-	if like {
-		likeNum = "1"
-	} else {
-		likeNum = "2"
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"bvid": bvid,
-		"like": likeNum,
-		"csrf": biliJct,
-	}).Post("https://api.bilibili.com/x/web-interface/archive/like")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	_, err = getRespData(resp, "点赞视频")
-	return err
+type CoinVideoParam struct {
+	Aid        int    `json:"aid,omitempty" request:"query,omitempty"`         // 稿件 avid。avid 与 bvid 任选一个
+	Bvid       string `json:"bvid,omitempty" request:"query,omitempty"`        // 稿件 bvid。avid 与 bvid 任选一个
+	Multiply   int    `json:"multiply"`                                        // 投币数量。上限为2
+	SelectLike int    `json:"select_like,omitempty" request:"query,omitempty"` // 是否附加点赞。0：不点赞。1：同时点赞。默认为0
 }
 
-// LikeVideoByShortUrl 通过短链接点赞视频，like为false表示取消点赞
-func (c *Client) LikeVideoByShortUrl(shortUrl string, like bool) error {
-	typ, bvid, err := c.UnwrapShortUrl(shortUrl)
-	if typ != "bvid" {
-		return errors.New("短链接不是视频链接")
-	}
-	if err != nil {
-		return err
-	}
-	return c.LikeVideoByBvid(bvid.(string), like)
+type CoinVideoResult struct {
+	Like bool `json:"like"` // 是否点赞成功。true：成功。false：失败。已赞过则附加点赞失败
 }
 
-// CoinVideoByAvid 通过Avid投币视频，multiply为投币数量，上限为2，like为是否附加点赞。返回是否附加点赞成功
-func (c *Client) CoinVideoByAvid(avid int, multiply int, like bool) (bool, error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return false, errors.New("B站登录过期")
-	}
-	var likeNum string
-	if like {
-		likeNum = "1"
-	} else {
-		likeNum = "0"
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"aid":         strconv.Itoa(avid),
-		"select_like": likeNum,
-		"multiply":    strconv.Itoa(multiply),
-		"csrf":        biliJct,
-	}).Post("https://api.bilibili.com/x/web-interface/coin/add")
-	if err != nil {
-		return false, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "投币视频")
-	if err != nil {
-		return false, err
-	}
-	return gjson.GetBytes(data, "like").Bool(), nil
+// CoinVideo 投币视频
+func (c *Client) CoinVideo(param CoinVideoParam) (*CoinVideoResult, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/web-interface/coin/add"
+	)
+	return execute[*CoinVideoResult](c, method, url, param, fillCsrf(c))
 }
 
-// CoinVideoByBvid 通过Bvid投币视频，multiply为投币数量，上限为2，like为是否附加点赞。返回是否附加点赞成功
-func (c *Client) CoinVideoByBvid(bvid string, multiply int, like bool) (bool, error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return false, errors.New("B站登录过期")
-	}
-	var likeNum string
-	if like {
-		likeNum = "1"
-	} else {
-		likeNum = "0"
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"bvid":        bvid,
-		"select_like": likeNum,
-		"multiply":    strconv.Itoa(multiply),
-		"csrf":        biliJct,
-	}).Post("https://api.bilibili.com/x/web-interface/coin/add")
-	if err != nil {
-		return false, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "投币视频")
-	if err != nil {
-		return false, err
-	}
-	return gjson.GetBytes(data, "like").Bool(), nil
+type FavourVideoParam struct {
+	Rid         int   `json:"rid"`                                               // 稿件 avid
+	Type        int   `json:"type"`                                              // 必须为2
+	AddMediaIds []int `json:"add_media_ids,omitempty" request:"query,omitempty"` // 需要加入的收藏夹 mlid。同时添加多个，用,（%2C）分隔
+	DelMediaIds []int `json:"del_media_ids,omitempty" request:"query,omitempty"` // 需要取消的收藏夹 mlid。同时取消多个，用,（%2C）分隔
 }
 
-// CoinVideoByShortUrl 通过短链接投币视频，multiply为投币数量，上限为2，like为是否附加点赞。返回是否附加点赞成功
-func (c *Client) CoinVideoByShortUrl(shortUrl string, multiply int, like bool) (bool, error) {
-	typ, bvid, err := c.UnwrapShortUrl(shortUrl)
-	if typ != "bvid" {
-		return false, errors.New("短链接不是视频链接")
-	}
-	if err != nil {
-		return false, err
-	}
-	return c.CoinVideoByBvid(bvid.(string), multiply, like)
+type FavourVideoResult struct {
+	Prompt bool `json:"prompt"` // 是否为未关注用户收藏。false：否。true：是
 }
 
-// FavourVideoByAvid 通过Avid收藏视频，addMediaIds和delMediaIds为要增加/删除的收藏列表，非必填。返回是否为未关注用户收藏
-func (c *Client) FavourVideoByAvid(avid int, addMediaIds, delMediaIds []int) (bool, error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return false, errors.New("B站登录过期")
-	}
-	addMediaIdStr := make([]string, 0, len(addMediaIds))
-	for _, id := range addMediaIds {
-		addMediaIdStr = append(addMediaIdStr, strconv.Itoa(id))
-	}
-	delMediaIdStr := make([]string, 0, len(delMediaIds))
-	for _, id := range delMediaIds {
-		delMediaIdStr = append(delMediaIdStr, strconv.Itoa(id))
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"rid":           strconv.Itoa(avid),
-		"type":          "2",
-		"add_media_ids": strings.Join(addMediaIdStr, ","),
-		"del_media_ids": strings.Join(delMediaIdStr, ","),
-		"csrf":          biliJct,
-	}).Post("https://api.bilibili.com/medialist/gateway/coll/resource/deal")
-	if err != nil {
-		return false, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "收藏视频")
-	if err != nil {
-		return false, err
-	}
-	return gjson.GetBytes(data, "prompt").Bool(), nil
-}
-
-// FavourVideoByBvid 通过Bvid收藏视频，addMediaIds和delMediaIds为要增加/删除的收藏列表，非必填。返回是否为未关注用户收藏
-func (c *Client) FavourVideoByBvid(bvid string, addMediaIds, delMediaIds []int) (bool, error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return false, errors.New("B站登录过期")
-	}
-	addMediaIdStr := make([]string, 0, len(addMediaIds))
-	for _, id := range addMediaIds {
-		addMediaIdStr = append(addMediaIdStr, strconv.Itoa(id))
-	}
-	delMediaIdStr := make([]string, 0, len(delMediaIds))
-	for _, id := range delMediaIds {
-		delMediaIdStr = append(delMediaIdStr, strconv.Itoa(id))
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"rid":           bvid,
-		"type":          "2",
-		"add_media_ids": strings.Join(addMediaIdStr, ","),
-		"del_media_ids": strings.Join(delMediaIdStr, ","),
-		"csrf":          biliJct,
-	}).Post("https://api.bilibili.com/medialist/gateway/coll/resource/deal")
-	if err != nil {
-		return false, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "收藏视频")
-	if err != nil {
-		return false, err
-	}
-	return gjson.GetBytes(data, "prompt").Bool(), nil
-}
-
-// FavourVideoByShortUrl 通过短链接收藏视频，addMediaIds和delMediaIds为要增加/删除的收藏列表，非必填。返回是否为未关注用户收藏
-func (c *Client) FavourVideoByShortUrl(shortUrl string, addMediaIds, delMediaIds []int) (bool, error) {
-	typ, bvid, err := c.UnwrapShortUrl(shortUrl)
-	if typ != "bvid" {
-		return false, errors.New("短链接不是视频链接")
-	}
-	if err != nil {
-		return false, err
-	}
-	return c.FavourVideoByBvid(bvid.(string), addMediaIds, delMediaIds)
+// FavourVideo 收藏视频
+func (c *Client) FavourVideo(param FavourVideoParam) (*FavourVideoResult, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/medialist/gateway/coll/resource/deal"
+	)
+	return execute[*FavourVideoResult](c, method, url, param, fillCsrf(c))
 }
 
 type LikeCoinFavourResult struct {
-	Like     bool `json:"like"`     // 是否点赞成功
-	Coin     bool `json:"coin"`     // 是否投币成功
-	Fav      bool `json:"fav"`      // 是否收藏成功
-	Multiply int  `json:"multiply"` // 投币枚数
+	Like     bool `json:"like"`     // 是否点赞成功。true：成功。false：失败
+	Coin     bool `json:"coin"`     // 是否投币成功。true：成功。false：失败
+	Fav      bool `json:"fav"`      // 是否收藏成功。true：成功。false：失败
+	Multiply int  `json:"multiply"` // 投币枚数。默认为2
 }
 
-// LikeCoinFavourVideoByAvid 通过Avid一键三连视频
-func (c *Client) LikeCoinFavourVideoByAvid(avid int) (*LikeCoinFavourResult, error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return nil, errors.New("B站登录过期")
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"aid":  strconv.Itoa(avid),
-		"csrf": biliJct,
-	}).Post("https://api.bilibili.com/x/web-interface/archive/like/triple")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "一键三连视频")
-	if err != nil {
-		return nil, err
-	}
-	var ret *LikeCoinFavourResult
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+// LikeCoinFavourVideo 一键三连视频
+func (c *Client) LikeCoinFavourVideo(param VideoParam) (*LikeCoinFavourResult, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/web-interface/archive/like/triple"
+	)
+	return execute[*LikeCoinFavourResult](c, method, url, param, fillCsrf(c))
 }
 
-// LikeCoinFavourVideoByBvid 通过Bvid一键三连视频
-func (c *Client) LikeCoinFavourVideoByBvid(bvid string) (*LikeCoinFavourResult, error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return nil, errors.New("B站登录过期")
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"bvid": bvid,
-		"csrf": biliJct,
-	}).Post("https://api.bilibili.com/x/web-interface/archive/like/triple")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "一键三连视频")
-	if err != nil {
-		return nil, err
-	}
-	var ret *LikeCoinFavourResult
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+type VideoCidParam struct {
+	Aid  int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件avid。avid与bvid任选一个
+	Bvid string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件bvid。avid与bvid任选一个
+	Cid  int    `json:"cid"`                                      // 视频cid。用于选择目标分P
 }
 
-// LikeCoinFavourVideoByShortUrl 通过短链接一键三连视频
-func (c *Client) LikeCoinFavourVideoByShortUrl(shortUrl string) (*LikeCoinFavourResult, error) {
-	typ, bvid, err := c.UnwrapShortUrl(shortUrl)
-	if typ != "bvid" {
-		return nil, errors.New("短链接不是视频链接")
-	}
-	if err != nil {
-		return nil, err
-	}
-	return c.LikeCoinFavourVideoByBvid(bvid.(string))
+type ShowSwitch struct {
+	Total bool `json:"total"` // 展示所有终端总计人数
+	Count bool `json:"count"` // 展示web端实时在线人数
 }
 
 type VideoOnlineInfo struct {
-	Total      string   `json:"total"` // 所有终端总计人数，例如“10万+”
-	Count      string   `json:"count"` // web端实时在线人数
-	ShowSwitch struct { // 数据显示控制
-		Total bool `json:"total"` // 是否展示所有终端总计人数
-		Count bool `json:"count"` // 是否展示web端实时在线人数
-	} `json:"show_switch"`
+	Total      string     `json:"total"`       // 所有终端总计人数。例如10万+
+	Count      string     `json:"count"`       // web端实时在线人数
+	ShowSwitch ShowSwitch `json:"show_switch"` // 数据显示控制
 }
 
-// GetVideoOnlineInfoByAvid 通过Avid获取视频在线人数
-func (c *Client) GetVideoOnlineInfoByAvid(avid, cid int) (*VideoOnlineInfo, error) {
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"aid": strconv.Itoa(avid),
-		"cid": strconv.Itoa(cid),
-	}).Get("https://api.bilibili.com/x/player/online/total")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频在线人数")
-	if err != nil {
-		return nil, err
-	}
-	var ret *VideoOnlineInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
-}
-
-// GetVideoOnlineInfoByBvid 通过Bvid获取视频在线人数
-func (c *Client) GetVideoOnlineInfoByBvid(bvid string, cid int) (*VideoOnlineInfo, error) {
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"bvid": bvid,
-		"cid":  strconv.Itoa(cid),
-	}).Get("https://api.bilibili.com/x/player/online/total")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频在线人数")
-	if err != nil {
-		return nil, err
-	}
-	var ret *VideoOnlineInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
-}
-
-// GetVideoOnlineInfoByShortUrl 通过短链接获取视频在线人数
-func (c *Client) GetVideoOnlineInfoByShortUrl(shortUrl string, cid int) (*VideoOnlineInfo, error) {
-	typ, bvid, err := c.UnwrapShortUrl(shortUrl)
-	if typ != "bvid" {
-		return nil, errors.New("短链接不是视频链接")
-	}
-	if err != nil {
-		return nil, err
-	}
-	return c.GetVideoOnlineInfoByBvid(bvid.(string), cid)
-}
-
-type VideoPbPInfo struct {
-	StepSec int      `json:"step_sec"` // 采样间隔时间（单位为秒，由视频时长决定）
-	Tagstr  string   `json:"tagstr"`   // 作用尚不明确
-	Events  struct { // 数据本体
-		Default []float64 `json:"default"` // 顶点值列表（顶点个数由视频时长和采样时间决定）
-	} `json:"events"`
-	Debug string `json:"debug"` // 调试信息（json字串）
-}
-
-// GetVideoPbPInfo 获取视频弹幕趋势顶点列表（高能进度条）
-func (c *Client) GetVideoPbPInfo(cid int) (*VideoPbPInfo, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("cid", strconv.Itoa(cid)).Get("https://api.bilibili.com/pbp/data")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频弹幕趋势顶点列表")
-	if err != nil {
-		return nil, err
-	}
-	var ret *VideoPbPInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+// GetVideoOnlineInfo 获取视频在线人数
+func (c *Client) GetVideoOnlineInfo(param VideoCidParam) (*VideoOnlineInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/player/online/total"
+	)
+	return execute[*VideoOnlineInfo](c, method, url, param)
 }
 
 type VideoStatusNumber struct {
-	Aid        int         `json:"aid"`        // 稿件avid
-	Bvid       string      `json:"bvid"`       // 稿件bvid
-	View       interface{} `json:"view"`       // 播放次数（有值则为一个int，如果被屏蔽了则为字符串"--"）
-	Danmaku    int         `json:"danmaku"`    // 弹幕条数
-	Reply      int         `json:"reply"`      // 评论条数
-	Favorite   int         `json:"favorite"`   // 收藏人数
-	Coin       int         `json:"coin"`       // 投币枚数
-	Share      int         `json:"share"`      // 分享次数
-	Like       int         `json:"like"`       // 获赞次数
-	NowRank    int         `json:"now_rank"`   // 固定值0，作用尚不明确
-	HisRank    int         `json:"his_rank"`   // 历史最高排行
-	Dislike    int         `json:"dislike"`    // 固定值0，作用尚不明确
-	NoReprint  int         `json:"no_reprint"` // 禁止转载标志，0：无，1：禁止
-	Copyright  int         `json:"copyright"`  // 版权标志，1：自制，2：转载
-	ArgueMsg   string      `json:"argue_msg"`  // 警告信息
-	Evaluation string      `json:"evaluation"` // 视频评分
+	Aid        int    `json:"aid"`        // 稿件avid
+	Bvid       string `json:"bvid"`       // 稿件bvid
+	View       any    `json:"view"`       // 正常：播放次数(num)。屏蔽："--"(str)
+	Danmaku    int    `json:"danmaku"`    // 弹幕条数
+	Reply      int    `json:"reply"`      // 评论条数
+	Favorite   int    `json:"favorite"`   // 收藏人数
+	Coin       int    `json:"coin"`       // 投币枚数
+	Share      int    `json:"share"`      // 分享次数
+	NowRank    int    `json:"now_rank"`   // 0。作用尚不明确
+	HisRank    int    `json:"his_rank"`   // 历史最高排行
+	Like       int    `json:"like"`       // 获赞次数
+	Dislike    int    `json:"dislike"`    // 0。作用尚不明确
+	NoReprint  int    `json:"no_reprint"` // 禁止转载标志。0：无。1：禁止
+	Copyright  int    `json:"copyright"`  // 版权标志。1：自制。2：转载
+	ArgueMsg   string `json:"argue_msg"`  // 警告信息。默认为空
+	Evaluation string `json:"evaluation"` // 视频评分。默认为空
 }
 
-// GetVideoStatusNumberByAvid 通过Avid获取视频状态数视频
-func (c *Client) GetVideoStatusNumberByAvid(avid int) (*VideoStatusNumber, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/web-interface/archive/stat")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频状态数视频")
-	if err != nil {
-		return nil, err
-	}
-	var ret *VideoStatusNumber
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+// GetVideoStatusNumber 获取视频状态数视频
+func (c *Client) GetVideoStatusNumber(param VideoParam) (*VideoStatusNumber, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/web-interface/archive/stat"
+	)
+	return execute[*VideoStatusNumber](c, method, url, param)
 }
 
-// GetVideoStatusNumberByBvid 通过Bvid获取视频状态数
-func (c *Client) GetVideoStatusNumberByBvid(bvid string) (*VideoStatusNumber, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/web-interface/archive/stat")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频状态数")
-	if err != nil {
-		return nil, err
-	}
-	var ret *VideoStatusNumber
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+type GetTopRecommendVideoParam struct {
+	FreshType  int `json:"fresh_type,omitempty" request:"query,omitempty"`   // 相关性。默认为3 。 值越大推荐内容越相关
+	Version    int `json:"version,omitempty" request:"query,omitempty"`      // web端新旧版本:0为旧版本1为新版本。默认为 0 。1,0分别为新旧web端
+	Ps         int `json:"ps,omitempty" request:"query,omitempty"`           // pagesize 单页返回的记录条数默认为10或8。默认为10 。当version为1时默认为8
+	FreshIdx   int `json:"fresh_idx,omitempty" request:"query,omitempty"`    // 翻页相关。默认为1 。 与翻页相关
+	FreshIdx1H int `json:"fresh_idx_1h,omitempty" request:"query,omitempty"` // 翻页相关。默认为1 。 与翻页相关
 }
 
-// GetTopRecommendVideo 获取首页视频推荐列表，freshType相关性（默认为3），ps单页返回的记录条数（默认为8）
-func (c *Client) GetTopRecommendVideo(freshType, ps int) ([]*VideoInfo, error) {
-	request := c.resty.R().SetQueryParam("version", "1")
-	if freshType != 0 {
-		request.SetQueryParam("fresh_type", strconv.Itoa(freshType))
-	}
-	if ps != 0 {
-		request.SetQueryParam("ps", strconv.Itoa(ps))
-	}
-	resp, err := request.Get("https://api.bilibili.com/x/web-interface/index/top/rcmd")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取首页视频推荐列表")
-	if err != nil {
-		return nil, err
-	}
-
-	type MixedData struct {
-		Item []*VideoInfo `json:"item"`
-	}
-
-	var mixedRet MixedData
-	err = json.Unmarshal(data, &mixedRet)
-	return mixedRet.Item, errors.WithStack(err)
+// GetTopRecommendVideo 获取首页视频推荐列表
+func (c *Client) GetTopRecommendVideo(param GetTopRecommendVideoParam) ([]VideoInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/web-interface/index/top/rcmd"
+	)
+	return execute[[]VideoInfo](c, method, url, param)
 }
 
-type ArchivesList struct {
-	Aids     []int `json:"aids"`
-	Archives []struct {
-		Aid              int    `json:"aid"`
-		Bvid             string `json:"bvid"`
-		Ctime            int    `json:"ctime"`
-		Duration         int    `json:"duration"`
-		EnableVt         bool   `json:"enable_vt"`
-		InteractiveVideo bool   `json:"interactive_video"`
-		Pic              string `json:"pic"`
-		PlaybackPosition int    `json:"playback_position"`
-		Pubdate          int    `json:"pubdate"`
-		Stat             struct {
-			View int `json:"view"`
-			Vt   int `json:"vt"`
-		} `json:"stat"`
-		State     int    `json:"state"`
-		Title     string `json:"title"`
-		UgcPay    int    `json:"ugc_pay"`
-		VtDisplay string `json:"vt_display"`
-	} `json:"archives"`
-	Meta struct {
-		Category    int    `json:"category"`
-		Cover       string `json:"cover"`
-		Description string `json:"description"`
-		Mid         int    `json:"mid"`
-		Name        string `json:"name"`
-		Ptime       int    `json:"ptime"`
-		SeasonID    int    `json:"season_id"`
-		Total       int    `json:"total"`
-	} `json:"meta"`
-	Page struct {
-		PageNum  int `json:"page_num"`
-		PageSize int `json:"page_size"`
-		Total    int `json:"total"`
-	} `json:"page"`
+type GetVideoCollectionInfoParam struct {
+	Mid         int  `json:"mid"`                                              // UP 主 ID
+	SeasonId    int  `json:"season_id"`                                        // 视频合集 ID
+	SortReverse bool `json:"sort_reverse,omitempty" request:"query,omitempty"` // 未知
+	PageNum     int  `json:"page_num,omitempty" request:"query,omitempty"`     // 页码索引
+	PageSize    int  `json:"page_size,omitempty" request:"query,omitempty"`    // 单页内容数量
 }
 
-// GetArchivesList 获取视频合集信息 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md#%E8%8E%B7%E5%8F%96%E8%A7%86%E9%A2%91%E5%90%88%E9%9B%86%E4%BF%A1%E6%81%AF
-func (c *Client) GetArchivesList(mid int, sid int, pn int, ps int, sortReverse bool) (*ArchivesList, error) {
-	postData := map[string]string{
-		"mid":          strconv.Itoa(mid),
-		"page_num":     strconv.Itoa(pn),
-		"page_size":    strconv.Itoa(ps),
-		"season_id":    strconv.Itoa(sid),
-		"sort_reverse": strconv.FormatBool(sortReverse),
-	}
-	resp, err := c.resty.R().SetQueryParams(postData).Get("https://api.bilibili.com/x/polymer/web-space/seasons_archives_list")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+type CollectionVideoStat struct {
+	View int `json:"view"` // 稿件播放量
+	Vt   int `json:"vt"`   // 0
+}
 
-	var ret *ArchivesList
-	data, err := getRespData(resp, "获取合集信息")
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+type CollectionVideo struct {
+	Aid              int                 `json:"aid"`               // 稿件avid
+	Bvid             string              `json:"bvid"`              // 稿件bvid
+	Ctime            int                 `json:"ctime"`             // 创建时间。Unix 时间戳
+	Duration         int                 `json:"duration"`          // 视频时长。单位为秒
+	EnableVt         bool                `json:"enable_vt"`         // false
+	InteractiveVideo bool                `json:"interactive_video"` // false
+	Pic              string              `json:"pic"`               // 封面 URL
+	PlaybackPosition int                 `json:"playback_position"` // 会随着播放时间增长，播放完成后为 -1 。单位未知
+	Pubdate          int                 `json:"pubdate"`           // 发布日期。Unix 时间戳
+	Stat             CollectionVideoStat `json:"stat"`              // 稿件信息
+	State            int                 `json:"state"`             // 0
+	Title            string              `json:"title"`             // 稿件标题
+	UgcPay           int                 `json:"ugc_pay"`           // 0
+	VtDisplay        string              `json:"vt_display"`
+}
+
+type CollectionMeta struct {
+	Category    int    `json:"category"`    // 0
+	Covr        string `json:"covr"`        // 合集封面 URL
+	Description string `json:"description"` // 合集描述
+	Mid         int    `json:"mid"`         // UP 主 ID
+	Name        int    `json:"name"`        // 合集标题
+	Ptime       int    `json:"ptime"`       // 发布时间。Unix 时间戳
+	SeasonId    int    `json:"season_id"`   // 合集 ID
+	Total       int    `json:"total"`       // 合集内视频数量
+}
+
+type CollectionPage struct {
+	PageNum  int `json:"page_num"`  // 分页页码
+	PageSize int `json:"page_size"` // 单页个数
+	Total    int `json:"total"`     // 合集内视频数量
+}
+
+type VideoCollectionInfo struct {
+	Aids     []int             `json:"aids"`     // 稿件avid。对应下方数组中内容 aid
+	Archives []CollectionVideo `json:"archives"` // 合集中的视频
+	Meta     CollectionMeta    `json:"meta"`     // 合集元数据
+	Page     CollectionPage    `json:"page"`     // 分页信息
+}
+
+// GetVideoCollectionInfo 获取视频合集信息 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md#%E8%8E%B7%E5%8F%96%E8%A7%86%E9%A2%91%E5%90%88%E9%9B%86%E4%BF%A1%E6%81%AF
+func (c *Client) GetVideoCollectionInfo(param GetVideoCollectionInfoParam) (*VideoCollectionInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/polymer/web-space/seasons_archives_list"
+	)
+	return execute[*VideoCollectionInfo](c, method, url, param)
 }
