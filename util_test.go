@@ -158,7 +158,7 @@ func TestFormData(t *testing.T) {
 	}
 }
 
-func TestWithParamsNil(t *testing.T) {
+func TestWithParamsSlice(t *testing.T) {
 	type Test struct {
 		Ids  []int    `request:"query"`
 		IdsA []string `request:"query"`
@@ -190,7 +190,7 @@ func TestWithParamsNil(t *testing.T) {
 	}
 }
 
-func TestWithParamsSlice(t *testing.T) {
+func TestWithParamsNil(t *testing.T) {
 	r := resty.New().R()
 	err := withParams(r, []int{1, 2, 3})
 
