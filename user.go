@@ -1,206 +1,71 @@
 package bilibili
 
 import (
-	"encoding/json"
 	"github.com/pkg/errors"
-	"strconv"
 )
 
-type OrderType string
-
-const (
-	OrderPubDate OrderType = "pubdate"
-	OrderClick   OrderType = "click"
-	OrderStow    OrderType = "stow"
-)
-
-type Video struct {
-	Aid          int    `json:"aid"`            // 稿件avid
-	Author       string `json:"author"`         // 视频UP主，不一定为目标用户（合作视频）
-	Bvid         string `json:"bvid"`           // 稿件bvid
-	Comment      int    `json:"comment"`        // 视频评论数
-	Copyright    string `json:"copyright"`      // 空，作用尚不明确
-	Created      int64  `json:"created"`        // 投稿时间戳
-	Description  string `json:"description"`    // 视频简介
-	HideClick    bool   `json:"hide_click"`     // 固定值false，作用尚不明确
-	IsPay        int    `json:"is_pay"`         // 固定值0，作用尚不明确
-	IsUnionVideo int    `json:"is_union_video"` // 是否为合作视频，0：否，1：是
-	Length       string `json:"length"`         // 视频长度，MM:SS
-	Mid          int    `json:"mid"`            // 视频UP主mid，不一定为目标用户（合作视频）
-	Pic          string `json:"pic"`            // 视频封面
-	Play         int    `json:"play"`           // 视频播放次数
-	Review       int    `json:"review"`         // 固定值0，作用尚不明确
-	Subtitle     string `json:"subtitle"`       // 固定值空，作用尚不明确
-	Title        string `json:"title"`          // 视频标题
-	Typeid       int    `json:"typeid"`         // 视频分区tid
-	VideoReview  int    `json:"video_review"`   // 视频弹幕数
+// GetUserVideos 查询用户投稿视频明细
+func (c *Client) GetUserVideos() error {
+	// https://api.bilibili.com/x/space/wbi/arc/search
+	return errors.New("wbi还未实现，本接口暂时无法使用")
 }
 
-type GetUserVideosResult struct {
-	List struct { // 列表信息
-		Tlist map[int]struct { // 投稿视频分区索引
-			Count int    `json:"count"` // 投稿至该分区的视频数
-			Name  string `json:"name"`  // 该分区名称
-			Tid   int    `json:"tid"`   // 该分区tid
-		} `json:"tlist"`
-		Vlist []Video `json:"vlist"` // 投稿视频列表
-	} `json:"list"`
-	Page struct { // 页面信息
-		Count int `json:"count"` // 总计稿件数
-		Pn    int `json:"pn"`    // 当前页码
-		Ps    int `json:"ps"`    // 每页项数
-	} `json:"page"`
-	EpisodicButton struct { // “播放全部“按钮
-		Text string `json:"text"` // 按钮文字
-		Uri  string `json:"uri"`  // 全部播放页url
-	} `json:"episodic_button"`
+type GetUserCardParam struct {
+	Mid   int  `json:"mid"`                                       // 目标用户mid
+	Photo bool `json:"photo,omitempty" request:"query,omitempty"` // 是否请求用户主页头图。true：是。false：否
 }
 
-type UserCardResult struct {
-	Card struct {
-		Mid         string        `json:"mid"`
-		Name        string        `json:"name"`
-		Approve     bool          `json:"approve"`
-		Sex         string        `json:"sex"`
-		Rank        string        `json:"rank"`
-		Face        string        `json:"face"`
-		FaceNft     int           `json:"face_nft"`
-		FaceNftType int           `json:"face_nft_type"`
-		DisplayRank string        `json:"DisplayRank"`
-		Regtime     int           `json:"regtime"`
-		Spacesta    int           `json:"spacesta"`
-		Birthday    string        `json:"birthday"`
-		Place       string        `json:"place"`
-		Description string        `json:"description"`
-		Article     int           `json:"article"`
-		Attentions  []interface{} `json:"attentions"`
-		Fans        int           `json:"fans"`
-		Friend      int           `json:"friend"`
-		Attention   int           `json:"attention"`
-		Sign        string        `json:"sign"`
-		LevelInfo   struct {
-			CurrentLevel int `json:"current_level"`
-			CurrentMin   int `json:"current_min"`
-			CurrentExp   int `json:"current_exp"`
-			NextExp      int `json:"next_exp"`
-		} `json:"level_info"`
-		Pendant struct {
-			Pid               int    `json:"pid"`
-			Name              string `json:"name"`
-			Image             string `json:"image"`
-			Expire            int    `json:"expire"`
-			ImageEnhance      string `json:"image_enhance"`
-			ImageEnhanceFrame string `json:"image_enhance_frame"`
-			NPid              int    `json:"n_pid"`
-		} `json:"pendant"`
-		Nameplate struct {
-			Nid        int    `json:"nid"`
-			Name       string `json:"name"`
-			Image      string `json:"image"`
-			ImageSmall string `json:"image_small"`
-			Level      string `json:"level"`
-			Condition  string `json:"condition"`
-		} `json:"nameplate"`
-		Official struct {
-			Role  int    `json:"role"`
-			Title string `json:"title"`
-			Desc  string `json:"desc"`
-			Type  int    `json:"type"`
-		} `json:"Official"`
-		OfficialVerify struct {
-			Type int    `json:"type"`
-			Desc string `json:"desc"`
-		} `json:"official_verify"`
-		Vip struct {
-			Type       int   `json:"type"`
-			Status     int   `json:"status"`
-			DueDate    int64 `json:"due_date"`
-			VipPayType int   `json:"vip_pay_type"`
-			ThemeType  int   `json:"theme_type"`
-			Label      struct {
-				Path                  string `json:"path"`
-				Text                  string `json:"text"`
-				LabelTheme            string `json:"label_theme"`
-				TextColor             string `json:"text_color"`
-				BgStyle               int    `json:"bg_style"`
-				BgColor               string `json:"bg_color"`
-				BorderColor           string `json:"border_color"`
-				UseImgLabel           bool   `json:"use_img_label"`
-				ImgLabelURIHans       string `json:"img_label_uri_hans"`
-				ImgLabelURIHant       string `json:"img_label_uri_hant"`
-				ImgLabelURIHansStatic string `json:"img_label_uri_hans_static"`
-				ImgLabelURIHantStatic string `json:"img_label_uri_hant_static"`
-			} `json:"label"`
-			AvatarSubscript    int    `json:"avatar_subscript"`
-			NicknameColor      string `json:"nickname_color"`
-			Role               int    `json:"role"`
-			AvatarSubscriptURL string `json:"avatar_subscript_url"`
-			TvVipStatus        int    `json:"tv_vip_status"`
-			TvVipPayType       int    `json:"tv_vip_pay_type"`
-			TvDueDate          int    `json:"tv_due_date"`
-			AvatarIcon         struct {
-				IconType     int `json:"icon_type"`
-				IconResource struct {
-				} `json:"icon_resource"`
-			} `json:"avatar_icon"`
-			VipType   int `json:"vipType"`
-			VipStatus int `json:"vipStatus"`
-		} `json:"vip"`
-		IsSeniorMember int `json:"is_senior_member"`
-	} `json:"card"`
-	Space *struct {
-		SImg string `json:"s_img,omitempty"`
-		LImg string `json:"l_img,omitempty"`
-	} `json:"space,omitempty"`
-	Following    bool `json:"following"`
-	ArchiveCount int  `json:"archive_count"`
-	ArticleCount int  `json:"article_count"`
-	Follower     int  `json:"follower"`
-	LikeNum      int  `json:"like_num"`
+type UserCardVip struct {
+	Viptype       int    `json:"vipType"`       // 大会员类型。0：无。1：月度大会员。2：年度及以上大会员
+	Dueremark     string `json:"dueRemark"`     // 空。**作用尚不明确**
+	Accessstatus  int    `json:"accessStatus"`  // 0。**作用尚不明确**
+	Vipstatus     int    `json:"vipStatus"`     // 大会员状态。0：无。1：有
+	Vipstatuswarn string `json:"vipStatusWarn"` // 空。**作用尚不明确**
+	ThemeType     int    `json:"theme_type"`    // 0。**作用尚不明确**
 }
 
-// GetUserVideos 获取用户投稿视频明细
-func (c *Client) GetUserVideos(mid int, order OrderType, tid int, keyword string, pn int, ps int) (*GetUserVideosResult, error) {
-	postData := map[string]string{
-		"mid": strconv.Itoa(mid),
-		"pn":  strconv.Itoa(pn),
-		"ps":  strconv.Itoa(ps),
-	}
-	if len(order) > 0 {
-		postData["order"] = string(order)
-	}
-	if tid != 0 {
-		postData["tid"] = strconv.Itoa(tid)
-	}
-	if len(keyword) > 0 {
-		postData["keyword"] = keyword
-	}
-	resp, err := c.resty.R().SetQueryParams(postData).Get("https://api.bilibili.com/x/space/wbi/arc/search")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取用户视频")
-	if err != nil {
-		return nil, err
-	}
-	var ret *GetUserVideosResult
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+type UserCardInfo struct {
+	Mid            string         `json:"mid"`             // 用户mid
+	Approve        bool           `json:"approve"`         // false。**作用尚不明确**
+	Name           string         `json:"name"`            // 用户昵称
+	Sex            string         `json:"sex"`             // 用户性别。男 女 保密
+	Face           string         `json:"face"`            // 用户头像链接
+	Displayrank    string         `json:"DisplayRank"`     // 0。**作用尚不明确**
+	Regtime        int            `json:"regtime"`         // 0。**作用尚不明确**
+	Spacesta       int            `json:"spacesta"`        // 用户状态。0：正常。-2：被封禁
+	Birthday       string         `json:"birthday"`        // 空。**作用尚不明确**
+	Place          string         `json:"place"`           // 空。**作用尚不明确**
+	Description    string         `json:"description"`     // 空。**作用尚不明确**
+	Article        int            `json:"article"`         // 0。**作用尚不明确**
+	Attentions     any            `json:"attentions"`      // 空。**作用尚不明确**
+	Fans           int            `json:"fans"`            // 粉丝数
+	Friend         int            `json:"friend"`          // 关注数
+	Attention      int            `json:"attention"`       // 关注数
+	Sign           string         `json:"sign"`            // 签名
+	LevelInfo      LevelInfo      `json:"level_info"`      // 等级
+	Pendant        Pendant        `json:"pendant"`         // 挂件
+	Nameplate      Nameplate      `json:"nameplate"`       // 勋章
+	Official       Official       `json:"Official"`        // 认证信息
+	OfficialVerify OfficialVerify `json:"official_verify"` // 认证信息2
+	Vip            UserCardVip    `json:"vip"`             // 大会员状态
+	Space          CardSpace      `json:"space"`           // 主页头图
+}
+
+type UserCard struct {
+	Card         UserCardInfo `json:"card"`          // 卡片信息
+	Following    bool         `json:"following"`     // 是否关注此用户。true：已关注。false：未关注。需要登录(Cookie)。未登录为false
+	ArchiveCount int          `json:"archive_count"` // 用户稿件数
+	ArticleCount int          `json:"article_count"` // 0。**作用尚不明确**
+	Follower     int          `json:"follower"`      // 粉丝数
+	LikeNum      int          `json:"like_num"`      // 点赞数
 }
 
 // GetUserCard 获取用户用户名片 免登录
 // https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/user/info.md#%E7%94%A8%E6%88%B7%E5%90%8D%E7%89%87%E4%BF%A1%E6%81%AF
-func (c *Client) GetUserCard(mid int, photo bool) (*UserCardResult, error) {
-	r := c.resty.R().SetQueryParam("mid", strconv.Itoa(mid)).SetQueryParam("photo", strconv.FormatBool(photo))
-	resp, err := r.Get("https://api.bilibili.com/x/web-interface/card")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取用户名片")
-	if err != nil {
-		return nil, err
-	}
-	var ret *UserCardResult
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+func (c *Client) GetUserCard(param GetUserCardParam) (*UserCard, error) {
+	const (
+		method = "GET"
+		url    = "https://api.bilibili.com/x/web-interface/card"
+	)
+	return execute[*UserCard](c, method, url, param)
 }

@@ -138,5 +138,22 @@ type Member struct {
 }
 
 type Upper struct {
-	Mid int `json:"mid"` // UP 主 mid
+	Mid       int    `json:"mid"`        // UP 主 mid
+	Name      string `json:"name"`       // 创建者昵称
+	Face      string `json:"face"`       // 创建者头像url
+	Followed  bool   `json:"followed"`   // 是否已关注创建者
+	VipType   int    `json:"vip_type"`   // 会员类别，0：无，1：月大会员，2：年度及以上大会员
+	VipStatue int    `json:"vip_statue"` // 0：无，1：有
+}
+
+type LevelInfo struct {
+	CurrentLevel int `json:"current_level"` // 用户等级
+	CurrentMin   int `json:"current_min"`   // 0
+	CurrentExp   int `json:"current_exp"`   // 0
+	NextExp      int `json:"next_exp"`      // 0
+}
+
+type CardSpace struct {
+	SImg string `json:"s_img"` // 主页头图url 小图
+	LImg string `json:"l_img"` // 主页头图url 正常
 }

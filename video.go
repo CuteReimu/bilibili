@@ -39,7 +39,7 @@ type CardVip struct {
 	TvVipPayType       int    `json:"tv_vip_pay_type"`      // 电视大会员支付类型
 }
 
-type Card struct {
+type VideoCard struct {
 	Mid            string         `json:"mid"`              // 用户mid
 	Name           string         `json:"name"`             // 用户昵称
 	Approve        bool           `json:"approve"`          // false。作用尚不明确
@@ -68,13 +68,8 @@ type Card struct {
 	IsSeniorMember int            `json:"is_senior_member"` // 是否为硬核会员。0：否。1：是
 }
 
-type CardSpace struct {
-	SImg string `json:"s_img"` // 主页头图url 小图
-	LImg string `json:"l_img"` // 主页头图url 正常
-}
-
 type VideoDetailInfoCard struct {
-	Card         Card      `json:"card"`          // UP主名片信息
+	Card         VideoCard `json:"card"`          // UP主名片信息
 	Space        CardSpace `json:"space"`         // 主页头图
 	Following    bool      `json:"following"`     // 是否关注此用户。true：已关注。false：未关注。需要登录(Cookie) 。未登录为false
 	ArchiveCount int       `json:"archive_count"` // 用户稿件数

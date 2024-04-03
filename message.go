@@ -2,16 +2,12 @@ package bilibili
 
 import (
 	"crypto/rand"
-	"encoding/json"
-	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
-	"strconv"
-	"time"
+	"github.com/go-resty/resty/v2"
 )
 
 type UnreadMessage struct {
 	At     int `json:"at"`      // 未读at数
-	Chat   int `json:"chat"`    // 固定值0，作用尚不明确
+	Chat   int `json:"chat"`    // 0。作用尚不明确
 	Like   int `json:"like"`    // 未读点赞数
 	Reply  int `json:"reply"`   // 未读回复数
 	SysMsg int `json:"sys_msg"` // 未读系统通知数
@@ -20,38 +16,26 @@ type UnreadMessage struct {
 
 // GetUnreadMessage 获取未读消息数
 func (c *Client) GetUnreadMessage() (*UnreadMessage, error) {
-	resp, err := c.resty.R().Get("https://api.bilibili.com/x/msgfeed/unread")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取未读消息数")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	var ret *UnreadMessage
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/msgfeed/unread"
+	)
+	return execute[*UnreadMessage](c, method, url, nil)
 }
 
 type UnreadPrivateMessage struct {
 	UnfollowUnread int `json:"unfollow_unread"` // 未关注用户未读私信数
 	FollowUnread   int `json:"follow_unread"`   // 已关注用户未读私信数
-	Gt             int `json:"_gt_"`            // 固定值0，作用尚不明确
+	Gt             int `json:"_gt_"`            // 0
 }
 
 // GetUnreadPrivateMessage 获取未读私信数
 func (c *Client) GetUnreadPrivateMessage() (*UnreadPrivateMessage, error) {
-	resp, err := c.resty.R().Get("https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取未读私信数")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	var ret *UnreadPrivateMessage
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+	const (
+		method = resty.MethodGet
+		url    = "https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread"
+	)
+	return execute[*UnreadPrivateMessage](c, method, url, nil)
 }
 
 var deviceId string
@@ -75,164 +59,89 @@ func init() {
 	deviceId = string(s)
 }
 
-// SendPrivateMessageText 发送私信（文字消息）
-func (c *Client) SendPrivateMessageText(senderUid, receiverId int, content string) (int, string, error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return 0, "", errors.New("B站登录过期")
-	}
-	contentBytes, err := json.Marshal(map[string]interface{}{"content": content})
-	if err != nil {
-		return 0, "", errors.WithStack(err)
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"msg[sender_uid]":    strconv.Itoa(senderUid),
-		"msg[receiver_id]":   strconv.Itoa(receiverId),
-		"msg[receiver_type]": "1",
-		"msg[msg_type]":      "1",
-		"msg[dev_id]":        deviceId,
-		"msg[timestamp]":     strconv.FormatInt(time.Now().Unix(), 10),
-		"msg[content]":       string(contentBytes),
-		"csrf":               biliJct,
-	}).Post("https://api.vc.bilibili.com/web_im/v1/web_im/send_msg")
-	if err != nil {
-		return 0, "", errors.WithStack(err)
-	}
-	if resp.StatusCode() != 200 {
-		return 0, "", errors.Errorf("发送私信失败，status code: %d", resp.StatusCode())
-	}
-	if !gjson.ValidBytes(resp.Body()) {
-		return 0, "", errors.New("json解析失败：" + resp.String())
-	}
-	res := gjson.ParseBytes(resp.Body())
-	code := res.Get("code").Int()
-	if code != 0 {
-		return 0, "", errors.Errorf("发送私信失败，返回值：%d，返回信息：%s", code, res.Get("message").String())
-	}
-	return int(res.Get("data.msg_key").Int()), res.Get("data.msg_content").String(), err
+type SendPrivateMessageParam struct {
+	SenderUid      int `json:"msg[sender_uid]"`                                           // 发送者mid
+	ReceiverId     int `json:"msg[receiver_id]"`                                          // 接收者mid
+	ReceiverType   int `json:"msg[receiver_type]"`                                        // 1。固定为1
+	MsgType        int `json:"msg[msg_type]"`                                             // 消息类型。1:发送文字。2:发送图片。5:撤回消息
+	MsgStatus      int `json:"msg[msg_status],omitempty" request:"query,omitempty"`       // 0
+	Timestamp      int `json:"msg[timestamp]"`                                            // 时间戳（秒）
+	NewFaceVersion int `json:"msg[new_face_version],omitempty" request:"query,omitempty"` // 表情包版本
+	Content        any `json:"msg[content]"`                                              // 消息内容。发送文字时：str<br />撤回消息时：num
 }
 
-// SendPrivateMessageImage 发送私信（图片消息）
-func (c *Client) SendPrivateMessageImage(senderUid, receiverId int, url string) (int, string, error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return 0, "", errors.New("B站登录过期")
-	}
-	contentBytes, err := json.Marshal(map[string]interface{}{"url": url})
-	if err != nil {
-		return 0, "", errors.WithStack(err)
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"msg[sender_uid]":    strconv.Itoa(senderUid),
-		"msg[receiver_id]":   strconv.Itoa(receiverId),
-		"msg[receiver_type]": "1",
-		"msg[msg_type]":      "2",
-		"msg[dev_id]":        deviceId,
-		"msg[timestamp]":     strconv.FormatInt(time.Now().Unix(), 10),
-		"msg[content]":       string(contentBytes),
-		"csrf":               biliJct,
-	}).Post("https://api.vc.bilibili.com/web_im/v1/web_im/send_msg")
-	if err != nil {
-		return 0, "", errors.WithStack(err)
-	}
-	if resp.StatusCode() != 200 {
-		return 0, "", errors.Errorf("发送私信失败，status code: %d", resp.StatusCode())
-	}
-	if !gjson.ValidBytes(resp.Body()) {
-		return 0, "", errors.New("json解析失败：" + resp.String())
-	}
-	res := gjson.ParseBytes(resp.Body())
-	code := res.Get("code").Int()
-	if code != 0 {
-		return 0, "", errors.Errorf("发送私信失败，返回值：%d，返回信息：%s", code, res.Get("message").String())
-	}
-	return int(res.Get("data.msg_key").Int()), res.Get("data.msg_content").String(), err
+type SendPrivateMessageResult struct {
+	MsgKey      int    `json:"msg_key"`       // 消息唯一id
+	MsgContent  string `json:"msg_content"`   // 发送的消息
+	KeyHitInfos any    `json:"key_hit_infos"` // 作用尚不明确
 }
 
-// SendPrivateMessageRecall 发送私信（撤回消息）
-func (c *Client) SendPrivateMessageRecall(senderUid, receiverId, msgKey int) (int, string, error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return 0, "", errors.New("B站登录过期")
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"msg[sender_uid]":    strconv.Itoa(senderUid),
-		"msg[receiver_id]":   strconv.Itoa(receiverId),
-		"msg[receiver_type]": "1",
-		"msg[msg_type]":      "5",
-		"msg[dev_id]":        deviceId,
-		"msg[timestamp]":     strconv.FormatInt(time.Now().Unix(), 10),
-		"msg[content]":       strconv.Itoa(msgKey),
-		"csrf":               biliJct,
-	}).Post("https://api.vc.bilibili.com/web_im/v1/web_im/send_msg")
-	if err != nil {
-		return 0, "", errors.WithStack(err)
-	}
-	if resp.StatusCode() != 200 {
-		return 0, "", errors.Errorf("发送私信（撤回消息）失败，status code: %d", resp.StatusCode())
-	}
-	if !gjson.ValidBytes(resp.Body()) {
-		return 0, "", errors.New("json解析失败：" + resp.String())
-	}
-	res := gjson.ParseBytes(resp.Body())
-	code := res.Get("code").Int()
-	if code != 0 {
-		return 0, "", errors.Errorf("发送私信（撤回消息）失败，返回值：%d，返回信息：%s", code, res.Get("message").String())
-	}
-	return int(res.Get("data.msg_key").Int()), res.Get("data.msg_content").String(), err
-}
-
-type SessionMessages struct {
-	Messages []struct { // 聊天记录列表
-		SenderUid      int    `json:"sender_uid"`                 // 发送者uid
-		ReceiverType   int    `json:"receiver_type"`              // 1为用户，2为粉丝团
-		ReceiverId     int    `json:"receiver_id"`                // 接收者uid
-		MsgType        int    `json:"msg_type"`                   // 消息类型，1:文字消息，2:图片消息，5:撤回的消息，12、13:通知
-		Content        string `json:"content"`                    // 消息内容
-		MsgSeqno       int64  `json:"msg_seqno"`                  // 作用尚不明确
-		Timestamp      int    `json:"timestamp"`                  // 消息发送时间戳
-		AtUids         []int  `json:"at_uids"`                    // 作用尚不明确
-		MsgKey         int64  `json:"msg_key"`                    // 作用尚不明确
-		MsgStatus      int    `json:"msg_status"`                 // 固定值0
-		NotifyCode     string `json:"notify_code"`                // 作用尚不明确
-		NewFaceVersion int    `json:"new_face_version,omitempty"` // 作用尚不明确
-	} `json:"messages"`
-	HasMore  int        `json:"has_more"`  // 固定值0
-	MinSeqno int64      `json:"min_seqno"` // 作用尚不明确
-	MaxSeqno int64      `json:"max_seqno"` // 作用尚不明确
-	EInfos   []struct { // 聊天表情列表
-		Text string `json:"text"` // 表情名称
-		Url  string `json:"url"`  // 表情链接
-		Size int    `json:"size"` // 表情尺寸
-	} `json:"e_infos"`
-}
-
-// GetSessionMessages 获取私信消息记录
-func (c *Client) GetSessionMessages(talkerId, sessionType, size int, mobiApp string) (*SessionMessages, error) {
-	r := c.resty.R().SetQueryParams(map[string]string{
-		"talker_id":    strconv.Itoa(talkerId),
-		"session_type": strconv.Itoa(sessionType),
+// SendPrivateMessage 发送私信（文字消息）
+func (c *Client) SendPrivateMessage(param SendPrivateMessageParam) (*SendPrivateMessageResult, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.vc.bilibili.com/web_im/v1/web_im/send_msg"
+	)
+	return execute[*SendPrivateMessageResult](c, method, url, param, fillCsrf(c), func(request *resty.Request) error {
+		request.SetQueryParam("msg[dev_id]", deviceId)
+		return nil
 	})
-	if size != 0 {
-		r = r.SetQueryParam("size", strconv.Itoa(size))
-	}
-	if len(mobiApp) > 0 {
-		r = r.SetQueryParam("mobi_app", mobiApp)
-	}
-	resp, err := r.Get("https://api.vc.bilibili.com/svr_sync/v1/svr_sync/fetch_session_msgs")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取私信消息记录")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	var ret *SessionMessages
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
 }
 
-type SessionList struct {
+type GetPrivateMessageRecordsParam struct {
+	SenderDeviceId int    `json:"sender_device_id,omitempty" request:"query,omitempty"` // 发送者设备。1
+	SessionType    int    `json:"session_type"`                                         // 聊天对象的类型。1为用户，2为粉丝团
+	Size           int    `json:"size,omitempty" request:"query,omitempty"`             // 列出消息条数。默认是20，最大为200
+	Build          int    `json:"build,omitempty" request:"query,omitempty"`            // 未知。默认是0
+	MobiApp        string `json:"mobi_app,omitempty" request:"query,omitempty"`         // 设备。web
+	BeginSeqno     int    `json:"begin_seqno,omitempty" request:"query,omitempty"`      // 开始的序列号。默认0为全部
+	EndSeqno       int    `json:"end_seqno,omitempty" request:"query,omitempty"`        // 结束的序列号。默认0为全部
+}
+
+type Message struct {
+	SenderUid      int    `json:"sender_uid"`       // 发送者uid。注意名称是sender_uid
+	ReceiverType   int    `json:"receiver_type"`    // 与session_type对应。1为用户，2为粉丝团
+	ReceiverId     int    `json:"receiver_id"`      // 接收者uid。注意名称是receiver_id
+	MsgType        int    `json:"msg_type"`         // 消息类型。1:文字消息。2:图片消息。5:撤回的消息。12、13:通知
+	Content        string `json:"content"`          // 消息内容。此处存在设计缺陷
+	MsgSeqno       int    `json:"msg_seqno"`        // 消息序列号，保证按照时间顺序从小到大
+	Timestamp      int    `json:"timestamp"`        // 消息发送时间戳
+	AtUids         []int  `json:"at_uids"`          // 未知
+	MsgKey         int    `json:"msg_key"`          // 未知
+	MsgStatus      int    `json:"msg_status"`       // 消息状态。0
+	NotifyCode     string `json:"notify_code"`      // 未知
+	NewFaceVersion int    `json:"new_face_version"` // 表情包版本。0或者没有是旧版，此时b站会自动转换成新版表情包，例如[doge] -> [tv_doge]；1是新版
+}
+
+type EInfo struct {
+	Text string `json:"text"` // 表情名称
+	Uri  string `json:"uri"`  // 表情链接
+	Size int    `json:"size"` // 表情尺寸。1
+}
+
+type PrivateMessageRecords struct {
+	Messages []Message `json:"messages"`  // 聊天记录列表
+	HasMore  int       `json:"has_more"`  // 0
+	MinSeqno int       `json:"min_seqno"` // 所有消息最小的序列号（最早）
+	MaxSeqno int       `json:"max_seqno"` // 所有消息最大的序列号（最晚）
+	EInfos   []EInfo   `json:"e_infos"`   // 聊天表情列表
+}
+
+// GetPrivateMessageRecords 获取私信消息记录
+func (c *Client) GetPrivateMessageRecords(param GetPrivateMessageRecordsParam) (*PrivateMessageRecords, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.vc.bilibili.com/svr_sync/v1/svr_sync/fetch_session_msgs"
+	)
+	return execute[*PrivateMessageRecords](c, method, url, param)
+}
+
+type GetPrivateMessageListParam struct {
+	SessionType int    `json:"session_type"`                                 // 1：系统，2：用户，3：应援团
+	MobiApp     string `json:"mobi_app,omitempty" request:"query,omitempty"` // 设备
+}
+
+type PrivateMessageList struct {
 	SessionList []struct {
 		TalkerId    int64  `json:"talker_id"`
 		SessionType int    `json:"session_type"`
@@ -283,23 +192,13 @@ type SessionList struct {
 	ShowLevel           bool             `json:"show_level"`
 }
 
-// GetSessions 获取消息列表 session_type，1：系统，2：用户，3：应援团
+// GetPrivateMessageList 获取消息列表 session_type，1：系统，2：用户，3：应援团
 //
 // 参照 https://github.com/CuteReimu/bilibili/issues/8
-func (c *Client) GetSessions(sessionType int, mobiApp string) (*SessionList, error) {
-	r := c.resty.R().SetQueryParam("session_type", strconv.Itoa(sessionType))
-	if len(mobiApp) > 0 {
-		r = r.SetQueryParam("mobi_app", mobiApp)
-	}
-	resp, err := r.Get("https://api.vc.bilibili.com/session_svr/v1/session_svr/get_sessions")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取消息列表")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	var ret *SessionList
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+func (c *Client) GetPrivateMessageList(param GetPrivateMessageListParam) (*PrivateMessageList, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.vc.bilibili.com/session_svr/v1/session_svr/get_sessions"
+	)
+	return execute[*PrivateMessageList](c, method, url, param)
 }

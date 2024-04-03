@@ -29,13 +29,6 @@ type CommentsConfig struct {
 	ShowDelLog bool `json:"show_del_log"` // 是否显示删除记录
 }
 
-type LevelInfo struct {
-	CurrentLevel int `json:"current_level"` // 用户等级
-	CurrentMin   int `json:"current_min"`   // 0
-	CurrentExp   int `json:"current_exp"`   // 0
-	NextExp      int `json:"next_exp"`      // 0
-}
-
 type Picture struct {
 	ImgSrc    string  `json:"img_src"`    // 图片地址
 	ImgWidth  int     `json:"img_width"`  // 图片宽度

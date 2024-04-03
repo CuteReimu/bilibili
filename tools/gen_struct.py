@@ -11,6 +11,7 @@ head_mapping = {
 	'参数名': 'name',
 	'字段': 'name',
 	'字段名': 'name',
+	'项': 'name',
 	'类型': 'type',
 	'内容': 'content',
 	'必要性': 'notnull',
