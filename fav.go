@@ -146,20 +146,17 @@ func (c *Client) DeleteFavourResources(mediaId int, resources []Resource, platfo
 	return err
 }
 
+type MediaIdParam struct {
+	MediaId int `json:"media_id"` // 目标收藏夹id
+}
+
 // CleanFavourResources 清空所有失效收藏内容
-func (c *Client) CleanFavourResources(mediaId int) error {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return errors.New("B站登录过期")
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"media_id": strconv.Itoa(mediaId),
-		"csrf":     biliJct,
-	}).Post("https://api.bilibili.com/x/v3/fav/resource/clean")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	_, err = getRespData(resp, "清空所有失效收藏内容")
+func (c *Client) CleanFavourResources(param MediaIdParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v3/fav/resource/clean"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
 
@@ -191,19 +188,18 @@ type FavourFolderInfo struct {
 }
 
 // GetFavourFolderInfo 获取收藏夹元数据
-func (c *Client) GetFavourFolderInfo(mediaId int) (*FavourFolderInfo, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("media_id", strconv.Itoa(mediaId)).Get("https://api.bilibili.com/x/v3/fav/folder/info")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取收藏夹元数据")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	var ret *FavourFolderInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+func (c *Client) GetFavourFolderInfo(param MediaIdParam) (*FavourFolderInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/v3/fav/folder/info"
+	)
+	return execute[*FavourFolderInfo](c, method, url, param)
+}
+
+type GetAllFavourFolderInfoParam struct {
+	UpMid int `json:"up_mid"`                                   // 目标用户mid
+	Type  int `json:"type,omitempty" request:"query,omitempty"` // 目标内容属性。默认为全部。0：全部。2：视频稿件
+	Rid   int `json:"rid,omitempty" request:"query,omitempty"`  // 目标内容id。视频稿件：视频稿件avid
 }
 
 type AllFavourFolderInfo struct {
@@ -220,26 +216,12 @@ type AllFavourFolderInfo struct {
 }
 
 // GetAllFavourFolderInfo 获取指定用户创建的所有收藏夹信息
-
-func (c *Client) GetAllFavourFolderInfo(upMid, attrType, rid int) (*AllFavourFolderInfo, error) {
-	r := c.resty.R().SetQueryParams(map[string]string{
-		"up_mid": strconv.Itoa(upMid),
-		"type":   strconv.Itoa(attrType),
-	})
-	if rid != 0 {
-		r = r.SetQueryParam("rid", strconv.Itoa(rid))
-	}
-	resp, err := r.Get("https://api.bilibili.com/x/v3/fav/folder/created/list-all")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取指定用户创建的所有收藏夹信息")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	var ret *AllFavourFolderInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+func (c *Client) GetAllFavourFolderInfo(param GetAllFavourFolderInfoParam) (*AllFavourFolderInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/v3/fav/folder/created/list-all"
+	)
+	return execute[*AllFavourFolderInfo](c, method, url, param)
 }
 
 type FavourInfo struct {
@@ -261,17 +243,16 @@ type FavourInfo struct {
 		Play    int `json:"play"`
 		Danmaku int `json:"danmaku"`
 	} `json:"cnt_info"`
-	Link    string      `json:"link"`
-	Ctime   int         `json:"ctime"`
-	Pubtime int         `json:"pubtime"`
-	FavTime int         `json:"fav_time"`
-	BvId    string      `json:"bv_id"`
-	Bvid    string      `json:"bvid"`
-	Season  interface{} `json:"season"`
+	Link    string `json:"link"`
+	Ctime   int    `json:"ctime"`
+	Pubtime int    `json:"pubtime"`
+	FavTime int    `json:"fav_time"`
+	BvId    string `json:"bv_id"`
+	Bvid    string `json:"bvid"`
+	Season  any    `json:"season"`
 }
 
 // GetFavourInfo 获取收藏内容
-
 func (c *Client) GetFavourInfo(resources []Resource, platform string) ([]*FavourInfo, error) {
 	resourcesStr := make([]string, 0, len(resources))
 	for _, resource := range resources {
@@ -292,6 +273,17 @@ func (c *Client) GetFavourInfo(resources []Resource, platform string) ([]*Favour
 	var ret []*FavourInfo
 	err = json.Unmarshal(data, &ret)
 	return ret, errors.WithStack(err)
+}
+
+type GetFavourListParam struct {
+	MediaId  int    `json:"media_id"`                                     // 目标收藏夹mlid（完整id）
+	Tid      int    `json:"tid,omitempty" request:"query,omitempty"`      // 分区tid。默认为全部分区。0：全部分区
+	Keyword  string `json:"keyword,omitempty" request:"query,omitempty"`  // 搜索关键字
+	Order    string `json:"order,omitempty" request:"query,omitempty"`    // 排序方式。按收藏时间:mtime。按播放量: view。按投稿时间：pubtime
+	Type     int    `json:"type,omitempty" request:"query,omitempty"`     // 查询范围。0：当前收藏夹（对应media_id）。 1：全部收藏夹
+	Ps       int    `json:"ps"`                                           // 每页数量。定义域：1-20
+	Pn       int    `json:"pn,omitempty" request:"query,omitempty"`       // 页码。默认为1
+	Platform string `json:"platform,omitempty" request:"query,omitempty"` // 平台标识。可为web（影响内容列表类型）
 }
 
 type FavourList struct {
@@ -356,38 +348,17 @@ type FavourList struct {
 }
 
 // GetFavourList 获取收藏夹内容明细列表
+func (c *Client) GetFavourList(param GetFavourListParam) (*FavourList, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/v3/fav/resource/list"
+	)
+	return execute[*FavourList](c, method, url, param)
+}
 
-func (c *Client) GetFavourList(mediaId, tid int, keyword, order string, searchType, ps, pn int, platform string) (*FavourList, error) {
-	if pn == 0 {
-		pn = 1
-	}
-	r := c.resty.R().SetQueryParams(map[string]string{
-		"media_id": strconv.Itoa(mediaId),
-		"tid":      strconv.Itoa(tid),
-		"type":     strconv.Itoa(searchType),
-		"ps":       strconv.Itoa(ps),
-		"pn":       strconv.Itoa(pn),
-	})
-	if len(keyword) > 0 {
-		r = r.SetQueryParam("keyword", keyword)
-	}
-	if len(order) > 0 {
-		r = r.SetQueryParam("order", order)
-	}
-	if len(platform) > 0 {
-		r = r.SetQueryParam("platform", platform)
-	}
-	resp, err := r.Get("https://api.bilibili.com/x/v3/fav/resource/list")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取收藏夹内容明细列表")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	var ret *FavourList
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+type GetFavourIdsParam struct {
+	MediaId  int    `json:"media_id"`                                     // 目标收藏夹mlid（完整id）
+	Platform string `json:"platform,omitempty" request:"query,omitempty"` // 平台标识。可为web（影响内容列表类型）
 }
 
 type FavourId struct {
@@ -398,21 +369,10 @@ type FavourId struct {
 }
 
 // GetFavourIds 获取收藏夹全部内容id
-
-func (c *Client) GetFavourIds(mediaId int, platform string) ([]*FavourId, error) {
-	r := c.resty.R().SetQueryParam("media_id", strconv.Itoa(mediaId))
-	if len(platform) > 0 {
-		r = r.SetQueryParam("platform", platform)
-	}
-	resp, err := r.Get("https://api.bilibili.com/x/v3/fav/resource/ids")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取收藏夹全部内容id")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	var ret []*FavourId
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+func (c *Client) GetFavourIds(param GetFavourIdsParam) ([]FavourId, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/v3/fav/resource/ids"
+	)
+	return execute[[]FavourId](c, method, url, param)
 }

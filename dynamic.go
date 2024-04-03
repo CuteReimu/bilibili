@@ -499,7 +499,7 @@ func (c *Client) UploadDynamicBfs(fileName string, file io.Reader, category stri
 		ImageHeight int    `json:"image_height"`
 	}]
 	if err = json.Unmarshal(resp.Body(), &response); err != nil {
-		return "", Size{}, err
+		return "", Size{}, errors.WithStack(err)
 	}
 	if response.Code != 0 {
 		return "", Size{}, errors.Errorf("错误码: %d, 错误信息: %s", response.Code, response.Message)
@@ -562,7 +562,7 @@ type DynamicItem struct {
 		} `json:"like_icon"`
 		RidStr string `json:"rid_str"`
 	} `json:"basic"`
-	IdStr   interface{} `json:"id_str"` // 这个字段，B站返回的数据有时是number，有时是string，不知道为什么。这里用interface{}会带来一个问题，number会解析成为float64，有可能存在丢失精度问题。请谨慎使用
+	IdStr   any `json:"id_str"` // 这个字段，B站返回的数据有时是number，有时是string，不知道为什么。这里用any会带来一个问题，number会解析成为float64，有可能存在丢失精度问题。请谨慎使用
 	Modules struct {
 		ModuleAuthor struct {
 			Avatar struct {
@@ -630,13 +630,13 @@ type DynamicItem struct {
 				} `json:"fallback_layers"`
 				Mid string `json:"mid"`
 			} `json:"avatar"`
-			Face           string      `json:"face"`
-			FaceNft        bool        `json:"face_nft"`
-			Following      interface{} `json:"following"`
-			JumpUrl        string      `json:"jump_url"`
-			Label          string      `json:"label"`
-			Mid            int         `json:"mid"`
-			Name           string      `json:"name"`
+			Face           string `json:"face"`
+			FaceNft        bool   `json:"face_nft"`
+			Following      any    `json:"following"`
+			JumpUrl        string `json:"jump_url"`
+			Label          string `json:"label"`
+			Mid            int    `json:"mid"`
+			Name           string `json:"name"`
 			OfficialVerify struct {
 				Desc string `json:"desc"`
 				Type int    `json:"type"`
@@ -680,14 +680,14 @@ type DynamicItem struct {
 			} `json:"vip"`
 		} `json:"module_author"`
 		ModuleDynamic struct {
-			Additional interface{} `json:"additional"`
+			Additional any `json:"additional"`
 			Desc       *struct {
 				RichTextNodes []struct {
-					OrigText string      `json:"orig_text"`
-					Text     string      `json:"text"`
-					Type     string      `json:"type"`
-					JumpUrl  string      `json:"jump_url,omitempty"`
-					Style    interface{} `json:"style"`
+					OrigText string `json:"orig_text"`
+					Text     string `json:"text"`
+					Type     string `json:"type"`
+					JumpUrl  string `json:"jump_url,omitempty"`
+					Style    any    `json:"style"`
 					Emoji    struct {
 						IconUrl string `json:"icon_url"`
 						Size    int    `json:"size"`
@@ -702,21 +702,21 @@ type DynamicItem struct {
 				Draw struct {
 					Id    int `json:"id"`
 					Items []struct {
-						Height int           `json:"height"`
-						Size   float64       `json:"size"`
-						Src    string        `json:"src"`
-						Tags   []interface{} `json:"tags"`
-						Width  int           `json:"width"`
+						Height int     `json:"height"`
+						Size   float64 `json:"size"`
+						Src    string  `json:"src"`
+						Tags   []any   `json:"tags"`
+						Width  int     `json:"width"`
 					} `json:"items"`
 				} `json:"draw,omitempty"`
 				Type    string `json:"type"`
 				Archive struct {
 					Aid   string `json:"aid"`
 					Badge struct {
-						BgColor string      `json:"bg_color"`
-						Color   string      `json:"color"`
-						IconUrl interface{} `json:"icon_url"`
-						Text    string      `json:"text"`
+						BgColor string `json:"bg_color"`
+						Color   string `json:"color"`
+						IconUrl any    `json:"icon_url"`
+						Text    string `json:"text"`
 					} `json:"badge"`
 					Bvid           string `json:"bvid"`
 					Cover          string `json:"cover"`
@@ -732,7 +732,7 @@ type DynamicItem struct {
 					Type  int    `json:"type"`
 				} `json:"archive,omitempty"`
 			} `json:"major"`
-			Topic interface{} `json:"topic"`
+			Topic any `json:"topic"`
 		} `json:"module_dynamic"`
 		ModuleMore struct {
 			ThreePointItems []struct {
@@ -768,7 +768,7 @@ type DynamicItem struct {
 			} `json:"like_icon"`
 			RidStr string `json:"rid_str"`
 		} `json:"basic"`
-		IdStr   interface{} `json:"id_str"`
+		IdStr   any `json:"id_str"`
 		Modules struct {
 			ModuleAuthor struct {
 				Avatar struct {
@@ -847,13 +847,13 @@ type DynamicItem struct {
 					Name    string `json:"name"`
 					Type    int    `json:"type"`
 				} `json:"decorate,omitempty"`
-				Face           string      `json:"face"`
-				FaceNft        bool        `json:"face_nft"`
-				Following      interface{} `json:"following"`
-				JumpUrl        string      `json:"jump_url"`
-				Label          string      `json:"label"`
-				Mid            int         `json:"mid"`
-				Name           string      `json:"name"`
+				Face           string `json:"face"`
+				FaceNft        bool   `json:"face_nft"`
+				Following      any    `json:"following"`
+				JumpUrl        string `json:"jump_url"`
+				Label          string `json:"label"`
+				Mid            int    `json:"mid"`
+				Name           string `json:"name"`
 				OfficialVerify struct {
 					Desc string `json:"desc"`
 					Type int    `json:"type"`
@@ -896,7 +896,7 @@ type DynamicItem struct {
 				} `json:"vip"`
 			} `json:"module_author"`
 			ModuleDynamic struct {
-				Additional interface{} `json:"additional"`
+				Additional any `json:"additional"`
 				Desc       *struct {
 					RichTextNodes []struct {
 						JumpUrl  string `json:"jump_url,omitempty"`
@@ -916,10 +916,10 @@ type DynamicItem struct {
 					Archive struct {
 						Aid   string `json:"aid"`
 						Badge struct {
-							BgColor string      `json:"bg_color"`
-							Color   string      `json:"color"`
-							IconUrl interface{} `json:"icon_url"`
-							Text    string      `json:"text"`
+							BgColor string `json:"bg_color"`
+							Color   string `json:"color"`
+							IconUrl any    `json:"icon_url"`
+							Text    string `json:"text"`
 						} `json:"badge"`
 						Bvid           string `json:"bvid"`
 						Cover          string `json:"cover"`
@@ -938,15 +938,15 @@ type DynamicItem struct {
 					Draw struct {
 						Id    int `json:"id"`
 						Items []struct {
-							Height int           `json:"height"`
-							Size   float64       `json:"size"`
-							Src    string        `json:"src"`
-							Tags   []interface{} `json:"tags"`
-							Width  int           `json:"width"`
+							Height int     `json:"height"`
+							Size   float64 `json:"size"`
+							Src    string  `json:"src"`
+							Tags   []any   `json:"tags"`
+							Width  int     `json:"width"`
 						} `json:"items"`
 					} `json:"draw,omitempty"`
 				} `json:"major"`
-				Topic interface{} `json:"topic"`
+				Topic any `json:"topic"`
 			} `json:"module_dynamic"`
 		} `json:"modules"`
 		Type    string `json:"type"`

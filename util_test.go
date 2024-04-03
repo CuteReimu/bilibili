@@ -95,7 +95,7 @@ func TestJson(t *testing.T) {
 		t.Fatal("withParams content type not correct ", r.Header.Get("Content-Type"))
 	}
 
-	if !maps.Equal(r.Body.(map[string]interface{}), map[string]any{
+	if !maps.Equal(r.Body.(map[string]any), map[string]any{
 		"test_a": "",
 		"tb":     "1",
 		"test_e": "1",
@@ -144,7 +144,7 @@ func TestFormData(t *testing.T) {
 		t.Fatal("withParams content type not correct ", r.Header.Get("Content-Type"))
 	}
 
-	if !maps.Equal(r.Body.(map[string]interface{}), map[string]any{
+	if !maps.Equal(r.Body.(map[string]any), map[string]any{
 		"test_a": "",
 		"tb":     "1",
 		"test_e": "1",
@@ -180,7 +180,7 @@ func TestWithParamsNil(t *testing.T) {
 		t.Fatal("withParams query result not correct ", r.QueryParam)
 	}
 
-	if r.Body != nil && len(r.Body.(map[string]interface{})) != 0 {
+	if r.Body != nil && len(r.Body.(map[string]any)) != 0 {
 		t.Fatal("withParams body result not correct ", r.Body)
 	}
 }
