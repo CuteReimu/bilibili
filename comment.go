@@ -175,7 +175,7 @@ type CommentReply struct {
 	Control  CommentsControl `json:"control"`   // 评论区输入属性
 	Page     CommentsPage    `json:"page"`      // 页面信息
 	Replies  []*Comment      `json:"replies"`   // 评论对话树列表。最大内容数为20
-	Root     *Comment        `json:"root"`      // 根评论信息。[对象定义见表](readme.md#评论条目对象)
+	Root     *Comment        `json:"root"`      // 根评论信息
 	ShowBvid bool            `json:"show_bvid"` // 显示 bvid?
 	ShowText string          `json:"show_text"` // (?)
 	ShowType int             `json:"show_type"` // (?)
@@ -189,4 +189,26 @@ func (c *Client) GetCommentReply(param GetCommentReplyParam) (*CommentReply, err
 		url    = "https://api.bilibili.com/x/v2/reply/reply"
 	)
 	return execute[*CommentReply](c, method, url, param)
+}
+
+type GetCommentsHotReplyParam struct {
+	Type int `json:"type"`                                   // 评论区类型代码
+	Oid  int `json:"oid"`                                    // 目标评论区 id
+	Root int `json:"root"`                                   // 根回复 rpid
+	Ps   int `json:"ps,omitempty" request:"query,omitempty"` // 每页项数。默认为20。定义域：1-49
+	Pn   int `json:"pn,omitempty" request:"query,omitempty"` // 页码。默认为1
+}
+
+type CommentsHotReply struct {
+	Page    CommentsPage `json:"page"`    // 页面信息
+	Replies []Comment    `json:"replies"` // 热评列表
+}
+
+// GetCommentsHotReply 获取评论区热评
+func (c *Client) GetCommentsHotReply(param GetCommentsHotReplyParam) (*CommentsHotReply, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/v2/reply/hot"
+	)
+	return execute[*CommentsHotReply](c, method, url, param)
 }

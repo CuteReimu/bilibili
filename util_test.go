@@ -7,6 +7,11 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+func TestVideo(t *testing.T) {
+	c := New()
+	t.Log(c.GetVideoRecommendList(GetVideoRecommendListParam{Bvid: "BV17x411w7KC"}))
+}
+
 func TestQuery(t *testing.T) {
 	type Test struct {
 		TestA string `request:"query"`

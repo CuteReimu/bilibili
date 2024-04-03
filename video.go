@@ -9,224 +9,122 @@ import (
 	"strings"
 )
 
-// OfficialInfo 成员认证信息
-type OfficialInfo struct {
-	Role  int    `json:"role"`  // 成员认证级别，0：无，1 2 7：个人认证，3 4 5 6：机构认证
-	Title string `json:"title"` // 成员认证名
-	Desc  string `json:"desc"`  // 成员认证备注
-	Type  int    `json:"type"`  // 成员认证类型，-1：无，0：有
-}
-
-type VideoDimension struct {
-	Width  int `json:"width"`  // 当前分P 宽度
-	Height int `json:"height"` // 当前分P 高度
-	Rotate int `json:"rotate"` // 是否将宽高对换，0：正常，1：对换
-}
-
-type VideoInfo struct {
-	Bvid      string     `json:"bvid"`      // 稿件bvid
-	Aid       int        `json:"aid"`       // 稿件avid
-	Videos    int        `json:"videos"`    // 稿件分P总数，默认为1
-	Tid       int        `json:"tid"`       // 分区tid
-	Tname     string     `json:"tname"`     // 子分区名称
-	Copyright int        `json:"copyright"` // 1：原创，2：转载
-	Pic       string     `json:"pic"`       // 稿件封面图片url
-	Title     string     `json:"title"`     // 稿件标题
-	Pubdate   int64      `json:"pubdate"`   // 稿件发布时间戳
-	Ctime     int64      `json:"ctime"`     // 用户投稿时间戳
-	Desc      string     `json:"desc"`      // 视频简介
-	DescV2    []struct { // 新版视频简介
-		RawText string `json:"raw_text"` // 简介内容
-		Type    int    `json:"type"`     // 作用尚不明确
-		BizId   int    `json:"biz_id"`   // 作用尚不明确
-	} `json:"desc_v2"`
-	State       int      `json:"state"`        // 视频状态
-	Duration    int      `json:"duration"`     // 稿件总时长（所有分P，单位：秒）
-	Forward     int      `json:"forward"`      // 撞车视频跳转avid
-	MissionId   int      `json:"mission_id"`   // 稿件参与的活动id
-	RedirectUrl string   `json:"redirect_url"` // 重定向url，仅番剧或影视视频存在此字段
-	Rights      struct { // 视频属性标志，全部都是1表示是，0表示否
-		Bp            int `json:"bp"`              // 固定值0，作用尚不明确
-		Elec          int `json:"elec"`            // 是否支持充电
-		Download      int `json:"download"`        // 是否允许下载
-		Movie         int `json:"movie"`           // 是否电影
-		Pay           int `json:"pay"`             // 是否PGC付费
-		Hd5           int `json:"hd5"`             // 是否有高码率
-		NoReprint     int `json:"no_reprint"`      // 是否显示“禁止转载“标志
-		Autoplay      int `json:"autoplay"`        // 是否自动播放
-		UgcPay        int `json:"ugc_pay"`         // 是否UGC付费
-		IsSteinGate   int `json:"is_stein_gate"`   // 是否为互动视频
-		IsCooperation int `json:"is_cooperation"`  // 是否为联合投稿
-		UgcPayPreview int `json:"ugc_pay_preview"` // 固定值0，作用尚不明确
-		NoBackground  int `json:"no_background"`   // 固定值0，作用尚不明确
-		CleanMode     int `json:"clean_mode"`
-		Is360         int `json:"is_360"`
-		NoShare       int `json:"no_share"`
-		ArcPay        int `json:"arc_pay"`
-		FreeWatch     int `json:"free_watch"`
-	} `json:"rights"`
-	Owner struct { // 视频UP主信息
-		Mid  int    `json:"mid"`  // UP主mid
-		Name string `json:"name"` // UP主昵称
-		Face string `json:"face"` // UP主头像url
-	} `json:"owner"`
-	Stat struct { // 视频状态数
-		Aid        int    `json:"aid"`        // 稿件avid
-		View       int    `json:"view"`       // 播放数
-		Danmaku    int    `json:"danmaku"`    // 弹幕数
-		Reply      int    `json:"reply"`      // 评论数
-		Favorite   int    `json:"favorite"`   // 收藏数
-		Coin       int    `json:"coin"`       // 投币数
-		Share      int    `json:"share"`      // 分享数
-		NowRank    int    `json:"now_rank"`   // 当前排名
-		HisRank    int    `json:"his_rank"`   // 历史最高排行
-		Like       int    `json:"like"`       // 获赞数
-		Dislike    int    `json:"dislike"`    // 点踩数，恒为0
-		Evaluation string `json:"evaluation"` // 视频评分
-		ArgueMsg   string `json:"argue_msg"`  // 警告/争议提示信息
-	} `json:"stat"`
-	Dynamic            string         `json:"dynamic"`   // 视频同步发布的的动态的文字内容
-	Cid                int            `json:"cid"`       // 视频1P cid
-	Dimension          VideoDimension `json:"dimension"` // 视频1P分辨率
-	TeenageMode        int            `json:"teenage_mode"`
-	IsChargeableSeason bool           `json:"is_chargeable_season"`
-	NoCache            bool           `json:"no_cache"` // 固定值true，作用尚不明确
-	Pages              []struct {     // 视频分P列表，无分P则数组只有1个元素
-		Cid       int            `json:"cid"`       // 当前分P cid
-		Page      int            `json:"page"`      // 当前分P
-		From      string         `json:"from"`      // 视频来源，vupload：普通上传（B站），hunan：芒果TV，qq：腾讯
-		Part      string         `json:"part"`      // 当前分P标题
-		Duration  int            `json:"duration"`  // 当前分P持续时间（单位：秒）
-		Vid       string         `json:"vid"`       // 站外视频vid，仅站外视频有效
-		Weblink   string         `json:"weblink"`   // 站外视频跳转url，仅站外视频有效
-		Dimension VideoDimension `json:"dimension"` // 当前分P分辨率，部分较老视频无分辨率值
-	} `json:"pages"`
-	Subtitle struct { // 视频CC字幕信息
-		AllowCommit bool       `json:"allow_commit"` // 是否允许提交字幕
-		List        []struct { // 字幕列表
-			Id          int      `json:"id"`           // 字幕id
-			Lan         string   `json:"lan"`          // 字幕语言
-			LanDoc      string   `json:"lan_doc"`      // 字幕语言名称
-			IsLock      bool     `json:"is_lock"`      // 是否锁定
-			AuthorMid   int      `json:"author_mid"`   // 字幕上传者mid
-			SubtitleUrl string   `json:"subtitle_url"` // json格式字幕文件url
-			Author      struct { // 字幕上传者信息
-				Mid           int    `json:"mid"`             // 字幕上传者mid
-				Name          string `json:"name"`            // 字幕上传者昵称
-				Sex           string `json:"sex"`             // 字幕上传者性别 男 女 保密
-				Face          string `json:"face"`            // 字幕上传者头像url
-				Sign          string `json:"sign"`            // 字幕上传者签名
-				Rank          int    `json:"rank"`            // 固定值10000，作用尚不明确
-				Birthday      int    `json:"birthday"`        // 固定值0，作用尚不明确
-				IsFakeAccount int    `json:"is_fake_account"` // 固定值0，作用尚不明确
-				IsDeleted     int    `json:"is_deleted"`      // 固定值0，作用尚不明确
-			} `json:"author"`
-		} `json:"list"`
-	} `json:"subtitle"`
-	IsSeasonDisplay bool       `json:"is_season_display"`
-	Staff           []struct { // 合作成员列表，非合作视频无此项
-		Mid   int      `json:"mid"`   // 成员mid
-		Title string   `json:"title"` // 成员名称
-		Name  string   `json:"name"`  // 成员昵称
-		Face  string   `json:"face"`  // 成员头像url
-		Vip   struct { // 成员大会员状态
-			Type      int `json:"type"`       // 成员会员类型，0：无，1：月会员，2：年会员
-			Status    int `json:"status"`     // 会员状态，0：无，1：有
-			ThemeType int `json:"theme_type"` // 固定值0，作用尚不明确
-		} `json:"vip"`
-		Official OfficialInfo `json:"official"` // 成员认证信息
-		Follower int          `json:"follower"` // 成员粉丝数
-	} `json:"staff"`
-	UserGarb struct { // 用户装扮信息
-		UrlImageAniCut string `json:"url_image_ani_cut"` // 某url，作用尚不明确
-	} `json:"user_garb"`
-	HonorReply struct {
-		Honor []struct {
-			Aid                int    `json:"aid"`
-			Type               int    `json:"type"`
-			Desc               string `json:"desc"`
-			WeeklyRecommendNum int    `json:"weekly_recommend_num"`
-		} `json:"honor"`
-	} `json:"honor_reply"`
-}
-
-// GetVideoInfoByAvid 通过Avid获取视频信息
-func (c *Client) GetVideoInfoByAvid(avid int) (*VideoInfo, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/web-interface/view")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频详细信息")
-	if err != nil {
-		return nil, err
-	}
-	var ret *VideoInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
-}
-
-// GetVideoInfoByBvid 通过Bvid获取视频信息
-func (c *Client) GetVideoInfoByBvid(bvid string) (*VideoInfo, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/web-interface/view")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取视频详细信息")
-	if err != nil {
-		return nil, err
-	}
-	var ret *VideoInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
-}
-
-// GetVideoInfoByShortUrl 通过短链接获取视频信息
-func (c *Client) GetVideoInfoByShortUrl(shortUrl string) (*VideoInfo, error) {
-	typ, bvid, err := c.UnwrapShortUrl(shortUrl)
-	if typ != "bvid" {
-		return nil, errors.New("短链接不是视频链接")
-	}
-	if err != nil {
-		return nil, err
-	}
-	return c.GetVideoInfoByBvid(bvid.(string))
-}
-
-// GetRecommendVideoByAvid 通过Avid获取推荐视频
-func (c *Client) GetRecommendVideoByAvid(avid int) ([]*VideoInfo, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("aid", strconv.Itoa(avid)).Get("https://api.bilibili.com/x/web-interface/archive/related")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取推荐视频")
-	if err != nil {
-		return nil, err
-	}
-	var ret []*VideoInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
-}
-
-// GetRecommendVideoByBvid 通过Bvid获取推荐视频
-func (c *Client) GetRecommendVideoByBvid(bvid string) ([]*VideoInfo, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("bvid", bvid).Get("https://api.bilibili.com/x/web-interface/archive/related")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取推荐视频")
-	if err != nil {
-		return nil, err
-	}
-	var ret []*VideoInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
-}
-
 type GetVideoDetailInfoParam struct {
+	Aid  int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件avid。avid与bvid任选一个
+	Bvid string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件bvid。avid与bvid任选一个
+}
+
+type Label struct {
+	Path                  string `json:"path"`                      // 空。作用尚不明确
+	Text                  string `json:"text"`                      // 会员类型文案。大会员 年度大会员 十年大会员 百年大会员 最强绿鲤鱼
+	LabelTheme            string `json:"label_theme"`               // 会员标签。vip：大会员。annual_vip：年度大会员。ten_annual_vip：十 年大会员。hundred_annual_vip：百年大会员。fools_day_hundred_annual_vip：最强绿鲤鱼
+	TextColor             string `json:"text_color"`                // 会员标签
+	BgStyle               int    `json:"bg_style"`                  // 1
+	BgColor               string `json:"bg_color"`                  // 会员标签背景颜色。颜色码，一般为#FB7299，曾用于愚人节改变大会员配色
+	BorderColor           string `json:"border_color"`              // 会员标签边框颜色。未使用
+	UseImgLabel           bool   `json:"use_img_label"`             // true
+	ImgLabelUriHans       string `json:"img_label_uri_hans"`        // 空串
+	ImgLabelUriHant       string `json:"img_label_uri_hant"`        // 空串
+	ImgLabelUriHansStatic string `json:"img_label_uri_hans_static"` // 大会员牌子图片。简体版
+	ImgLabelUriHantStatic string `json:"img_label_uri_hant_static"` // 大会员牌子图片。繁体版
+}
+
+type CardVip struct {
+	Type               int    `json:"type"`                 // 会员类型。0：无。1：月大会员。2：年度及以上大会员
+	Status             int    `json:"status"`               // 会员状态。0：无。1：有
+	DueDate            int    `json:"due_date"`             // 会员过期时间。Unix时间戳(毫秒)
+	VipPayType         int    `json:"vip_pay_type"`         // 支付类型。0：未支付（常见于官方账号）。1：已支付（以正常渠道获取的大会员均为此值）
+	ThemeType          int    `json:"theme_type"`           // 0。作用尚不明确
+	Label              Label  `json:"label"`                // 会员标签
+	AvatarSubscript    int    `json:"avatar_subscript"`     // 是否显示会员图标。0：不显示。1：显示
+	NicknameColor      string `json:"nickname_color"`       // 会员昵称颜色。颜色码，一般为#FB7299，曾用于愚人节改变大会员配色
+	Role               int    `json:"role"`                 // 大角色类型。1：月度大会员。3：年度大会员。7：十年大会员。15：百年大会员
+	AvatarSubscriptUrl string `json:"avatar_subscript_url"` // 大会员角标地址
+	TvVipStatus        int    `json:"tv_vip_status"`        // 电视大会员状态。0：未开通
+	TvVipPayType       int    `json:"tv_vip_pay_type"`      // 电视大会员支付类型
+}
+
+type Card struct {
+	Mid            string         `json:"mid"`              // 用户mid
+	Name           string         `json:"name"`             // 用户昵称
+	Approve        bool           `json:"approve"`          // false。作用尚不明确
+	Sex            string         `json:"sex"`              // 用户性别。男 女 保密
+	Rank           string         `json:"rank"`             // 10000。作用尚不明确
+	Face           string         `json:"face"`             // 用户头像链接
+	FaceNft        int            `json:"face_nft"`         // 是否为 nft 头像。0不是nft头像。1是 nft 头像
+	Displayrank    string         `json:"DisplayRank"`      // 0。作用尚不明确
+	Regtime        int            `json:"regtime"`          // 0。作用尚不明确
+	Spacesta       int            `json:"spacesta"`         // 0。作用尚不明确
+	Birthday       string         `json:"birthday"`         // 空。作用尚不明确
+	Place          string         `json:"place"`            // 空。作用尚不明确
+	Description    string         `json:"description"`      // 空。作用尚不明确
+	Article        int            `json:"article"`          // 0。作用尚不明确
+	Attentions     []any          `json:"attentions"`       // 空。作用尚不明确
+	Fans           int            `json:"fans"`             // 粉丝数
+	Friend         int            `json:"friend"`           // 关注数
+	Attention      int            `json:"attention"`        // 关注数
+	Sign           string         `json:"sign"`             // 签名
+	LevelInfo      LevelInfo      `json:"level_info"`       // 等级
+	Pendant        Pendant        `json:"pendant"`          // 挂件
+	Nameplate      Nameplate      `json:"nameplate"`        // 勋章
+	Official       Official       `json:"Official"`         // 认证信息
+	OfficialVerify OfficialVerify `json:"official_verify"`  // 认证信息2
+	Vip            CardVip        `json:"vip"`              // 大会员状态
+	IsSeniorMember int            `json:"is_senior_member"` // 是否为硬核会员。0：否。1：是
+}
+
+type CardSpace struct {
+	SImg string `json:"s_img"` // 主页头图url 小图
+	LImg string `json:"l_img"` // 主页头图url 正常
+}
+
+type VideoDetailInfoCard struct {
+	Card         Card      `json:"card"`          // UP主名片信息
+	Space        CardSpace `json:"space"`         // 主页头图
+	Following    bool      `json:"following"`     // 是否关注此用户。true：已关注。false：未关注。需要登录(Cookie) 。未登录为false
+	ArchiveCount int       `json:"archive_count"` // 用户稿件数
+	ArticleCount int       `json:"article_count"` // 用户专栏数
+	Follower     int       `json:"follower"`      // 粉丝数
+	LikeNum      int       `json:"like_num"`      // UP主获赞次数
+}
+
+type VideoDetailInfo struct {
+	View      VideoInfo           `json:"View"`       // 视频基本信息
+	Card      VideoDetailInfoCard `json:"Card"`       // 视频UP主信息
+	Tags      []VideoTag          `json:"Tags"`       // 视频TAG信息
+	Reply     CommentsHotReply    `json:"Reply"`      // 视频热评信息
+	Related   []VideoInfo         `json:"Related"`    // 推荐视频信息
+	Spec      any                 `json:"Spec"`       // ？。作用尚不明确
+	HotShare  any                 `json:"hot_share"`  // ？。作用尚不明确
+	Elec      any                 `json:"elec"`       // ？。作用尚不明确
+	Recommend any                 `json:"recommend"`  // ？。作用尚不明确
+	ViewAddit any                 `json:"view_addit"` // ？。作用尚不明确
+}
+
+// GetVideoDetailInfo 获取视频超详细信息
+func (c *Client) GetVideoDetailInfo(param GetVideoDetailInfoParam) (*VideoDetailInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/web-interface/view/detail"
+	)
+	return execute[*VideoDetailInfo](c, method, url, param)
+}
+
+type GetVideoRecommendListParam struct {
+	Aid  int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件avid。avid与bvid任选一个
+	Bvid string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件bvid。avid与bvid任选一个
+}
+
+// GetVideoRecommendList 获取单视频推荐列表
+func (c *Client) GetVideoRecommendList(param GetVideoRecommendListParam) ([]VideoInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/web-interface/archive/related"
+	)
+	return execute[[]VideoInfo](c, method, url, param)
+}
+
+type GetVideoInfoParam struct {
 	Aid  int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件avid。avid与bvid任选一个
 	Bvid string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件bvid。avid与bvid任选一个
 }
@@ -352,7 +250,7 @@ type ArgueInfo struct {
 	ArgueType int    `json:"argue_type"` // 作用尚不明确
 }
 
-type VideoDetailInfo struct {
+type VideoInfo struct {
 	Bvid               string        `json:"bvid"`         // 稿件bvid
 	Aid                int           `json:"aid"`          // 稿件avid
 	Videos             int           `json:"videos"`       // 稿件分P总数。默认为1
@@ -391,14 +289,13 @@ type VideoDetailInfo struct {
 	ArgueInfo          ArgueInfo     `json:"argue_info"` // 争议/警告信息
 }
 
-// GetVideoDetailInfo 获取视频详细信息
-func (c *Client) GetVideoDetailInfo(param GetVideoDetailInfoParam) (*VideoDetailInfo, error) {
+// GetVideoInfo 获取视频详细信息
+func (c *Client) GetVideoInfo(param GetVideoInfoParam) (*VideoInfo, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/web-interface/view"
 	)
-	return execute[*VideoDetailInfo](c, method, url, param)
-
+	return execute[*VideoInfo](c, method, url, param)
 }
 
 // GetVideoDescByAvid 通过Avid获取视频简介
@@ -516,39 +413,31 @@ func (c *Client) GetVideoPageListByShortUrl(shortUrl string) ([]*VideoPage, erro
 	return c.GetVideoPageListByBvid(bvid.(string))
 }
 
+type StatusCount struct {
+	View  int `json:"view"`  // 0。作用尚不明确
+	Use   int `json:"use"`   // 视频添加TAG数
+	Atten int `json:"atten"` // TAG关注
+}
+
 // VideoTag 视频TAG信息
-type VideoTag []struct {
-	TagId        int      `json:"tag_id"`        // tag_id
-	TagName      string   `json:"tag_name"`      // TAG名称
-	Cover        string   `json:"cover"`         // TAG图片url
-	HeadCover    string   `json:"head_cover"`    // TAG页面头图url
-	Content      string   `json:"content"`       // TAG介绍
-	ShortContent string   `json:"short_content"` // TAG简介
-	Type         int      `json:"type"`          // 作用尚不明确
-	State        int      `json:"state"`         // 固定值0，作用尚不明确
-	Ctime        int      `json:"ctime"`         // 创建时间戳
-	Count        struct { // 状态数
-		View  int `json:"view"`  // 固定值0，作用尚不明确
-		Use   int `json:"use"`   // 视频添加TAG数
-		Atten int `json:"atten"` // TAG关注
-	} `json:"count"`
-	IsAtten         int    `json:"is_atten"`   // 是否关注，0：未关注，1：已关注，需要登录(Cookie)，未登录为0
-	Likes           int    `json:"likes"`      // 固定值0，作用尚不明确
-	Hates           int    `json:"hates"`      // 固定值0，作用尚不明确
-	Attribute       int    `json:"attribute"`  // 固定值0，作用尚不明确
-	Liked           int    `json:"liked"`      // 是否已经点赞，0：未点赞，1：已点赞，需要登录(Cookie)，未登录为0
-	Hated           int    `json:"hated"`      // 是否已经点踩，0：未点踩，1：已点踩，需要登录(Cookie)，未登录为0
-	ExtraAttr       int    `json:"extra_attr"` // 作用尚不明确
-	MusicId         string `json:"music_id"`
-	TagType         string `json:"tag_type"`
-	IsActivity      bool   `json:"is_activity"`
-	Color           string `json:"color"`
-	Alpha           int    `json:"alpha"`
-	IsSeason        bool   `json:"is_season"`
-	SubscribedCount int    `json:"subscribed_count"`
-	ArchiveCount    string `json:"archive_count"`
-	FeaturedCount   int    `json:"featured_count"`
-	JumpUrl         string `json:"jump_url"`
+type VideoTag struct {
+	TagId        int         `json:"tag_id"`        // tag_id
+	TagName      string      `json:"tag_name"`      // TAG名称
+	Cover        string      `json:"cover"`         // TAG图片url
+	HeadCover    string      `json:"head_cover"`    // TAG页面头图url
+	Content      string      `json:"content"`       // TAG介绍
+	ShortContent string      `json:"short_content"` // TAG简介
+	Type         int         `json:"type"`          // ？？？
+	State        int         `json:"state"`         // 0
+	Ctime        int         `json:"ctime"`         // 创建时间。时间戳
+	Count        StatusCount `json:"count"`         // 状态数
+	IsAtten      int         `json:"is_atten"`      // 是否关注。0：未关注。1：已关注。需要登录(Cookie) 。未登录为0
+	Likes        int         `json:"likes"`         // 0。作用尚不明确
+	Hates        int         `json:"hates"`         // 0。作用尚不明确
+	Attribute    int         `json:"attribute"`     // 0。作用尚不明确
+	Liked        int         `json:"liked"`         // 是否已经点赞。0：未点赞。1：已点赞。需要登录(Cookie) 。未登录为0
+	Hated        int         `json:"hated"`         // 是否已经点踩。0：未点踩。1：已点踩。需要登录(Cookie) 。未登录为0
+	ExtraAttr    int         `json:"extra_attr"`    // ? ? ?
 }
 
 // GetVideoTagsByAvid 通过Avid获取视频TAG

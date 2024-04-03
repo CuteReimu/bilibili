@@ -41,7 +41,7 @@ type Category struct {
 	Name     string `json:"name"`      // 分类名称
 }
 
-type Tag struct {
+type ArticleTag struct {
 	Tid  int    `json:"tid"`  // 标签id
 	Name string `json:"name"` // 标签名称
 }
@@ -72,7 +72,7 @@ type Article struct {
 	PublishTime     int          `json:"publish_time"` // 发布时间戳。单位：秒
 	Ctime           int          `json:"ctime"`        // 提交时间戳。单位：秒
 	Stats           ArticleStats `json:"stats"`        // 专栏文章数据统计
-	Tags            []Tag        `json:"tags"`         // 标签
+	Tags            []ArticleTag `json:"tags"`         // 标签
 	Words           int          `json:"words"`
 	Dynamic         string       `json:"dynamic"` // 粉丝动态文案
 	OriginImageUrls []string     `json:"origin_image_urls"`
