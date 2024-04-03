@@ -2,45 +2,47 @@ package bilibili
 
 import (
 	"encoding/json"
+	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 	"io"
-	"strconv"
-	"strings"
 )
 
+type SearchDynamicAtParam struct {
+	Uid     int    `json:"uid"`     // 自己的uid
+	Keyword string `json:"keyword"` // 搜索关键字
+}
+
+type DynamicGroupItem struct {
+	Uid                int    `json:"uid"`                  // 用户id
+	Uname              string `json:"uname"`                // 用户昵称
+	Face               string `json:"face"`                 // 用户头像url
+	Fans               int    `json:"fans"`                 // 用户粉丝数
+	OfficialVerifyType int    `json:"official_verify_type"` // 认证信息?
+}
+
+type DynamicGroup struct {
+	GroupType int                `json:"group_type"` // 2:我的关注。4:其他
+	GroupName string             `json:"group_name"` // 分组名字
+	Items     []DynamicGroupItem `json:"items"`      // 用户信息
+}
+
 type SearchDynamicAtResult struct {
-	Groups []struct { // 内容分组
-		GroupType int        `json:"group_type"` // 2：我的关注，4：其他
-		GroupName string     `json:"group_name"` // 分组名字
-		Items     []struct { // 用户信息
-			Uid                int    `json:"uid"`   // 用户id
-			Uname              string `json:"uname"` // 用户昵称
-			Face               string `json:"face"`  // 用户头像url
-			Fans               int    `json:"fans"`  // 用户粉丝数
-			OfficialVerifyType int    `json:"official_verify_type"`
-		} `json:"items"`
-	} `json:"groups"`
-	Gt int `json:"_gt_"` // 固定值0
+	Groups []DynamicGroup `json:"groups"` // 内容分组
+	Gt     int            `json:"_gt_"`   // 固定值0
 }
 
 // SearchDynamicAt 根据关键字搜索用户(at别人时的填充列表)
+func (c *Client) SearchDynamicAt(param SearchDynamicAtParam) (*SearchDynamicAtResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.vc.bilibili.com/dynamic_mix/v1/dynamic_mix/at_search"
+	)
+	return execute[*SearchDynamicAtResult](c, method, url, param)
+}
 
-func (c *Client) SearchDynamicAt(uid int, keyword string) (*SearchDynamicAtResult, error) {
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"uid":     strconv.Itoa(uid),
-		"keyword": keyword,
-	}).Get("https://api.vc.bilibili.com/dynamic_mix/v1/dynamic_mix/at_search")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "根据关键字搜索用户")
-	if err != nil {
-		return nil, err
-	}
-	var ret *SearchDynamicAtResult
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+type GetDynamicRepostDetailParam struct {
+	DynamicId int `json:"dynamic_id"`                                 // 动态id
+	Offset    int `json:"offset,omitempty" request:"query,omitempty"` // 偏移量
 }
 
 type DynamicRepostDetail struct {
@@ -198,22 +200,20 @@ type DynamicRepostDetail struct {
 }
 
 // GetDynamicRepostDetail 获取动态转发列表
+//
+// 见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/dynamic/basicInfo.md
+func (c *Client) GetDynamicRepostDetail(param GetDynamicRepostDetailParam) (*DynamicRepostDetail, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.vc.bilibili.com/dynamic_repost/v1/dynamic_repost/repost_detail"
+	)
+	return execute[*DynamicRepostDetail](c, method, url, param)
+}
 
-func (c *Client) GetDynamicRepostDetail(dynamicId, offset int) (*DynamicRepostDetail, error) {
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"dynamic_id": strconv.Itoa(dynamicId),
-		"offset":     strconv.Itoa(offset),
-	}).Get("https://api.vc.bilibili.com/dynamic_repost/v1/dynamic_repost/repost_detail")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取动态转发列表")
-	if err != nil {
-		return nil, err
-	}
-	var ret *DynamicRepostDetail
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+type GetDynamicLikeListParam struct {
+	DynamicId int64 `json:"dynamic_id"`                             // 动态id
+	Pn        int64 `json:"pn,omitempty" request:"query,omitempty"` // 页码
+	Ps        int64 `json:"ps,omitempty" request:"query,omitempty"` // 每页数量。该值不得大于20
 }
 
 type DynamicLikeList struct {
@@ -270,25 +270,17 @@ type DynamicLikeList struct {
 	Gt         int `json:"_gt_"`        // 固定值0
 }
 
-// GetDynamicLikeList 获取动态点赞列表。offset是非必填项
+// GetDynamicLikeList 获取动态点赞列表
+func (c *Client) GetDynamicLikeList(param GetDynamicLikeListParam) (*DynamicLikeList, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/spec_item_likes"
+	)
+	return execute[*DynamicLikeList](c, method, url, param)
+}
 
-func (c *Client) GetDynamicLikeList(dynamicId, offset int) (*DynamicLikeList, error) {
-	r := c.resty.R().
-		SetQueryParam("dynamic_id", strconv.Itoa(dynamicId))
-	if offset != 0 {
-		r = r.SetQueryParam("offset", strconv.Itoa(offset))
-	}
-	resp, err := r.Get("https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/spec_item_likes")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取动态点赞列表")
-	if err != nil {
-		return nil, err
-	}
-	var ret *DynamicLikeList
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+type GetDynamicLiveUserListParam struct {
+	Size int `json:"size,omitempty" request:"query,omitempty"` // 每页显示数。默认为10
 }
 
 type DynamicLiveUserList struct {
@@ -304,24 +296,13 @@ type DynamicLiveUserList struct {
 	Gt int `json:"_gt_"` // 固定值0，作用尚不明确
 }
 
-// GetDynamicLiveUserList 获取正在直播的已关注者。size是非必填项
-
-func (c *Client) GetDynamicLiveUserList(size int) (*DynamicLiveUserList, error) {
-	r := c.resty.R()
-	if size != 0 {
-		r = r.SetQueryParam("size", strconv.Itoa(size))
-	}
-	resp, err := r.Get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_live_users")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取正在直播的已关注者")
-	if err != nil {
-		return nil, err
-	}
-	var ret *DynamicLiveUserList
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+// GetDynamicLiveUserList 获取正在直播的已关注者
+func (c *Client) GetDynamicLiveUserList(param GetDynamicLiveUserListParam) (*DynamicLiveUserList, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_live_users"
+	)
+	return execute[*DynamicLiveUserList](c, method, url, param)
 }
 
 type DynamicUpList struct {
@@ -372,49 +353,43 @@ type DynamicUpList struct {
 	Gt int `json:"_gt_"` // 固定值0，作用尚不明确
 }
 
-// GetDynamicUpList 获取发布新动态的已关注者。size参数，0：不开启青少年模式，1：开启青少年模式
+type GetDynamicUpListParam struct {
+	TeenagersMode int `json:"teenagers_mode,omitempty" request:"query,omitempty"` // 是否开启青少年模式。否：0。是：1
+}
 
-func (c *Client) GetDynamicUpList(size int) (*DynamicUpList, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("size", strconv.Itoa(size)).Get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取发布新动态的已关注者")
-	if err != nil {
-		return nil, err
-	}
-	var ret *DynamicUpList
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+// GetDynamicUpList 获取发布新动态的已关注者
+func (c *Client) GetDynamicUpList(param GetDynamicUpListParam) (*DynamicUpList, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist"
+	)
+	return execute[*DynamicUpList](c, method, url, param)
+}
+
+type RemoveDynamicParam struct {
 }
 
 // RemoveDynamic 删除动态
-
-func (c *Client) RemoveDynamic(dynamicId int) error {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return errors.New("B站登录过期")
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"dynamic_id": strconv.Itoa(dynamicId),
-		"csrf":       biliJct,
-	}).Post("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/rm_dynamic")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	_, err = getRespData(resp, "删除动态")
+func (c *Client) RemoveDynamic(param RemoveDynamicParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/rm_dynamic"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
 
-// DynamicCard 动态卡片内容。因为 ActivityInfos 、 Desc 、 Display 等字段会随着此动态类型不同发生一定的变化，
-// // 无法统一，因此都转换成了 map[string]interface{} ，请自行解析
+type GetDynamicDetailParam struct {
+	DynamicId int `json:"dynamic_id"` // 动态id
+}
+
+// DynamicCard 动态卡片内容。因为 ActivityInfos 、 Desc 、 Display 等字段会随着此动态类型不同发生一定的变化，无法统一，因此都转换成了 map[string]any ，请自行解析
 type DynamicCard struct {
-	ActivityInfos map[string]interface{} `json:"activity_infos"` // 该条动态参与的活动
-	Card          string                 `json:"card"`           // 动态详细信息
-	Desc          map[string]interface{} `json:"desc"`           // 动态相关信息
-	Display       map[string]interface{} `json:"display"`        // 动态部分的可操作项
-	ExtendJson    string                 `json:"extend_json"`    // 动态扩展项
+	ActivityInfos map[string]any `json:"activity_infos"` // 该条动态参与的活动
+	Card          string         `json:"card"`           // 动态详细信息
+	Desc          map[string]any `json:"desc"`           // 动态相关信息
+	Display       map[string]any `json:"display"`        // 动态部分的可操作项
+	ExtendJson    string         `json:"extend_json"`    // 动态扩展项
 }
 
 type DynamicDetail struct {
@@ -424,20 +399,12 @@ type DynamicDetail struct {
 }
 
 // GetDynamicDetail 获取特定动态卡片信息
-
-func (c *Client) GetDynamicDetail(dynamicId int) (*DynamicDetail, error) {
-	resp, err := c.resty.R().
-		SetQueryParam("dynamic_id", strconv.Itoa(dynamicId)).Get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取特定动态卡片信息")
-	if err != nil {
-		return nil, err
-	}
-	var ret *DynamicDetail
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+func (c *Client) GetDynamicDetail(param GetDynamicDetailParam) (*DynamicDetail, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail"
+	)
+	return execute[*DynamicDetail](c, method, url, param)
 }
 
 type DynamicPortal struct {
@@ -502,21 +469,14 @@ type DynamicPortal struct {
 
 // GetDynamicPortal 获取最近更新UP主列表（其实就是获取自己的动态门户）
 func (c *Client) GetDynamicPortal() (*DynamicPortal, error) {
-	resp, err := c.resty.R().Get("https://api.bilibili.com/x/polymer/web-dynamic/v1/portal")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取最近更新UP主列表")
-	if err != nil {
-		return nil, err
-	}
-	var ret *DynamicPortal
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/polymer/web-dynamic/v1/portal"
+	)
+	return execute[*DynamicPortal](c, method, url, nil)
 }
 
 // UploadDynamicBfs 为图片动态上传图片
-
 func (c *Client) UploadDynamicBfs(fileName string, file io.Reader, category string) (url string, size Size, err error) {
 	biliJct := c.getCookie("bili_jct")
 	if len(biliJct) == 0 {
@@ -530,60 +490,52 @@ func (c *Client) UploadDynamicBfs(fileName string, file io.Reader, category stri
 	if err != nil {
 		return "", Size{}, errors.WithStack(err)
 	}
-	ret, err := getRespData(resp, "为图片动态上传图片")
-	if err != nil {
-		return "", Size{}, err
+	if resp.StatusCode() != 200 {
+		return "", Size{}, errors.Errorf("status code: %d", resp.StatusCode())
 	}
-	var data struct {
+	var response commonResp[struct {
 		ImageUrl    string `json:"image_url"`
 		ImageWidth  int    `json:"image_width"`
 		ImageHeight int    `json:"image_height"`
+	}]
+	if err = json.Unmarshal(resp.Body(), &response); err != nil {
+		return "", Size{}, err
 	}
-	err = json.Unmarshal(ret, &data)
+	if response.Code != 0 {
+		return "", Size{}, errors.Errorf("错误码: %d, 错误信息: %s", response.Code, response.Message)
+	}
+	data := response.Data
 	return data.ImageUrl, Size{Width: data.ImageWidth, Height: data.ImageHeight}, errors.WithStack(err)
 }
 
-// CreateDynamic 发表纯文本动态
-//
-// TODO: extension 字段尚不知如何使用，需自行填写。参考 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/dynamic/publish.md
+type CreateDynamicParam struct {
+	DynamicId       int          `json:"dynamic_id"`                                            // 0
+	Type            int          `json:"type"`                                                  // 4
+	Rid             int          `json:"rid"`                                                   // 0
+	Content         string       `json:"content"`                                               // 动态内容
+	UpChooseComment int          `json:"up_choose_comment,omitempty" request:"query,omitempty"` // 0
+	UpCloseComment  int          `json:"up_close_comment,omitempty" request:"query,omitempty"`  // 0
+	Extension       string       `json:"extension,omitempty" request:"query,omitempty"`         // 位置信息，参考 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/dynamic/publish.md
+	AtUids          string       `json:"at_uids,omitempty" request:"query,omitempty"`           // 动态中 at 到的用户的 uid。使用逗号,分隔
+	Ctrl            []FormatCtrl `json:"ctrl,omitempty" request:"query,omitempty"`              // 特殊格式控制 (如 at 别人时的蓝字体和链接)
+}
 
-func (c *Client) CreateDynamic(content, extension string, atUids []int, ctrl []*FormatCtrl) (dynamicId int, err error) {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return 0, errors.New("B站登录过期")
-	}
-	ctrlJson, err := json.Marshal(ctrl)
-	if err != nil {
-		return 0, errors.WithStack(err)
-	}
-	atUidsStr := make([]string, 0, len(atUids))
-	for _, atUid := range atUids {
-		atUidsStr = append(atUidsStr, strconv.Itoa(atUid))
-	}
-	r := c.resty.R().SetQueryParams(map[string]string{
-		"dynamic_id":        "0",
-		"type":              "4",
-		"rid":               "0",
-		"content":           content,
-		"up_choose_comment": "0",
-		"up_close_comment":  "0",
-		"at_uids":           strings.Join(atUidsStr, ","),
-		"ctrl":              string(ctrlJson),
-		"csrf_token":        biliJct,
-		"csrf":              biliJct,
-	})
-	if len(extension) > 0 {
-		r = r.SetQueryParam("extension", extension)
-	}
-	resp, err := r.Post("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/create")
-	if err != nil {
-		return 0, errors.WithStack(err)
-	}
-	ret, err := getRespData(resp, "发表纯文本动态")
-	if err != nil {
-		return 0, err
-	}
-	return int(gjson.GetBytes(ret, "dynamic_id").Int()), nil
+type CreateDynamicResult struct {
+	Result       int    `json:"result"`         // 0
+	Errmsg       string `json:"errmsg"`         // 像是服务器日志一样的东西
+	DynamicId    int    `json:"dynamic_id"`     // 动态 id
+	CreateResult int    `json:"create_result"`  // 1
+	DynamicIdStr string `json:"dynamic_id_str"` // 动态 id。字符串格式
+	Gt           int    `json:"_gt_"`           // 0
+}
+
+// CreateDynamic 发表纯文本动态
+func (c *Client) CreateDynamic(param CreateDynamicParam) (*CreateDynamicResult, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/create"
+	)
+	return execute[*CreateDynamicResult](c, method, url, param, fillCsrf(c))
 }
 
 // DynamicList 包含置顶及热门的动态列表
@@ -596,56 +548,6 @@ type DynamicList struct {
 	IsDrawerTopic int          `json:"is_drawer_topic,omitempty"`
 	Offset        string       `json:"offset"` // 接下来获取列表时的偏移值，一般为当前获取的话题列表下最后一个动态id
 	Gt            int          `json:"_gt_"`   // 固定值0，作用尚不明确
-}
-
-// FetchDynamics 获取包含置顶及热门的动态列表，topicId与topicName任选一个
-
-func (c *Client) FetchDynamics(topicId int, topicName string, sortby, offset int) (*DynamicList, error) {
-	r := c.resty.R()
-	if topicId != 0 {
-		r = r.SetQueryParam("topic_id", strconv.Itoa(topicId))
-	} else {
-		r = r.SetQueryParam("topic_name", topicName)
-	}
-	if sortby != 0 {
-		r = r.SetQueryParam("sortby", strconv.Itoa(sortby))
-	}
-	if offset != 0 {
-		r = r.SetQueryParam("offset", strconv.Itoa(offset))
-	}
-	resp, err := r.Get("https://api.vc.bilibili.com/topic_svr/v1/topic_svr/fetch_dynamics")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取动态列表")
-	if err != nil {
-		return nil, err
-	}
-	var ret *DynamicList
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
-}
-
-// GetTopicHistory 获取历史动态列表，topicId与topicName任选一个
-
-func (c *Client) GetTopicHistory(topicId int, topicName string, offsetDynamicId int) (*DynamicList, error) {
-	r := c.resty.R().SetQueryParam("offset_dynamic_id", strconv.Itoa(offsetDynamicId))
-	if topicId != 0 {
-		r = r.SetQueryParam("topic_id", strconv.Itoa(topicId))
-	} else {
-		r = r.SetQueryParam("topic_name", topicName)
-	}
-	resp, err := r.Get("https://api.vc.bilibili.com/topic_svr/v1/topic_svr/topic_history")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取历史动态列表")
-	if err != nil {
-		return nil, err
-	}
-	var ret *DynamicList
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
 }
 
 type DynamicItem struct {
@@ -1062,24 +964,20 @@ type DynamicInfo struct {
 	UpdateNum      int           `json:"update_num"`      // 本次获取获取到了多少条新动态，在更新基线以上的动态条数
 }
 
+type GetUserSpaceDynamicParam struct {
+	Offset         string `json:"offset"`          // 分页偏移量
+	HostMid        string `json:"host_mid"`        // 用户UID
+	TimezoneOffset int    `json:"timezone_offset"` // -480
+	Features       string `json:"features"`        // itemOpusStyle
+}
+
 // GetUserSpaceDynamic 获取用户空间动态，mid就是用户UID，无需登录。
 //
 // 返回结构较为繁琐，见 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/dynamic/space.md
-
-func (c *Client) GetUserSpaceDynamic(mid int, offset string) (*DynamicInfo, error) {
-	r := c.resty.R().SetHeader("Content-Type", "application/x-www-form-urlencoded").SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0").SetQueryParam("host_mid", strconv.Itoa(mid))
-	if len(offset) > 0 {
-		r = r.SetQueryParam("offset", offset)
-	}
-	resp, err := r.Get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取用户空间动态")
-	if err != nil {
-		return nil, err
-	}
-	var ret *DynamicInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+func (c *Client) GetUserSpaceDynamic(param GetUserSpaceDynamicParam) (*DynamicInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space"
+	)
+	return execute[*DynamicInfo](c, method, url, param)
 }

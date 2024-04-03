@@ -74,7 +74,7 @@ if __name__ == '__main__':
 				m['type'] = '[]bool'
 			elif m['type'] == 'obj':
 				m['type'] = name
-			if m.get('notnull', '必要') in ('必要', '√'):
+			if m.get('notnull', '必要') in ('必要', '必须', '必填', '√'):
 				m['notnull'] = '"'
 			else:
 				m['notnull'] = ',omitempty" request:"query,omitempty"'
