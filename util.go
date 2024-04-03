@@ -132,6 +132,10 @@ func withParams(r *resty.Request, in any) error {
 		for name := range tagMap {
 			switch name {
 			case "query":
+				// 对query类型的字段进行特殊处理
+				if fieldType.Type.Kind() == reflect.Slice {
+					realVal = slice2string(realVal, ",")
+				}
 				contentType = "application/x-www-form-urlencoded"
 			case "json":
 				contentType = "application/json"
@@ -152,6 +156,24 @@ func withParams(r *resty.Request, in any) error {
 	}
 
 	return nil
+}
+
+func slice2string(in any, sep string) string {
+	if in == nil {
+		return ""
+	}
+
+	v := reflect.ValueOf(in)
+	if v.Type().Kind() != reflect.Slice {
+		return ""
+	}
+
+	strSlice := make([]string, 0, 4)
+	for i := 0; i < v.Len(); i++ {
+		strSlice = append(strSlice, cast.ToString(v.Index(i).Interface()))
+	}
+
+	return strings.Join(strSlice, sep)
 }
 
 func parseTag(tag string) map[string]string {

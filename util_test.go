@@ -159,6 +159,38 @@ func TestFormData(t *testing.T) {
 }
 
 func TestWithParamsNil(t *testing.T) {
+	type Test struct {
+		Ids  []int    `request:"query"`
+		IdsA []string `request:"query"`
+	}
+
+	params := Test{
+		Ids:  []int{1, 2, 3},
+		IdsA: []string{"1", "2", "3"},
+	}
+
+	r := resty.New().R()
+	err := withParams(r, params)
+
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	query := make(map[string]string)
+	for k := range r.QueryParam {
+		query[k] = r.QueryParam.Get(k)
+	}
+
+	if !maps.Equal(query, map[string]string{
+		"ids":   "1,2,3",
+		"ids_a": "1,2,3",
+	}) {
+		t.Fatal("withParams query result not correct ", r.QueryParam)
+	}
+}
+
+func TestWithParamsSlice(t *testing.T) {
 	r := resty.New().R()
 	err := withParams(r, []int{1, 2, 3})
 
