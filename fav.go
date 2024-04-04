@@ -1,11 +1,7 @@
 package bilibili
 
 import (
-	"encoding/json"
 	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
-	"strconv"
-	"strings"
 )
 
 type AddFavourFolderParam struct {
@@ -41,108 +37,61 @@ func (c *Client) EditFavourFolder(param EditFavourFolderParam) (*FavourFolderInf
 	return execute[*FavourFolderInfo](c, method, url, param, fillCsrf(c))
 }
 
+type DeleteFavourFolderParam struct {
+	MediaIds []int `json:"media_ids"` // 目标收藏夹mdid列表
+}
+
 // DeleteFavourFolder 删除收藏夹
-//
-// media_ids：目标收藏夹mdid列表，必填。
-func (c *Client) DeleteFavourFolder(mediaIds []int) error {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return errors.New("B站登录过期")
-	}
-	mediaIdsStr := make([]string, 0, len(mediaIds))
-	for _, mediaId := range mediaIds {
-		mediaIdsStr = append(mediaIdsStr, strconv.Itoa(mediaId))
-	}
-	resp, err := c.resty.R().SetQueryParams(map[string]string{
-		"media_ids": strings.Join(mediaIdsStr, ","),
-		"csrf":      biliJct,
-	}).Post("https://api.bilibili.com/x/v3/fav/folder/del")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	_, err = getRespData(resp, "删除收藏夹")
+func (c *Client) DeleteFavourFolder(param DeleteFavourFolderParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v3/fav/folder/del"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
+}
+
+type MoveFavourResourcesParam struct {
+	SrcMediaId int      `json:"src_media_id"`                                 // 源收藏夹id
+	TarMediaId int      `json:"tar_media_id"`                                 // 目标收藏夹id
+	Mid        int      `json:"mid"`                                          // 当前用户mid
+	Resources  []string `json:"resources"`                                    // 目标内容id列表。格式：{内容id}:{内容类型}。类型：2：视频稿件。12：音频。21：视频合集。内容id：。视频稿件：视频稿件avid。音频：音频auid。视频合集：视频合集id
+	Platform   string   `json:"platform,omitempty" request:"query,omitempty"` // 平台标识。可为web
 }
 
 // CopyFavourResources 批量复制收藏内容
-func (c *Client) CopyFavourResources(srcMediaId, tarMediaId, mid int, resources []Resource, platform string) error {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return errors.New("B站登录过期")
-	}
-	resourcesStr := make([]string, 0, len(resources))
-	for _, resource := range resources {
-		resourcesStr = append(resourcesStr, resource.String())
-	}
-	r := c.resty.R().SetQueryParams(map[string]string{
-		"src_media_id": strconv.Itoa(srcMediaId),
-		"tar_media_id": strconv.Itoa(tarMediaId),
-		"mid":          strconv.Itoa(mid),
-		"resources":    strings.Join(resourcesStr, ","),
-		"csrf":         biliJct,
-	})
-	if len(platform) > 0 {
-		r = r.SetQueryParam("platform", platform)
-	}
-	resp, err := r.Post("https://api.bilibili.com/x/v3/fav/resource/copy")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	_, err = getRespData(resp, "批量复制收藏内容")
+func (c *Client) CopyFavourResources(param MoveFavourResourcesParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v3/fav/resource/copy"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
 
-// MoveFavourResources 批量移动收藏内容
-func (c *Client) MoveFavourResources(srcMediaId, tarMediaId, mid int, resources []Resource, platform string) error {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return errors.New("B站登录过期")
-	}
-	resourcesStr := make([]string, 0, len(resources))
-	for _, resource := range resources {
-		resourcesStr = append(resourcesStr, resource.String())
-	}
-	r := c.resty.R().SetQueryParams(map[string]string{
-		"src_media_id": strconv.Itoa(srcMediaId),
-		"tar_media_id": strconv.Itoa(tarMediaId),
-		"mid":          strconv.Itoa(mid),
-		"resources":    strings.Join(resourcesStr, ","),
-		"csrf":         biliJct,
-	})
-	if len(platform) > 0 {
-		r = r.SetQueryParam("platform", platform)
-	}
-	resp, err := r.Post("https://api.bilibili.com/x/v3/fav/resource/move")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	_, err = getRespData(resp, "批量移动收藏内容")
+// MoveFavourResources 批量复制收藏内容
+func (c *Client) MoveFavourResources(param MoveFavourResourcesParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v3/fav/resource/move"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
+}
+
+type DeleteFavourResourcesParam struct {
+	Resources []int  `json:"resources"`                                    // 目标内容id列表。格式：{内容id}:{内容类型}。类型：2：视频稿件。12：音频。21：视频合集。内容id：。视频稿件：视频稿件avid。音频：音频auid。视频合集：视频合集id
+	MediaId   int    `json:"media_id"`                                     // 目标收藏夹id
+	Platform  string `json:"platform,omitempty" request:"query,omitempty"` // 平台标识。可为web
 }
 
 // DeleteFavourResources 批量删除收藏内容
-func (c *Client) DeleteFavourResources(mediaId int, resources []Resource, platform string) error {
-	biliJct := c.getCookie("bili_jct")
-	if len(biliJct) == 0 {
-		return errors.New("B站登录过期")
-	}
-	resourcesStr := make([]string, 0, len(resources))
-	for _, resource := range resources {
-		resourcesStr = append(resourcesStr, resource.String())
-	}
-	r := c.resty.R().SetQueryParams(map[string]string{
-		"media_id":  strconv.Itoa(mediaId),
-		"resources": strings.Join(resourcesStr, ","),
-		"csrf":      biliJct,
-	})
-	if len(platform) > 0 {
-		r = r.SetQueryParam("platform", platform)
-	}
-	resp, err := r.Post("https://api.bilibili.com/x/v3/fav/resource/batch-del")
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	_, err = getRespData(resp, "批量删除收藏内容")
+func (c *Client) DeleteFavourResources(param DeleteFavourResourcesParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v3/fav/resource/batch-del"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
 
@@ -252,27 +201,18 @@ type FavourInfo struct {
 	Season  any    `json:"season"`
 }
 
+type GetFavourInfoParam struct {
+	Resources []string `json:"resources"`                                    // 目标内容id列表。格式：{内容id}:{内容类型}。类型：2：视频稿件。12：音频。21：视频合集。内容id：视频稿件：视频稿件avid。音频：音频auid。视频合集：视频合集id
+	Platform  string   `json:"platform,omitempty" request:"query,omitempty"` // 平台标识。可为web（影响内容列表类型）
+}
+
 // GetFavourInfo 获取收藏内容
-func (c *Client) GetFavourInfo(resources []Resource, platform string) ([]*FavourInfo, error) {
-	resourcesStr := make([]string, 0, len(resources))
-	for _, resource := range resources {
-		resourcesStr = append(resourcesStr, resource.String())
-	}
-	r := c.resty.R().SetQueryParam("resources", strings.Join(resourcesStr, ","))
-	if len(platform) > 0 {
-		r = r.SetQueryParam("platform", platform)
-	}
-	resp, err := r.Get("https://api.bilibili.com/x/v3/fav/resource/infos")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	data, err := getRespData(resp, "获取收藏内容")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	var ret []*FavourInfo
-	err = json.Unmarshal(data, &ret)
-	return ret, errors.WithStack(err)
+func (c *Client) GetFavourInfo(param GetFavourInfoParam) ([]FavourInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/v3/fav/resource/infos"
+	)
+	return execute[[]FavourInfo](c, method, url, param)
 }
 
 type GetFavourListParam struct {

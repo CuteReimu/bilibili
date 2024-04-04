@@ -20,6 +20,7 @@ func TestQuery(t *testing.T) {
 		TestI *int   `request:"query,omitempty"`
 		TestJ *int   `request:"query"`
 		TestK int    `request:"query"`
+		testL int    `request:"query"`
 	}
 
 	f, i := 10, 0
@@ -28,6 +29,62 @@ func TestQuery(t *testing.T) {
 		TestE: 0,
 		TestF: &f,
 		TestI: &i,
+		testL: 10,
+	}
+
+	r := resty.New().R()
+	err := withParams(r, params)
+
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	if r.Header.Get("Content-Type") != "application/x-www-form-urlencoded" {
+		t.Fatal("withParams content type not correct ", r.Header.Get("Content-Type"))
+	}
+
+	query := make(map[string]string)
+	for k := range r.QueryParam {
+		query[k] = r.QueryParam.Get(k)
+	}
+	if !maps.Equal(query, map[string]string{
+		"test_a": "",
+		"tb":     "1",
+		"test_e": "1",
+		"test_f": "10",
+		"test_g": "1",
+		"test_i": "0",
+		"test_j": "",
+		"test_k": "0",
+	}) {
+		t.Fatal("withParams query result not correct ", r.QueryParam)
+	}
+}
+
+func TestQueryPtr(t *testing.T) {
+	type Test struct {
+		TestA string `request:"query"`
+		TestB string `request:"query,field=tb,default=1"`
+		TestC string `request:"query,omitempty"`
+		TestD string `request:"-"`
+		TestE int    `request:"query,default=1"`
+		TestF *int   `request:"query,default=1"`
+		TestG *int   `request:"query,default=1"`
+		TestH *int   `request:"query,omitempty"`
+		TestI *int   `request:"query,omitempty"`
+		TestJ *int   `request:"query"`
+		TestK int    `request:"query"`
+		testL int    `request:"query"`
+	}
+
+	f, i := 10, 0
+	params := &Test{
+		TestD: "test_d",
+		TestE: 0,
+		TestF: &f,
+		TestI: &i,
+		testL: 10,
 	}
 
 	r := resty.New().R()
@@ -73,6 +130,7 @@ func TestJson(t *testing.T) {
 		TestI *int   `request:"json,omitempty"`
 		TestJ *int   `request:"json"`
 		TestK int    `request:"json"`
+		testL int    `request:"json"`
 	}
 
 	f, i := 10, 0
@@ -81,6 +139,7 @@ func TestJson(t *testing.T) {
 		TestE: 0,
 		TestF: &f,
 		TestI: &i,
+		testL: 10,
 	}
 
 	r := resty.New().R()
@@ -122,6 +181,7 @@ func TestFormData(t *testing.T) {
 		TestI *int   `request:"form-data,omitempty"`
 		TestJ *int   `request:"form-data"`
 		TestK int    `request:"form-data"`
+		testL int    `request:"form-data"`
 	}
 
 	f, i := 10, 0
@@ -130,6 +190,7 @@ func TestFormData(t *testing.T) {
 		TestE: 0,
 		TestF: &f,
 		TestI: &i,
+		testL: 10,
 	}
 
 	r := resty.New().R()
