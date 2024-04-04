@@ -132,6 +132,14 @@ func withParams(r *resty.Request, in any) error {
 		for name := range tagMap {
 			switch name {
 			case "query":
+				// 对query类型的字段进行特殊处理
+				if fieldType.Type.Kind() == reflect.Slice {
+					strSlice := make([]string, 0, 4)
+					for i := 0; i < fieldValue.Len(); i++ {
+						strSlice = append(strSlice, cast.ToString(fieldValue.Index(i).Interface()))
+					}
+					realVal = strings.Join(strSlice, ",")
+				}
 				contentType = "application/x-www-form-urlencoded"
 			case "json":
 				contentType = "application/json"
