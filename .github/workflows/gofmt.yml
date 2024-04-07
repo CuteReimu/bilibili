@@ -2,7 +2,9 @@ name: GoFmt
 
 on:
   push:
-    branches: [ master, v2 ]
+    branches: [ v1 ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
 
@@ -17,8 +19,6 @@ jobs:
           go-version: '1.22'
 
       - name: gofmt
-        if: github.repository_owner == 'CuteReimu'
-        continue-on-error: true
         run: |
           if [ "$(gofmt -s -l -w . | wc -l)" -gt 0 ]; then
           git config --local user.name 'github-actions[bot]'

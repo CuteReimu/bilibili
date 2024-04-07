@@ -2,15 +2,15 @@
 
 # 哔哩哔哩-API-Go版本
 
-![](https://img.shields.io/github/go-mod/go-version/CuteReimu/bilibili/v2?label=Go "语言")
-[![](https://img.shields.io/github/actions/workflow/status/CuteReimu/bilibili/build-v2.yml?branch=v2)](https://github.com/CuteReimu/bilibili/actions/workflows/golangci-lint.yml "代码分析")
+![](https://img.shields.io/github/go-mod/go-version/CuteReimu/bilibili "语言")
+[![](https://img.shields.io/github/actions/workflow/status/CuteReimu/bilibili/golangci-lint.yml?branch=master)](https://github.com/CuteReimu/bilibili/actions/workflows/golangci-lint.yml "代码分析")
 [![](https://img.shields.io/github/contributors/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/graphs/contributors "贡献者")
 [![](https://img.shields.io/github/license/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/blob/master/LICENSE "许可协议")
 </div>
 
 本项目是基于Go语言编写的哔哩哔哩API调用。目前常用的接口已经基本完成，具体进度可以看[这里](#进度)
 
-[v2版本正在施工中。。。](https://github.com/CuteReimu/bilibili/issues/31)
+现在是v2版本，v2版本使用了泛型，因此确认不支持Go1.17及之前的版本。[如果还想使用v1版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
 
 **声明**：
 
