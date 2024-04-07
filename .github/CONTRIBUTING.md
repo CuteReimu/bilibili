@@ -1,0 +1,14 @@
+# 如何为仓库做贡献？
+
+## 关于命名规范
+
+- 函数命名参考中文翻译，例如“获取全部直播间分区列表”翻译成GetLiveAreaList，每个词一一对应，个别词语在不影响理解的情况下可以省略，例如这里“全部”被省略了。
+  - 可以参考一下bilibili-API-collect库的翻译，例如专栏文集叫“Articles”，专栏文章叫“Article”。
+- 函数传入参数的结构体名定义为GetLiveAreaListParam，也就是后面加“Param”，然后返回值定义为GetLiveAreaListResult，也就是后面加“Result”。
+  - 如果完全没有传入参数，没必要弄个空的结构体，留空即可。
+  - 对于“Get”类的函数，返回值可以简写成LiveAreaList，也就是把“Get”和“Result”省略掉。
+  - 传入参数中的csrf特殊处理一下，不用调用者手动填写，可以参考一下live.go。
+- 子类型的名字（例如Category）可以自己随意修改，只要易读即可。
+- 子类型如果能够复用尽量复用，例如Category可能在别的结构体里也复用了。会复用的类型考虑写到type.go中去
+
+**[tools目录下](../tools)包含了方便将Markdown表格转化为Go struct的工具，强烈建议使用。**

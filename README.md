@@ -27,8 +27,6 @@ PS：目前，B站调用接口时强制使用 `https` 协议
 
 `由于B站最近对所有搜索类接口都加上了Wbi签名认证的风控策略，本项目还没有对其进行兼容，因此这些搜索类接口可能会返回“-403:非法访问”的错误。`
 
-本项目的注释不会太多，使用时建议对照着 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) 的文档查看。
-
 本项目预计不会编写单元测试代码。一则因为各项数据会频繁变动，难以写成固定的结果；二则因为每次单元测试都要大量请求B站API，会对其产生不必要的压力。
 
 ### 安装
@@ -170,3 +168,6 @@ client.Resty().SetLogger(logger) // 自定义logger
 
 其余的非常用接口会在后续的版本中不断补充
 
+## 如何为仓库做贡献？
+
+请参考[CONTRIBUTING.md](.github/CONTRIBUTING.md)
