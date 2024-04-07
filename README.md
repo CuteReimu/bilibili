@@ -2,8 +2,8 @@
 
 # 哔哩哔哩-API-Go版本
 
-![](https://img.shields.io/github/go-mod/go-version/CuteReimu/bilibili "语言")
-[![](https://img.shields.io/github/actions/workflow/status/CuteReimu/bilibili/golangci-lint.yml?branch=master)](https://github.com/CuteReimu/bilibili/actions/workflows/golangci-lint.yml "代码分析")
+![](https://img.shields.io/github/go-mod/go-version/CuteReimu/bilibili/v1?label=Go "语言")
+[![](https://img.shields.io/github/actions/workflow/status/CuteReimu/bilibili/build-v1.yml?branch=v1)](https://github.com/CuteReimu/bilibili/actions/workflows/golangci-lint.yml "代码分析")
 [![](https://img.shields.io/github/contributors/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/graphs/contributors "贡献者")
 [![](https://img.shields.io/github/license/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/blob/master/LICENSE "许可协议")
 </div>
@@ -24,8 +24,6 @@ PS：目前，B站调用接口时强制使用 `https` 协议
 ## 快速开始
 
 `由于B站最近对所有搜索类接口都加上了Wbi签名认证的风控策略，本项目还没有对其进行兼容，因此这些搜索类接口可能会返回“-403:非法访问”的错误。`
-
-`不过，GetUserVideos接口好像又可以在不使用Wbi签名的情况下用了。`~~本着代码能跑就不要乱动它的原则，因此就没管。~~
 
 本项目的注释不会太多，使用时建议对照着 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect) 的文档查看。
 
