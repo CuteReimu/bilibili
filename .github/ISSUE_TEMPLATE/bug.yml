@@ -1,0 +1,42 @@
+name: API接口的BUG
+description: "某个API接口无法使用，返回错误"
+labels: [bug]
+body:
+  - type: textarea
+    id: go-method
+    attributes:
+      label: 调用的方法
+      value: |-
+        ```go
+        client.GetXXXXXX(param)
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: request
+    attributes:
+      label: 请求
+      value: |-
+        ```go
+        VideoParam {
+            Bvid: "bvXX1234XXXX",
+        }
+        ```
+    validations:
+      required: true
+      
+  - type: textarea
+    id: response
+    attributes:
+      label: 返回
+      placeholder: 错误码及错误信息
+    validations:
+      required: true
+      
+  - type: textarea
+    id: expecting
+    attributes:
+      label: 期望结果
+    validations:
+      required: true

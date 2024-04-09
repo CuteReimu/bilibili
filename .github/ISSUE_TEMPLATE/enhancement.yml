@@ -1,0 +1,28 @@
+name: 新的API接口
+description: "某个API接口在本项目中没有"
+labels: [新特性]
+body:
+- type: textarea
+  id: request
+  attributes:
+    label: 描述
+    placeholder: 简要描述一下接口的含义
+  validations:
+    required: true
+
+- type: textarea
+  id: response
+  attributes:
+    label: 接口文档
+    placeholder: |-
+      https://github.com/SocialSisterYi/bilibili-API-collect/xxxx/xxxx/xxxx.md
+      也可以直接贴上接口url和各字段含义
+  validations:
+    required: true
+
+- type: textarea
+  id: expecting
+  attributes:
+    label: 请求和返回的例子
+  validations:
+    required: true
