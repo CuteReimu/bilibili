@@ -1,8 +1,6 @@
 name: GoFmt
 
 on:
-  push:
-    branches: [ v1 ]
   pull_request:
     branches: [ master ]
 
@@ -12,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -25,5 +26,10 @@ jobs:
           git config --local user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add --all
           git commit -m "gofmt"
-          git push
           fi
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: ${{ github.head_ref }}
+          github_token: ${{ secrets.GH_PAT }}
