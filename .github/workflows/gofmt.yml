@@ -3,8 +3,6 @@ name: GoFmt
 on:
   push:
     branches: [ v1 ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
 
