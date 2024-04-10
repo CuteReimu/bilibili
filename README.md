@@ -170,4 +170,6 @@ client.Resty().SetLogger(logger) // 自定义logger
 
 ## 如何为仓库做贡献？
 
-请参考[CONTRIBUTING.md](.github/CONTRIBUTING.md)
+不知道在哪些方面可以做贡献？[点击这里看看吧！](https://github.com/CuteReimu/bilibili/contribute)
+
+命名规范请参考[CONTRIBUTING.md](.github/CONTRIBUTING.md)
