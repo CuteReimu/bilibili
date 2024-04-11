@@ -8,7 +8,9 @@
 [![](https://img.shields.io/github/license/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/blob/master/LICENSE "许可协议")
 </div>
 
-本项目是基于Go语言编写的哔哩哔哩API调用。目前常用的接口已经基本完成，具体进度可以看[这里](#进度)
+本项目是基于Go语言编写的哔哩哔哩API调用。目前常用的接口已经基本完成。
+
+如果你发现有**接口bug**或者**有你需要但是本库尚未实现的接口**，可以[提交issue](https://github.com/CuteReimu/bilibili/issues/new/choose)或者[提交pull request](#如何为仓库做贡献)。
 
 现在是v2版本，v2版本使用了泛型，因此确认不支持Go1.17及之前的版本。[如果还想使用v1版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
 
@@ -99,7 +101,7 @@ if err == nil && result.Status == 0 {
 countryCrown, others, _ := client.GetCountryCrown()
 ```
 
-当然，如果你已经确定`cid`的值，这一步可以跳过。中国大陆的`cid`就是86。
+当然，如果你已经确定`cid`的值，这一步可以跳过。中国大陆的`cid`就是`86`。
 
 然后发送短信验证码：*（[这个接口大概率返回86103错误](https://github.com/SocialSisterYi/bilibili-API-collect/issues/756)）*
 
@@ -142,6 +144,26 @@ cookiesString := client.GetCookiesString()
 client.SetCookiesString(cookiesString)
 ```
 
+### 其它接口
+
+你可以很方便的调用其它接口，以下举个例子：
+
+```go
+videoInfo, err := client.GetVideoInfo(bilibili.VideoParam{
+    Aid: 12345678,
+})
+```
+
+参数中非必填字段你可以不填（可以通过是否有`omitempty`来判断这个字段是否为非必填字段）。
+
+方法都是按照对应功能的英文翻译命名的，因此你可以方便地使用IDE找到想要的方法，配合注释便能够知道如何使用。
+
+### 解析短链接
+
+```go
+typ, id, err := client.UnwrapShortUrl("https://b23.tv/xxxxxx")
+```
+
 ### 设置*resty.Client的一些参数
 
 调用`client.Resty()`就可以获取到`*resty.Client`，然后自行操作即可。**但是不要做一些离谱的操作**~~（比如把Cookies删了）~~
@@ -150,23 +172,6 @@ client.SetCookiesString(cookiesString)
 client.Resty().SetTimeout(20 * time.Second) // 设置超时时间
 client.Resty().SetLogger(logger) // 自定义logger
 ```
-
-## 进度
-
-目前常用的接口已经基本完成，计划在这个版本内的功能有：
-
-- [x] 专栏
-- [x] 评论
-- [x] 动态
-- [x] 收藏
-- [x] 直播
-- [x] 登录
-- [x] 消息
-- [x] 用户
-- [x] 视频
-- [ ] 大会员
-
-其余的非常用接口会在后续的版本中不断补充
 
 ## 如何为仓库做贡献？
 
