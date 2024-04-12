@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.head_ref }}
           token: ${{ secrets.GH_PAT }}
 
@@ -31,5 +32,6 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
           branch: ${{ github.head_ref }}
           github_token: ${{ secrets.GH_PAT }}

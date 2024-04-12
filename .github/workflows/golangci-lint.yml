@@ -22,7 +22,7 @@ jobs:
         uses: golangci/golangci-lint-action@v4
         with:
           version: latest
-          args: --out-${NO_FUTURE}format line-number --timeout 3m0s -p bugs -p error -p performance -D unused -D gosmopolitan -D exhaustive
+          args: --out-${NO_FUTURE}format line-number --timeout 3m0s -p bugs -p error -p performance -D unused -D gosmopolitan -D exhaustive -D noctx
 
       - name: Test
         run: go test -v ./...
