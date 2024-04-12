@@ -1,10 +1,11 @@
 package bilibili
 
 import (
-	"github.com/go-resty/resty/v2"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
 type Client struct {
@@ -48,6 +49,10 @@ func (c *Client) SetCookiesString(cookiesString string) {
 	c.resty.SetCookies((&resty.Response{RawResponse: &http.Response{Header: http.Header{
 		"Set-Cookie": strings.Split(cookiesString, "\n"),
 	}}}).Cookies())
+}
+
+func (c *Client) GetCookies() []*http.Cookie {
+	return c.resty.Cookies
 }
 
 // 根据key获取指定的cookie值
