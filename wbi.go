@@ -1,7 +1,7 @@
 package bilibili
 
 import (
-	"crypto/md5" //nolint:all
+	"crypto/md5"
 	"encoding/hex"
 	"net/http"
 	"net/url"
@@ -237,7 +237,7 @@ func (wbi *WBI) SignMap(payload map[string]string, ts time.Time) (newPayload map
 	}
 
 	// Calculate w_rid
-	hash := md5.Sum([]byte(signQueryStr + mixinKey)) //nolint:all
+	hash := md5.Sum([]byte(signQueryStr + mixinKey))
 	newPayload["w_rid"] = hex.EncodeToString(hash[:])
 
 	return newPayload, nil
