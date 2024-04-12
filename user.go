@@ -1,19 +1,77 @@
 package bilibili
 
 type GetUserVideosParam struct {
-	Mid int `json:"mid"` // 目标用户mid
+	Mid     int    `json:"mid"`                                         // 目标用户mid
+	Order   string `json:"order,omitempty" request:"query,omitempty"`   // 排序方式。默认为pubdate。最新发布：pubdate。最多播放：click。最多收藏：stow
+	Tid     int    `json:"tid,omitempty" request:"query,omitempty"`     // 筛选目标分区。默认为0。0：不进行分区筛选。分区tid为所筛选的分区
+	Keyword string `json:"keyword,omitempty" request:"query,omitempty"` // 关键词筛选。用于使用关键词搜索该UP主视频稿件
+	Pn      int    `json:"pn,omitempty" request:"query,omitempty"`      // 页码。默认为 1
+	Ps      int    `json:"ps,omitempty" request:"query,omitempty"`      // 每页项数。默认为 30
 }
 
-type GetUserVideos struct {
+type VideoArea struct {
+	Count int    `json:"count"` // 投稿至该分区的视频数
+	Name  string `json:"name"`  // 该分区名称
+	Tid   int    `json:"tid"`   // 该分区tid
+}
+
+type UserVideo struct {
+	Aid          int    `json:"aid"` // 稿件avid
+	Attribute    int    `json:"attribute"`
+	Author       string `json:"author"`      // 视频UP主。不一定为目标用户（合作视频）
+	Bvid         string `json:"bvid"`        // 稿件bvid
+	Comment      int    `json:"comment"`     // 视频评论数
+	Copyright    string `json:"copyright"`   // 视频版权类型
+	Created      int    `json:"created"`     // 投稿时间。时间戳
+	Description  string `json:"description"` // 视频简介
+	EnableVt     int    `json:"enable_vt"`
+	HideClick    bool   `json:"hide_click"`     // false。作用尚不明确
+	IsPay        int    `json:"is_pay"`         // 0。作用尚不明确
+	IsUnionVideo int    `json:"is_union_video"` // 是否为合作视频。0：否。1：是
+	Length       string `json:"length"`         // 视频长度。MM:SS
+	Mid          int    `json:"mid"`            // 视频UP主mid。不一定为目标用户（合作视频）
+	Meta         any    `json:"meta"`           // 无数据时为 null
+	Pic          string `json:"pic"`            // 视频封面
+	Play         int    `json:"play"`           // 视频播放次数
+	Review       int    `json:"review"`         // 0。作用尚不明确
+	Subtitle     string `json:"subtitle"`       // 空。作用尚不明确
+	Title        string `json:"title"`          // 视频标题
+	Typeid       int    `json:"typeid"`         // 视频分区tid
+	VideoReview  int    `json:"video_review"`   // 视频弹幕数
+}
+
+type UserVideosList struct {
+	Tlist map[int]VideoArea `json:"tlist"` // 投稿视频分区索引
+	Vlist []UserVideo       `json:"vlist"` // 投稿视频列表
+}
+
+type UserVideoPage struct {
+	Count int `json:"count"` // 总计稿件数
+	Pn    int `json:"pn"`    // 当前页码
+	Ps    int `json:"ps"`    // 每页项数
+}
+
+type EpisodicButton struct {
+	Text string `json:"text"` // 按钮文字
+	Uri  string `json:"uri"`  // 全部播放页url
+}
+
+type UserVideos struct {
+	List           UserVideosList `json:"list"`            // 列表信息
+	Page           UserVideoPage  `json:"page"`            // 页面信息
+	EpisodicButton EpisodicButton `json:"episodic_button"` // “播放全部“按钮
+	IsRisk         bool           `json:"is_risk"`
+	GaiaResType    int            `json:"gaia_res_type"`
+	GaiaData       any            `json:"gaia_data"`
 }
 
 // GetUserVideos 查询用户投稿视频明细
-func (c *Client) GetUserVideos(param GetUserVideosParam) (*GetUserVideos, error) {
+func (c *Client) GetUserVideos(param GetUserVideosParam) (*UserVideos, error) {
 	const (
 		method = "GET"
 		url    = "https://api.bilibili.com/x/space/wbi/arc/search"
 	)
-	return execute[*GetUserVideos](c, method, url, param, fillWbiHandler(c.wbi, c.GetCookies()))
+	return execute[*UserVideos](c, method, url, param, fillWbiHandler(c.wbi, c.GetCookies()))
 }
 
 type GetUserCardParam struct {
