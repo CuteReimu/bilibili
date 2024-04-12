@@ -1,13 +1,19 @@
 package bilibili
 
-import (
-	"github.com/pkg/errors"
-)
+type GetUserVideosParam struct {
+	Mid int `json:"mid"` // 目标用户mid
+}
+
+type GetUserVideos struct {
+}
 
 // GetUserVideos 查询用户投稿视频明细
-func (c *Client) GetUserVideos() error {
-	// https://api.bilibili.com/x/space/wbi/arc/search
-	return errors.New("wbi还未实现，本接口暂时无法使用")
+func (c *Client) GetUserVideos(param GetUserVideosParam) (*GetUserVideos, error) {
+	const (
+		method = "GET"
+		url    = "https://api.bilibili.com/x/space/wbi/arc/search"
+	)
+	return execute[*GetUserVideos](c, method, url, param, fillWbiHandler(c.wbi, c.GetCookies()))
 }
 
 type GetUserCardParam struct {
