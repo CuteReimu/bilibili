@@ -2,8 +2,10 @@ package bilibili
 
 import (
 	"encoding/json"
+	"net/http"
 	"reflect"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/go-resty/resty/v2"
@@ -27,6 +29,20 @@ func fillCsrf(c *Client) paramHandler {
 func fillParam(key, value string) paramHandler {
 	return func(r *resty.Request) error {
 		r.SetQueryParam(key, value)
+		return nil
+	}
+}
+
+func fillWbiHandler(wbi *WBI, cookies []*http.Cookie) func(*resty.Request) error {
+	return func(r *resty.Request) error {
+		newQuery, err := wbi.SignQuery(r.QueryParam, time.Now())
+		if err != nil {
+			return err
+		}
+
+		r.QueryParam = newQuery
+		r.Cookies = cookies
+		r.Header.Del("Referer")
 		return nil
 	}
 }

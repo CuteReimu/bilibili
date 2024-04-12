@@ -1,13 +1,15 @@
 package bilibili
 
 import (
-	"github.com/go-resty/resty/v2"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
 type Client struct {
+	wbi   *WBI
 	resty *resty.Client
 }
 
@@ -26,7 +28,10 @@ func New() *Client {
 
 // NewWithClient 接收一个自定义的*resty.Client为参数
 func NewWithClient(restyClient *resty.Client) *Client {
-	return &Client{resty: restyClient}
+	return &Client{
+		wbi:   NewDefaultWbi(),
+		resty: restyClient,
+	}
 }
 
 func (c *Client) Resty() *resty.Client {
@@ -48,6 +53,25 @@ func (c *Client) SetCookiesString(cookiesString string) {
 	c.resty.SetCookies((&resty.Response{RawResponse: &http.Response{Header: http.Header{
 		"Set-Cookie": strings.Split(cookiesString, "\n"),
 	}}}).Cookies())
+}
+
+// SetCookies 设置Cookies
+func (c *Client) SetCookies(cookies []*http.Cookie) {
+	c.resty.SetCookies(cookies)
+}
+
+// SetRawCookies 这个 RawCookie 可以直接从浏览器 request的header中复制出来，然后直接设置
+func (c *Client) SetRawCookies(rawCookies string) {
+	header := http.Header{}
+	header.Add("Cookie", rawCookies)
+	req := http.Request{Header: header}
+
+	c.SetCookies(req.Cookies())
+}
+
+// GetCookies 获取当前的cookies
+func (c *Client) GetCookies() []*http.Cookie {
+	return c.resty.Cookies
 }
 
 // 根据key获取指定的cookie值
