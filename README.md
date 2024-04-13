@@ -139,6 +139,7 @@ cookiesString := client.GetCookiesString()
 
 // 设置cookiesString，就不需要登录操作了
 client.SetCookiesString(cookiesString)
+// 你也可以直接把浏览器的Cookie复制过来调用SetCookiesString，这样也可以不需要登录操作了
 ```
 
 ### 其它接口
