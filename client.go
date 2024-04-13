@@ -45,28 +45,24 @@ func (c *Client) GetCookiesString() string {
 	for _, cookie := range c.resty.Cookies {
 		cookieStrings = append(cookieStrings, cookie.String())
 	}
-	return strings.Join(cookieStrings, "\n")
+	return strings.Join(cookieStrings, "; ")
 }
 
 // SetCookiesString 设置Cookies，但是是字符串格式，配合 GetCookiesString 使用。有些功能必须登录或设置Cookies后才能使用。
+//
+// 你也可以将浏览器中的Cookie传入这个函数使用。
 func (c *Client) SetCookiesString(cookiesString string) {
-	c.resty.SetCookies((&resty.Response{RawResponse: &http.Response{Header: http.Header{
-		"Set-Cookie": strings.Split(cookiesString, "\n"),
-	}}}).Cookies())
-}
-
-// SetCookies 设置Cookies
-func (c *Client) SetCookies(cookies []*http.Cookie) {
-	c.resty.SetCookies(cookies)
-}
-
-// SetRawCookies 这个 RawCookie 可以直接从浏览器 request的header中复制出来，然后直接设置
-func (c *Client) SetRawCookies(rawCookies string) {
+	rawCookies := strings.ReplaceAll(cookiesString, "\n", "; ") // 兼容之前的换行符
 	header := http.Header{}
 	header.Add("Cookie", rawCookies)
 	req := http.Request{Header: header}
 
 	c.SetCookies(req.Cookies())
+}
+
+// SetCookies 设置cookies
+func (c *Client) SetCookies(cookies []*http.Cookie) {
+	c.resty.SetCookies(cookies)
 }
 
 // GetCookies 获取当前的cookies
