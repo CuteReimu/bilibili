@@ -44,6 +44,8 @@ var client = bilibili.New()
 
 ### 首次登录
 
+**下文为了篇幅更短，示例中把很多显而易见的`err`校验忽略成了`_`，实际使用请自行校验`err`。**
+
 #### 方法一：扫码登录
 
 首先获取二维码：
@@ -95,7 +97,7 @@ if err == nil && result.Status == 0 {
 首先用上述方法二相同的方式获取人机验证参数并进行人机验证。然后获取国际地区代码：
 
 ```go
-countryCrown, others, _ := client.GetCountryCrown()
+countryCrownResult, _ := client.GetCountryCrown()
 ```
 
 当然，如果你已经确定`cid`的值，这一步可以跳过。中国大陆的`cid`就是`86`。
