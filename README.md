@@ -158,10 +158,20 @@ videoInfo, err := client.GetVideoInfo(bilibili.VideoParam{
 
 方法都是按照对应功能的英文翻译命名的，因此你可以方便地使用IDE找到想要的方法，配合注释便能够知道如何使用。
 
-### 解析短链接
+### 可能用到的工具接口
 
 ```go
+// 解析短连接
 typ, id, err := client.UnwrapShortUrl("https://b23.tv/xxxxxx")
+
+// 获取服务器当前时间戳
+timestamp, err := client.GetTimestamp()
+
+// av号转bv号
+bilibili.AvToBv(111298867365120)
+
+// bv号转av号
+bilibili.BvToAv("BV1L9Uoa9EUx")
 ```
 
 ### 设置*resty.Client的一些参数
