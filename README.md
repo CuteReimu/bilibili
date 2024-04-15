@@ -164,8 +164,8 @@ videoInfo, err := client.GetVideoInfo(bilibili.VideoParam{
 // 解析短连接
 typ, id, err := client.UnwrapShortUrl("https://b23.tv/xxxxxx")
 
-// 获取服务器当前时间戳
-timestamp, err := client.GetTimestamp()
+// 获取服务器当前时间
+now, err := client.Now()
 
 // av号转bv号
 bilibili.AvToBv(111298867365120)

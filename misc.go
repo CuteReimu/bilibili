@@ -46,7 +46,7 @@ func (c *Client) UnwrapShortUrl(shortUrl string) (string, any, error) {
 	return "", nil, errors.New("无法解析链接：" + url)
 }
 
-// Now 获取当前时间戳
+// Now 获取服务器当前时间
 func (c *Client) Now() (time.Time, error) {
 	const (
 		method = resty.MethodGet
