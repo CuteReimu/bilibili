@@ -168,10 +168,13 @@ typ, id, err := client.UnwrapShortUrl("https://b23.tv/xxxxxx")
 now, err := client.Now()
 
 // av号转bv号
-bilibili.AvToBv(111298867365120)
+bvid := bilibili.AvToBv(111298867365120)
 
 // bv号转av号
-bilibili.BvToAv("BV1L9Uoa9EUx")
+aid := bilibili.BvToAv("BV1L9Uoa9EUx")
+
+// 通过ip确定地理位置
+zoneLocation, err := client.GetZoneLocation()
 ```
 
 ### 设置*resty.Client的一些参数
