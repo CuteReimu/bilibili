@@ -95,3 +95,24 @@ func Bv2Av(bvid string) int {
 	}
 	return (tmp & maskCode) ^ xorCode
 }
+
+type ZoneLocation struct {
+	Addr        string `json:"addr"`         // 公网IP地址
+	Country     string `json:"country"`      // 国家/地区名
+	Province    string `json:"province"`     // 省/州。非必须存在项
+	City        string `json:"city"`         // 城市。非必须存在项
+	Isp         string `json:"isp"`          // 运营商名
+	Latitude    int    `json:"latitude"`     // 纬度
+	Longitude   int    `json:"longitude"`    // 经度
+	ZoneId      int    `json:"zone_id"`      // ip数据库id
+	CountryCode int    `json:"country_code"` // 国家/地区代码
+}
+
+// GetZoneLocation 通过ip确定地理位置
+func (c *Client) GetZoneLocation() (*ZoneLocation, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/web-interface/zone"
+	)
+	return execute[*ZoneLocation](c, method, url, nil)
+}
