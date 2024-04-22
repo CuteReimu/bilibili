@@ -589,7 +589,7 @@ type GetVideoSeriesInfoParam struct {
 	CurrentMid int    `json:"current_mid,omitempty" request:"query,omitempty"` // 单页内容数量
 }
 
-// 列表 https://api.bilibili.com/x/series/archives?mid=397490386&series_id=1203833
+// GetVideoSeriesInfo 获取视频列表信息（在个人空间里创建的叫做视频列表，在创作中心里创建的叫合集，注意区分）
 func (c *Client) GetVideoSeriesInfo(param GetVideoSeriesInfoParam) (*VideoCollectionInfo, error) {
 	const (
 		method = resty.MethodGet
