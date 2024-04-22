@@ -535,7 +535,7 @@ type CollectionVideo struct {
 	Bvid             string              `json:"bvid"`              // 稿件bvid
 	Ctime            int                 `json:"ctime"`             // 创建时间。Unix 时间戳
 	Duration         int                 `json:"duration"`          // 视频时长。单位为秒
-	EnableVt         bool                `json:"enable_vt"`         // false
+	EnableVt         any                 `json:"enable_vt"`         // int or bool
 	InteractiveVideo bool                `json:"interactive_video"` // false
 	Pic              string              `json:"pic"`               // 封面 URL
 	PlaybackPosition int                 `json:"playback_position"` // 会随着播放时间增长，播放完成后为 -1 。单位未知
@@ -565,10 +565,10 @@ type CollectionPage struct {
 }
 
 type VideoCollectionInfo struct {
-	Aids     []int             `json:"aids"`     // 稿件avid。对应下方数组中内容 aid
-	Archives []CollectionVideo `json:"archives"` // 合集中的视频
-	Meta     CollectionMeta    `json:"meta"`     // 合集元数据
-	Page     CollectionPage    `json:"page"`     // 分页信息
+	Aids     []int             `json:"aids"`           // 稿件avid。对应下方数组中内容 aid
+	Archives []CollectionVideo `json:"archives"`       // 合集中的视频
+	Meta     CollectionMeta    `json:"meta,omitempty"` // 合集元数据
+	Page     CollectionPage    `json:"page"`           // 分页信息
 }
 
 // GetVideoCollectionInfo 获取视频合集信息 https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md#%E8%8E%B7%E5%8F%96%E8%A7%86%E9%A2%91%E5%90%88%E9%9B%86%E4%BF%A1%E6%81%AF
@@ -576,6 +576,24 @@ func (c *Client) GetVideoCollectionInfo(param GetVideoCollectionInfoParam) (*Vid
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/polymer/web-space/seasons_archives_list"
+	)
+	return execute[*VideoCollectionInfo](c, method, url, param)
+}
+
+type GetVideoSeriesInfoParam struct {
+	Mid        int    `json:"mid"`                                             // UP 主 ID
+	SeriesId   int    `json:"series_id"`                                       // 视频合集 ID
+	Sort       string `json:"sort,omitempty" request:"query,omitempty"`        // 未知
+	Pn         int    `json:"pn,omitempty" request:"query,omitempty"`          // 页码索引
+	Ps         int    `json:"ps,omitempty" request:"query,omitempty"`          // 单页内容数量
+	CurrentMid int    `json:"current_mid,omitempty" request:"query,omitempty"` // 单页内容数量
+}
+
+// 列表 https://api.bilibili.com/x/series/archives?mid=397490386&series_id=1203833
+func (c *Client) GetVideoSeriesInfo(param GetVideoSeriesInfoParam) (*VideoCollectionInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/series/archives"
 	)
 	return execute[*VideoCollectionInfo](c, method, url, param)
 }
