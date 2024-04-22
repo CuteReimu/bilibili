@@ -186,6 +186,16 @@ client.Resty().SetTimeout(20 * time.Second) // 设置超时时间
 client.Resty().SetLogger(logger) // 自定义logger
 ```
 
+## Star History
+
+<a href="https://star-history.com/#CuteReimu/bilibili&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=CuteReimu/bilibili&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=CuteReimu/bilibili&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=CuteReimu/bilibili&type=Date" />
+ </picture>
+</a>
+
 ## 如何为仓库做贡献？
 
 不知道在哪些方面可以做贡献？[点击这里看看吧！](https://github.com/CuteReimu/bilibili/contribute)
