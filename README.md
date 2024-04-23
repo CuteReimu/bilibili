@@ -175,6 +175,9 @@ aid := bilibili.BvToAv("BV1L9Uoa9EUx")
 
 // 通过ip确定地理位置
 zoneLocation, err := client.GetZoneLocation()
+
+// 获取分区当日投稿稿件数
+regionDailyCount, err := client.GetRegionDailyCount()
 ```
 
 ### 设置*resty.Client的一些参数

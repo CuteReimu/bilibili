@@ -116,3 +116,16 @@ func (c *Client) GetZoneLocation() (*ZoneLocation, error) {
 	)
 	return execute[*ZoneLocation](c, method, url, nil)
 }
+
+type RegionDailyCount struct {
+	RegionCount map[int]int `json:"region_count"` // 分区当日投稿稿件数信息
+}
+
+// GetRegionDailyCount 获取分区当日投稿稿件数
+func (c *Client) GetRegionDailyCount() (*RegionDailyCount, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/web-interface/online"
+	)
+	return execute[*RegionDailyCount](c, method, url, nil)
+}
