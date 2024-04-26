@@ -26,14 +26,14 @@ func readCSV(filename string) ([]ZoneInfo, error) {
 		return nil, err
 	}
 	defer file.Close()
-	
+
 	// 创建CSV读取器
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var zoneInfos []ZoneInfo
 	// 遍历每一行, 将每一行转换为ZoneInfo对象
 	for _, record := range records[1:] { // 跳过标题行
@@ -41,12 +41,12 @@ func readCSV(filename string) ([]ZoneInfo, error) {
 		if err != nil {
 			return nil, err
 		}
-		
+
 		tid, err := strconv.Atoi(record[3])
 		if err != nil {
 			return nil, err
 		}
-		
+
 		info := ZoneInfo{
 			Name:      record[0],
 			Code:      record[1],
@@ -57,7 +57,7 @@ func readCSV(filename string) ([]ZoneInfo, error) {
 		}
 		zoneInfos = append(zoneInfos, info)
 	}
-	
+
 	return zoneInfos, nil
 }
 
@@ -68,7 +68,7 @@ func GetAllZoneInfos() ([]ZoneInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return zoneInfos, nil
 }
 
@@ -92,7 +92,7 @@ func GetZoneInfoByTid(tid int) (ZoneInfo, error) {
 	if err != nil {
 		return ZoneInfo{}, err
 	}
-	
+
 	//fmt.Println(zoneInfos)
 	// 遍历ZoneInfo切片, 查找匹配名称的ZoneInfo对象
 	for _, info := range zoneInfos {
@@ -100,7 +100,7 @@ func GetZoneInfoByTid(tid int) (ZoneInfo, error) {
 			return info, nil
 		}
 	}
-	
+
 	// 如果没有找到匹配的ZoneInfo对象, 返回错误
 	return ZoneInfo{}, fmt.Errorf("ZoneInfo not found")
 }
