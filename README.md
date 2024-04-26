@@ -3,6 +3,7 @@
 # 哔哩哔哩-API-Go版本
 
 ![](https://img.shields.io/github/go-mod/go-version/CuteReimu/bilibili "语言")
+[![](https://img.shields.io/github/stars/CuteReimu/bilibili?style=flat&color=yellow)](#star-history "stars")
 [![](https://img.shields.io/github/actions/workflow/status/CuteReimu/bilibili/golangci-lint.yml?branch=master)](https://github.com/CuteReimu/bilibili/actions/workflows/golangci-lint.yml "代码分析")
 [![](https://img.shields.io/github/contributors/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/graphs/contributors "贡献者")
 [![](https://img.shields.io/github/license/CuteReimu/bilibili)](https://github.com/CuteReimu/bilibili/blob/master/LICENSE "许可协议")
@@ -16,7 +17,7 @@
 
 现在是v2版本，v2版本使用了泛型，因此确认不支持Go1.17及之前的版本。[如果还想使用v1版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
 
-**声明**：
+## 声明
 
 1. 本项目遵守 AGPL 开源协议。
 2. 本项目基于 [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
@@ -27,7 +28,10 @@
 
 PS：目前，B站调用接口时强制使用 `https` 协议
 
+**如果你觉得本项目对你有帮助，点亮右上角的↗ :star: 不迷路**
+
 ## 快速开始
+
 ### 安装
 
 ```bash
