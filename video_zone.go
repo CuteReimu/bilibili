@@ -18,7 +18,7 @@ type ZoneInfo struct {
 	Overview  string //概述,简介
 }
 
-//go:embed zone.csv
+//go:embed video_zone.csv
 var embeddedCSV []byte
 
 // readCSV 从文件中读取CSV数据并转换为ZoneInfo切片,内部的一个工具函数。
