@@ -32,6 +32,15 @@ type Article struct {
 
 **[tools目录下](../tools)包含了方便将Markdown表格转化为Go struct的工具，强烈建议使用。**
 
+## 关于go文件的命名
+
+对于**bilibili-API-collect**库的接口，将对应方法放在对应的`.go`文件里。例如：
+
+- **bilibili-API-collect**中的`docs/user`文件夹下面的所有接口，对应方法放在`user.go`文件里
+- **bilibili-API-collect**中的`docs/video`文件夹下面的所有接口，对应方法放在`video.go`文件里
+
+对于并非是对应接口的方法，可自行找一个合适的`.go`文件。
+
 ## 关于编码风格
 
 本项目不做太多的编码风格限制，就提这样一个建议吧：
