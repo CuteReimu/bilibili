@@ -39,7 +39,7 @@ type Article struct {
 - **bilibili-API-collect**中的`docs/user`文件夹下面的所有接口，对应方法放在`user.go`文件里
 - **bilibili-API-collect**中的`docs/video`文件夹下面的所有接口，对应方法放在`video.go`文件里
 
-对于并非是对应接口的方法，可自行找一个合适的`.go`文件。
+对于并非是对应接口的方法（例如一些纯工具类方法），可自行找一个合适的`.go`文件。
 
 ## 关于编码风格
 
