@@ -1,9 +1,10 @@
 package bilibili
 
 import (
+	"bytes"
+	_ "embed"
 	"encoding/csv"
-	"fmt"
-	"os"
+	"github.com/pkg/errors"
 	"strconv"
 )
 
@@ -14,24 +15,22 @@ type ZoneInfo struct {
 	MasterTid int    //主分区tid
 	Tid       int    //子分区tid
 	Overview  string //概述,简介
-	Remark    string //备注
 }
 
+//go:embed zone.csv
+var embeddedCSV []byte
+
 // readCSV 从文件中读取CSV数据并转换为ZoneInfo切片,内部的一个工具函数。
-func readCSV(filename string) ([]ZoneInfo, error) {
+func readCSV() ([]ZoneInfo, error) {
 	// 打开文件
-	file, err := os.Open(filename)
-	if err != nil {
-		fmt.Println("Error opening file:", err)
-		return nil, err
-	}
-	defer file.Close()
+
+	csvReader := bytes.NewReader(embeddedCSV)
 
 	// 创建CSV读取器
-	reader := csv.NewReader(file)
+	reader := csv.NewReader(csvReader)
 	records, err := reader.ReadAll()
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	var zoneInfos []ZoneInfo
@@ -39,12 +38,12 @@ func readCSV(filename string) ([]ZoneInfo, error) {
 	for _, record := range records[1:] { // 跳过标题行
 		masterTid, err := strconv.Atoi(record[2]) // 将字符串转换为整数
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		tid, err := strconv.Atoi(record[3])
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		info := ZoneInfo{
@@ -53,7 +52,6 @@ func readCSV(filename string) ([]ZoneInfo, error) {
 			MasterTid: masterTid,
 			Tid:       tid,
 			Overview:  record[4],
-			Remark:    record[5],
 		}
 		zoneInfos = append(zoneInfos, info)
 	}
@@ -64,7 +62,7 @@ func readCSV(filename string) ([]ZoneInfo, error) {
 // GetAllZoneInfos 获取所有ZoneInfo对象
 func GetAllZoneInfos() ([]ZoneInfo, error) {
 	// 读取CSV文件
-	zoneInfos, err := readCSV("zone.csv")
+	zoneInfos, err := readCSV()
 	if err != nil {
 		return nil, err
 	}
@@ -72,15 +70,21 @@ func GetAllZoneInfos() ([]ZoneInfo, error) {
 	return zoneInfos, nil
 }
 
-// GetDescription 获取ZoneInfo对象的描述信息
+// GetDescription 获取ZoneInfo对象的描述信息,描述信息分为四个部分。当前分区，主分区，描述和备注。
 func (info ZoneInfo) GetDescription() string {
 	var description string
+	var masterInfo, _ = GetZoneInfoByTid(info.MasterTid)
+
 	description = "【分区】" + info.Name
+	description += "\n【主分区】" + masterInfo.Name
+
 	if info.Overview != "" {
 		description += "\n【描述】" + info.Overview
+		description += info.Overview
 	}
-	if info.Remark != "" {
-		description += "\n【备注】" + info.Remark
+	//备注写到主分区的备注中了
+	if masterInfo.Overview != "" {
+		description += "\n【备注】" + masterInfo.Overview
 	}
 	return description
 }
@@ -88,12 +92,11 @@ func (info ZoneInfo) GetDescription() string {
 // GetZoneInfoByTid 根据名称获取ZoneInfo对象
 func GetZoneInfoByTid(tid int) (ZoneInfo, error) {
 	// 读取CSV文件
-	zoneInfos, err := readCSV("zone.csv")
+	zoneInfos, err := readCSV()
 	if err != nil {
-		return ZoneInfo{}, err
+		return ZoneInfo{}, errors.WithStack(err)
 	}
 
-	//fmt.Println(zoneInfos)
 	// 遍历ZoneInfo切片, 查找匹配名称的ZoneInfo对象
 	for _, info := range zoneInfos {
 		if info.Tid == tid {
@@ -102,5 +105,5 @@ func GetZoneInfoByTid(tid int) (ZoneInfo, error) {
 	}
 
 	// 如果没有找到匹配的ZoneInfo对象, 返回错误
-	return ZoneInfo{}, fmt.Errorf("ZoneInfo not found")
+	return ZoneInfo{}, errors.Errorf("ZoneInfo not found")
 }
