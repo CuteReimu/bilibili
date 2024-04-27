@@ -34,7 +34,7 @@ func readCSV() ([]ZoneInfo, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	var zoneInfos []ZoneInfo
+	zoneInfos := make([]ZoneInfo, 0, len(records)-1)
 	// 遍历每一行, 将每一行转换为ZoneInfo对象
 	for _, record := range records[1:] { // 跳过标题行
 		masterTid, err := strconv.Atoi(record[2]) // 将字符串转换为整数
