@@ -1,5 +1,7 @@
 package bilibili
 
+import "github.com/go-resty/resty/v2"
+
 type GetUserVideosParam struct {
 	Mid     int    `json:"mid"`                                         // 目标用户mid
 	Order   string `json:"order,omitempty" request:"query,omitempty"`   // 排序方式。默认为pubdate。最新发布：pubdate。最多播放：click。最多收藏：stow
@@ -132,4 +134,18 @@ func (c *Client) GetUserCard(param GetUserCardParam) (*UserCard, error) {
 		url    = "https://api.bilibili.com/x/web-interface/card"
 	)
 	return execute[*UserCard](c, method, url, param)
+}
+
+type CheckNickNameParam struct {
+	Nickname string `json:"nickName"` // 目标昵称。最长为16字符
+}
+
+// CheckNickName 检查昵称是否可注册
+func (c *Client) CheckNickName(param CheckNickNameParam) error {
+	const (
+		method = resty.MethodGet
+		url    = "https://passport.bilibili.com/web/generic/check/nickname"
+	)
+	_, err := execute[any](c, method, url, param)
+	return err
 }
