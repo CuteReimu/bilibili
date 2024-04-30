@@ -21,6 +21,7 @@ func TestQuery(t *testing.T) {
 		TestJ *int   `request:"query"`
 		TestK int    `request:"query"`
 		testL int    `request:"query"`
+		TestM string `json:"testM"`
 	}
 
 	f, i := 10, 0
@@ -57,6 +58,7 @@ func TestQuery(t *testing.T) {
 		"test_i": "0",
 		"test_j": "",
 		"test_k": "0",
+		"testM":  "",
 	}) {
 		t.Fatal("withParams query result not correct ", r.QueryParam)
 	}
@@ -76,6 +78,7 @@ func TestQueryPtr(t *testing.T) {
 		TestJ *int   `request:"query"`
 		TestK int    `request:"query"`
 		testL int    `request:"query"`
+		TestM string `json:"testM"`
 	}
 
 	f, i := 10, 0
@@ -112,6 +115,7 @@ func TestQueryPtr(t *testing.T) {
 		"test_i": "0",
 		"test_j": "",
 		"test_k": "0",
+		"testM":  "",
 	}) {
 		t.Fatal("withParams query result not correct ", r.QueryParam)
 	}
@@ -131,6 +135,7 @@ func TestJson(t *testing.T) {
 		TestJ *int   `request:"json"`
 		TestK int    `request:"json"`
 		testL int    `request:"json"`
+		TestM string `json:"testM" request:"json"`
 	}
 
 	f, i := 10, 0
@@ -163,6 +168,7 @@ func TestJson(t *testing.T) {
 		"test_i": &i,
 		"test_j": (*int)(nil),
 		"test_k": 0,
+		"testM":  "",
 	}) {
 		t.Fatal("withParams body result not correct ", r.Body)
 	}
@@ -182,6 +188,7 @@ func TestFormData(t *testing.T) {
 		TestJ *int   `request:"form-data"`
 		TestK int    `request:"form-data"`
 		testL int    `request:"form-data"`
+		TestM string `json:"testM" request:"form-data"`
 	}
 
 	f, i := 10, 0
@@ -214,6 +221,7 @@ func TestFormData(t *testing.T) {
 		"test_i": &i,
 		"test_j": (*int)(nil),
 		"test_k": 0,
+		"testM":  "",
 	}) {
 		t.Fatal("withParams body result not correct ", r.Body)
 	}
