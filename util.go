@@ -123,6 +123,8 @@ func withParams(r *resty.Request, in any) error {
 		tagMap := parseTag(tValue)
 		if name, ok := tagMap["field"]; ok {
 			fieldName = name
+		} else if jsonValue := fieldType.Tag.Get("json"); jsonValue != "" && jsonValue != "-" {
+			fieldName = jsonValue
 		} else {
 			fieldName = toSnakeCase(fieldType.Name)
 		}
