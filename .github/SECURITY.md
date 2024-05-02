@@ -1,5 +1,5 @@
-# Security Policy
+# 安全策略
 
-## Reporting a Vulnerability
+## 报告一个安全漏洞
 
-Please report security issues to cutereimu@vip.qq.com
+请将安全问题发送至 cutereimu@vip.qq.com
