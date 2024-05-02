@@ -15,7 +15,7 @@
 如果你发现有**接口bug**或者**有你需要但是本库尚未实现的接口**，可以[提交issue](https://github.com/CuteReimu/bilibili/issues/new/choose)或者[提交pull request](#如何为仓库做贡献)。
 如果因为B站修改了接口导致接口突然不可用，不一定能够及时更新，很大程度上需要依赖各位的告知。
 
-现在是v2版本，v2版本使用了泛型，因此确认不支持Go1.17及之前的版本。[如果还想使用v1版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
+现在是v2版本，v2版本需要Go1.19及以上。[如果还想使用v1版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
 
 ## 声明
 
