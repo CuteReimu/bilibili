@@ -1,7 +1,6 @@
 package bilibili
 
 import (
-	"maps"
 	"testing"
 
 	"github.com/go-resty/resty/v2"
@@ -45,21 +44,16 @@ func TestQuery(t *testing.T) {
 		t.Fatal("withParams content type not correct ", r.Header.Get("Content-Type"))
 	}
 
-	query := make(map[string]string)
-	for k := range r.QueryParam {
-		query[k] = r.QueryParam.Get(k)
-	}
-	if !maps.Equal(query, map[string]string{
-		"test_a": "",
-		"tb":     "1",
-		"test_e": "1",
-		"test_f": "10",
-		"test_g": "1",
-		"test_i": "0",
-		"test_j": "",
-		"test_k": "0",
-		"testM":  "",
-	}) {
+	if len(r.QueryParam) != 9 ||
+		r.QueryParam.Get("test_a") != "" ||
+		r.QueryParam.Get("tb") != "1" ||
+		r.QueryParam.Get("test_e") != "1" ||
+		r.QueryParam.Get("test_f") != "10" ||
+		r.QueryParam.Get("test_g") != "1" ||
+		r.QueryParam.Get("test_i") != "0" ||
+		r.QueryParam.Get("test_j") != "" ||
+		r.QueryParam.Get("test_k") != "0" ||
+		r.QueryParam.Get("testM") != "" {
 		t.Fatal("withParams query result not correct ", r.QueryParam)
 	}
 }
@@ -102,21 +96,16 @@ func TestQueryPtr(t *testing.T) {
 		t.Fatal("withParams content type not correct ", r.Header.Get("Content-Type"))
 	}
 
-	query := make(map[string]string)
-	for k := range r.QueryParam {
-		query[k] = r.QueryParam.Get(k)
-	}
-	if !maps.Equal(query, map[string]string{
-		"test_a": "",
-		"tb":     "1",
-		"test_e": "1",
-		"test_f": "10",
-		"test_g": "1",
-		"test_i": "0",
-		"test_j": "",
-		"test_k": "0",
-		"testM":  "",
-	}) {
+	if len(r.QueryParam) != 9 ||
+		r.QueryParam.Get("test_a") != "" ||
+		r.QueryParam.Get("tb") != "1" ||
+		r.QueryParam.Get("test_e") != "1" ||
+		r.QueryParam.Get("test_f") != "10" ||
+		r.QueryParam.Get("test_g") != "1" ||
+		r.QueryParam.Get("test_i") != "0" ||
+		r.QueryParam.Get("test_j") != "" ||
+		r.QueryParam.Get("test_k") != "0" ||
+		r.QueryParam.Get("testM") != "" {
 		t.Fatal("withParams query result not correct ", r.QueryParam)
 	}
 }
@@ -159,17 +148,17 @@ func TestJson(t *testing.T) {
 		t.Fatal("withParams content type not correct ", r.Header.Get("Content-Type"))
 	}
 
-	if !maps.Equal(r.Body.(map[string]any), map[string]any{
-		"test_a": "",
-		"tb":     "1",
-		"test_e": "1",
-		"test_f": &f,
-		"test_g": "1",
-		"test_i": &i,
-		"test_j": (*int)(nil),
-		"test_k": 0,
-		"testM":  "",
-	}) {
+	body := r.Body.(map[string]any)
+	if len(body) != 9 ||
+		body["test_a"] != "" ||
+		body["tb"] != "1" ||
+		body["test_e"] != "1" ||
+		body["test_f"] != &f ||
+		body["test_g"] != "1" ||
+		body["test_i"] != &i ||
+		body["test_j"] != (*int)(nil) ||
+		body["test_k"] != 0 ||
+		body["testM"] != "" {
 		t.Fatal("withParams body result not correct ", r.Body)
 	}
 }
@@ -212,17 +201,17 @@ func TestFormData(t *testing.T) {
 		t.Fatal("withParams content type not correct ", r.Header.Get("Content-Type"))
 	}
 
-	if !maps.Equal(r.Body.(map[string]any), map[string]any{
-		"test_a": "",
-		"tb":     "1",
-		"test_e": "1",
-		"test_f": &f,
-		"test_g": "1",
-		"test_i": &i,
-		"test_j": (*int)(nil),
-		"test_k": 0,
-		"testM":  "",
-	}) {
+	body := r.Body.(map[string]any)
+	if len(body) != 9 ||
+		body["test_a"] != "" ||
+		body["tb"] != "1" ||
+		body["test_e"] != "1" ||
+		body["test_f"] != &f ||
+		body["test_g"] != "1" ||
+		body["test_i"] != &i ||
+		body["test_j"] != (*int)(nil) ||
+		body["test_k"] != 0 ||
+		body["testM"] != "" {
 		t.Fatal("withParams body result not correct ", r.Body)
 	}
 }
@@ -251,10 +240,9 @@ func TestWithParamsSlice(t *testing.T) {
 		query[k] = r.QueryParam.Get(k)
 	}
 
-	if !maps.Equal(query, map[string]string{
-		"ids":   "1,2,3",
-		"ids_a": "1,2,3",
-	}) {
+	if len(r.QueryParam) != 2 ||
+		r.QueryParam.Get("ids") != "1,2,3" ||
+		r.QueryParam.Get("ids_a") != "1,2,3" {
 		t.Fatal("withParams query result not correct ", r.QueryParam)
 	}
 }
