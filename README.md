@@ -162,6 +162,32 @@ videoInfo, err := client.GetVideoInfo(bilibili.VideoParam{
 
 方法都是按照对应功能的英文翻译命名的，因此你可以方便地使用IDE找到想要的方法，配合注释便能够知道如何使用。
 
+### 对B站返回的错误码进行处理
+
+因为B站的返回内容是这样的格式：
+
+```json
+{
+   "code": 0,
+   "message": "错误信息",
+   "data": {}
+}
+```
+
+而我们这个库的接口只会返回`data`数据和一个`error`，若`code`为`0`则`error`为`nil`，否则我们并不会把`code`和`message`字段直接返回。
+
+在一般情况下，调用者不太需要关心`code`和`message`字段，只需要关心是否有`error`即可。
+但如果你实在需要`code`和`message`字段，我们也提供了一个办法：
+
+```go
+videoInfo, err := client.GetVideoInfo(bilibili.VideoParam{
+    Aid: 12345678,
+})
+if e, ok := err.(bilibili.Error); !ok {
+    log.Println(e.Code(), e.Message())
+}
+```
+
 ### 可能用到的工具接口
 
 ```go
