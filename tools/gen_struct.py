@@ -83,7 +83,7 @@ if __name__ == '__main__':
 			if content or comment:
 				sep = '。' if content and comment else ''
 				comment = ' // %s%s%s' % (content, sep, comment)
-				comment = comment.replace('<br>', '。').replace('<br/>', '。').replace('<br />', '。')
+				comment = comment.replace('<br>', '。').replace('<br/>', '。').replace('<br />', '。').replace('\\', '')
 			print('\t%s %s `json:"%s%s`%s' % (name, m['type'], m['name'], m['notnull'], comment))
 		print('}')
 
