@@ -2,6 +2,7 @@ package bilibili
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
@@ -71,7 +72,7 @@ func execute[Out any](c *Client, method, url string, in any, handlers ...paramHa
 		return out, errors.WithStack(err)
 	}
 	if cr.Code != 0 {
-		return out, errors.Errorf("错误码: %d, 错误信息: %s", cr.Code, cr.Message)
+		return out, Error{Code: cr.Code, Message: cr.Message}
 	}
 	return cr.Data, errors.WithStack(err)
 }
@@ -212,4 +213,13 @@ func toSnakeCase(s string) string {
 	}
 
 	return result.String()
+}
+
+type Error struct {
+	Code    int
+	Message string
+}
+
+func (e Error) Error() string {
+	return fmt.Sprintf("错误码: %d, 错误信息: %s", e.Code, e.Message)
 }
