@@ -367,6 +367,7 @@ func (c *Client) GetDynamicUpList(param GetDynamicUpListParam) (*DynamicUpList, 
 }
 
 type RemoveDynamicParam struct {
+	DynamicId int `json:"dynamic_id"` // 动态id
 }
 
 // RemoveDynamic 删除动态

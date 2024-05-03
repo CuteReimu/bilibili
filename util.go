@@ -23,6 +23,7 @@ func fillCsrf(c *Client) paramHandler {
 			return errors.New("B站登录过期")
 		}
 		r.SetQueryParam("csrf", csrf)
+		r.SetQueryParam("csrf_token", csrf)
 		return nil
 	}
 }
