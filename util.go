@@ -72,7 +72,7 @@ func execute[Out any](c *Client, method, url string, in any, handlers ...paramHa
 		return out, errors.WithStack(err)
 	}
 	if cr.Code != 0 {
-		return out, &biliError{cr.Code, cr.Message}
+		return out, Error{Code: cr.Code, Message: cr.Message}
 	}
 	return cr.Data, errors.WithStack(err)
 }
@@ -215,25 +215,11 @@ func toSnakeCase(s string) string {
 	return result.String()
 }
 
-type Error interface {
-	error
-	Code() int
-	Message() string
+type Error struct {
+	Code    int
+	Message string
 }
 
-type biliError struct {
-	code    int
-	message string
-}
-
-func (e *biliError) Code() int {
-	return e.code
-}
-
-func (e *biliError) Message() string {
-	return e.message
-}
-
-func (e *biliError) Error() string {
-	return fmt.Sprintf("错误码: %d, 错误信息: %s", e.code, e.message)
+func (e Error) Error() string {
+	return fmt.Sprintf("错误码: %d, 错误信息: %s", e.Code, e.Message)
 }
