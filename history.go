@@ -8,7 +8,7 @@ import (
 func (c *Client) ClearHistory() error {
 	const (
 		method = resty.MethodPost
-		url    = "https://api.bilibili.com/x/v2/history/delete"
+		url    = "https://api.bilibili.com/x/v2/history/clear"
 	)
 	_, err := execute[any](c, method, url, nil, fillCsrf(c))
 	return err
