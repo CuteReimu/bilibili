@@ -5,11 +5,11 @@ import (
 )
 
 // ClearHistory 清空历史记录
-func (c *Client) ClearHistory(param RemoveDynamicParam) error {
+func (c *Client) ClearHistory() error {
 	const (
 		method = resty.MethodPost
 		url    = "https://api.bilibili.com/x/v2/history/delete"
 	)
-	_, err := execute[any](c, method, url, param, fillCsrf(c))
+	_, err := execute[any](c, method, url, nil, fillCsrf(c))
 	return err
 }
