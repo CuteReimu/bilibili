@@ -70,7 +70,7 @@ type UserVideos struct {
 // GetUserVideos 查询用户投稿视频明细
 func (c *Client) GetUserVideos(param GetUserVideosParam) (*UserVideos, error) {
 	const (
-		method = "GET"
+		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/space/wbi/arc/search"
 	)
 	return execute[*UserVideos](c, method, url, param, fillWbiHandler(c.wbi, c.GetCookies()))
@@ -130,7 +130,7 @@ type UserCard struct {
 // https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/user/info.md#%E7%94%A8%E6%88%B7%E5%90%8D%E7%89%87%E4%BF%A1%E6%81%AF
 func (c *Client) GetUserCard(param GetUserCardParam) (*UserCard, error) {
 	const (
-		method = "GET"
+		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/web-interface/card"
 	)
 	return execute[*UserCard](c, method, url, param)
