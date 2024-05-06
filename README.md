@@ -184,11 +184,10 @@ videoInfo, err := client.GetVideoInfo(bilibili.VideoParam{
     Aid: 12345678,
 })
 if err != nil {
+    log.Printf("%+v\n", err)
     var e bilibili.Error
     if errors.As(err, &e) { // B站返回的错误
         log.Printf("错误码: %d, 错误信息: %s", e.Code, e.Message)
-    } else { // 不是B站返回的错误
-        log.Printf("%+v\n", err)
     }
 }
 ```
