@@ -15,7 +15,10 @@
 如果你发现有**接口bug**或者**有你需要但是本库尚未实现的接口**，可以[提交issue](https://github.com/CuteReimu/bilibili/issues/new/choose)或者[提交pull request](#如何为仓库做贡献)。
 如果因为B站修改了接口导致接口突然不可用，不一定能够及时更新，很大程度上需要依赖各位的告知。
 
-现在是v2版本，v2版本需要Go1.19及以上。[如果还想使用v1版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
+> [!IMPORTANT]
+> 现在是v2版本，v2版本需要Go1.19及以上。[如果还想使用v1版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
+
+**如果你觉得本项目对你有帮助，点亮右上角的↗ :star: 不迷路**
 
 ## 声明
 
@@ -27,8 +30,6 @@
 5. 本项目为开源项目，不接受任何形式的催单和索取行为，更不容许存在付费内容
 
 PS：目前，B站调用接口时强制使用 `https` 协议
-
-**如果你觉得本项目对你有帮助，点亮右上角的↗ :star: 不迷路**
 
 ## 快速开始
 
@@ -48,7 +49,8 @@ var client = bilibili.New()
 
 ### 首次登录
 
-**下文为了篇幅更短，示例中把很多显而易见的`err`校验忽略成了`_`，实际使用请自行校验`err`。**
+> [!TIP]
+> 下文为了篇幅更短，示例中把很多显而易见的`err`校验忽略成了`_`，实际使用请自行校验`err`。
 
 #### 方法一：扫码登录
 
@@ -184,13 +186,17 @@ videoInfo, err := client.GetVideoInfo(bilibili.VideoParam{
     Aid: 12345678,
 })
 if err != nil {
-    log.Printf("%+v\n", err)
     var e bilibili.Error
     if errors.As(err, &e) { // B站返回的错误
         log.Printf("错误码: %d, 错误信息: %s", e.Code, e.Message)
+    } else { // 其它错误
+        log.Printf("%+v", err)
     }
 }
 ```
+
+> [!TIP]
+> 我们的所有`error`都包含堆栈信息。如有需要，你可以用`log.Printf("%+v", err)`打印出堆栈信息，方便追踪错误。
 
 ### 可能用到的工具接口
 
