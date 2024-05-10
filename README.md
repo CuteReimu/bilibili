@@ -154,7 +154,7 @@ client.SetRawCookies("cookie1=xxx; cookie2=xxx")
 
 > [!NOTE]
 > - `GetCookiesString`和`SetCookiesString`使用的字符串是`"cookie1=xxx; expires=xxx; domain=xxx.com; path=/\ncookie2=xxx; expires=xxx; domain=xxx.com; path=/"`，包含过期时间、domain等一些其它信息，以`"\n"`分隔多个cookie
-> - `SetRawCookies`使用的字符串是`"cookie1=xxx; cookie2=xxx"`，以`"; "`分隔多个cookie，这和在浏览器F12里复制的一样
+> - `SetRawCookies`使用的字符串是`"cookie1=xxx; cookie2=xxx"`，只包含key=value，以`"; "`分隔多个cookie，这和在浏览器F12里复制的一样
 >
 > 请注意不要混用。
 
