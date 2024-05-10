@@ -145,10 +145,18 @@ if err == nil && result.Status == 0 {
 // 获取cookiesString，自行存储，方便下次启动程序时不需要重新登录
 cookiesString := client.GetCookiesString()
 
-// 设置cookiesString，就不需要登录操作了
+// 下次启动时，把存储的cookiesString设置进来，就不需要登录操作了
 client.SetCookiesString(cookiesString)
-// 你也可以直接把浏览器的Cookie复制过来调用SetCookiesString，这样也可以不需要登录操作了
+
+// 如果你是从浏览器request的header中直接复制出来的cookies，则改为调用SetRawCookies
+client.SetRawCookies("cookie1=xxx; cookie2=xxx")
 ```
+
+> [!NOTE]
+> - `GetCookiesString`和`SetCookiesString`使用的字符串是`"cookie1=xxx; expires=xxx; domain=xxx.com; path=/\ncookie2=xxx; expires=xxx; domain=xxx.com; path=/"`，包含过期时间、domain等一些其它信息，以`"\n"`分隔多个cookie
+> - `SetRawCookies`使用的字符串是`"cookie1=xxx; cookie2=xxx"`，以`"; "`分隔多个cookie，这和在浏览器F12里复制的一样
+>
+> 请注意不要混用。
 
 ### 其它接口
 
