@@ -39,7 +39,7 @@ type StudioInfo struct {
 	MasterList []any `json:"master_list"`
 }
 
-type RoomInfo struct {
+type LiveRoomInfo struct {
 	Uid                  int         `json:"uid"`                // 主播mid
 	RoomId               int         `json:"room_id"`            // 直播间长号
 	ShortId              int         `json:"short_id"`           // 直播间短号。为0是无短号
@@ -80,12 +80,12 @@ type RoomInfo struct {
 }
 
 // GetLiveRoomInfo 获取直播间信息
-func (c *Client) GetLiveRoomInfo(param GetLiveRoomInfoParam) (*RoomInfo, error) {
+func (c *Client) GetLiveRoomInfo(param GetLiveRoomInfoParam) (*LiveRoomInfo, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.live.bilibili.com/room/v1/Room/get_info"
 	)
-	return execute[*RoomInfo](c, method, url, param)
+	return execute[*LiveRoomInfo](c, method, url, param)
 }
 
 type UpdateLiveRoomTitleParam struct {
