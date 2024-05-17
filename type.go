@@ -157,3 +157,25 @@ type CardSpace struct {
 	SImg string `json:"s_img"` // 主页头图url 小图
 	LImg string `json:"l_img"` // 主页头图url 正常
 }
+
+type Label struct {
+	Path                  string `json:"path"`                      // 空。作用尚不明确
+	Text                  string `json:"text"`                      // 会员类型文案。大会员 年度大会员 十年大会员 百年大会员 最强绿鲤鱼
+	LabelTheme            string `json:"label_theme"`               // 会员标签。vip：大会员。annual_vip：年度大会员。ten_annual_vip：十 年大会员。hundred_annual_vip：百年大会员。fools_day_hundred_annual_vip：最强绿鲤鱼
+	TextColor             string `json:"text_color"`                // 会员标签
+	BgStyle               int    `json:"bg_style"`                  // 1
+	BgColor               string `json:"bg_color"`                  // 会员标签背景颜色。颜色码，一般为#FB7299，曾用于愚人节改变大会员配色
+	BorderColor           string `json:"border_color"`              // 会员标签边框颜色。未使用
+	UseImgLabel           bool   `json:"use_img_label"`             // true
+	ImgLabelUriHans       string `json:"img_label_uri_hans"`        // 空串
+	ImgLabelUriHant       string `json:"img_label_uri_hant"`        // 空串
+	ImgLabelUriHansStatic string `json:"img_label_uri_hans_static"` // 大会员牌子图片。简体版
+	ImgLabelUriHantStatic string `json:"img_label_uri_hant_static"` // 大会员牌子图片。繁体版
+}
+
+type Official struct {
+	Role  int    `json:"role"`  // 成员认证级别
+	Title string `json:"title"` // 成员认证名。无为空
+	Desc  string `json:"desc"`  // 成员认证备注。无为空
+	Type  int    `json:"type"`  // 成员认证类型。-1：无。0：有
+}
