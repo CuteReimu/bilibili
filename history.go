@@ -61,13 +61,27 @@ type HistoryInfo struct {
 	List   []List `json:"list"`   // 分段历史记录列表
 }
 
-// ClearHistory 获取历史记录列表
+// GetHistory 获取历史记录列表
 func (c *Client) GetHistory(param HistoryParam) (*HistoryInfo, error) {
 	const (
 		method = resty.MethodPost
 		url    = "https://api.bilibili.com/x/web-interface/history/cursor"
 	)
 	return execute[*HistoryInfo](c, method, url, param)
+}
+
+type DeleteHistoryParam struct {
+	Kid string `json:"kid"` // 删除的目标记录，格式为{业务类型}_{目标id}详见备注。视频：archive_{稿件avid}。直播：live_{直播间id}。专栏：article_{专栏cvid}。剧集：pgc_{剧集ssid}。文集：article-list_{文集rlid}
+}
+
+// DeleteHistory 删除历史记录
+func (c *Client) DeleteHistory(param DeleteHistoryParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v2/history/delete"
+	)
+	_, err := execute[any](c, method, url, nil, fillCsrf(c))
+	return err
 }
 
 // ClearHistory 清空历史记录
