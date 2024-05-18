@@ -80,7 +80,7 @@ func (c *Client) DeleteHistory(param DeleteHistoryParam) error {
 		method = resty.MethodPost
 		url    = "https://api.bilibili.com/x/v2/history/delete"
 	)
-	_, err := execute[any](c, method, url, nil, fillCsrf(c))
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
 
