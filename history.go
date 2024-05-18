@@ -64,7 +64,7 @@ type HistoryInfo struct {
 // GetHistory 获取历史记录列表
 func (c *Client) GetHistory(param HistoryParam) (*HistoryInfo, error) {
 	const (
-		method = resty.MethodPost
+		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/web-interface/history/cursor"
 	)
 	return execute[*HistoryInfo](c, method, url, param)
