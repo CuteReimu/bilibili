@@ -16,6 +16,7 @@ body:
     label: 接口文档
     placeholder: |-
       https://github.com/SocialSisterYi/bilibili-API-collect/xxxx/xxxx/xxxx.md
+      
       也可以直接贴上接口url和各字段含义
   validations:
     required: true
@@ -24,5 +25,3 @@ body:
   id: expecting
   attributes:
     label: 请求和返回的例子
-  validations:
-    required: true

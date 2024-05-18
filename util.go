@@ -73,7 +73,7 @@ func execute[Out any](c *Client, method, url string, in any, handlers ...paramHa
 		return out, errors.WithStack(err)
 	}
 	if cr.Code != 0 {
-		return out, Error{Code: cr.Code, Message: cr.Message}
+		return out, errors.WithStack(Error{Code: cr.Code, Message: cr.Message})
 	}
 	return cr.Data, errors.WithStack(err)
 }
@@ -126,6 +126,9 @@ func withParams(r *resty.Request, in any) error {
 		if name, ok := tagMap["field"]; ok {
 			fieldName = name
 		} else if jsonValue := fieldType.Tag.Get("json"); jsonValue != "" && jsonValue != "-" {
+			if index := strings.Index(jsonValue, ","); index != -1 {
+				jsonValue = jsonValue[:index]
+			}
 			fieldName = jsonValue
 		} else {
 			fieldName = toSnakeCase(fieldType.Name)

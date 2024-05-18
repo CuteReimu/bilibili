@@ -38,5 +38,8 @@ body:
     id: expecting
     attributes:
       label: 期望结果
-    validations:
-      required: true
+
+  - type: textarea
+    id: advice
+    attributes:
+      label: 建议

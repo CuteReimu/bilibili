@@ -15,7 +15,10 @@
 如果你发现有**接口bug**或者**有你需要但是本库尚未实现的接口**，可以[提交issue](https://github.com/CuteReimu/bilibili/issues/new/choose)或者[提交pull request](#如何为仓库做贡献)。
 如果因为B站修改了接口导致接口突然不可用，不一定能够及时更新，很大程度上需要依赖各位的告知。
 
-现在是v2版本，v2版本需要Go1.19及以上。[如果还想使用v1版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
+> [!IMPORTANT]
+> 现在是v2版本，v2版本需要Go1.19及以上。[如果还想使用v1版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
+
+**如果你觉得本项目对你有帮助，点亮右上角的↗ :star: 不迷路**
 
 ## 声明
 
@@ -27,8 +30,6 @@
 5. 本项目为开源项目，不接受任何形式的催单和索取行为，更不容许存在付费内容
 
 PS：目前，B站调用接口时强制使用 `https` 协议
-
-**如果你觉得本项目对你有帮助，点亮右上角的↗ :star: 不迷路**
 
 ## 快速开始
 
@@ -48,7 +49,8 @@ var client = bilibili.New()
 
 ### 首次登录
 
-**下文为了篇幅更短，示例中把很多显而易见的`err`校验忽略成了`_`，实际使用请自行校验`err`。**
+> [!TIP]
+> 下文为了篇幅更短，示例中把很多显而易见的`err`校验忽略成了`_`，实际使用请自行校验`err`。
 
 #### 方法一：扫码登录
 
@@ -143,10 +145,18 @@ if err == nil && result.Status == 0 {
 // 获取cookiesString，自行存储，方便下次启动程序时不需要重新登录
 cookiesString := client.GetCookiesString()
 
-// 设置cookiesString，就不需要登录操作了
+// 下次启动时，把存储的cookiesString设置进来，就不需要登录操作了
 client.SetCookiesString(cookiesString)
-// 你也可以直接把浏览器的Cookie复制过来调用SetCookiesString，这样也可以不需要登录操作了
+
+// 如果你是从浏览器request的header中直接复制出来的cookies，则改为调用SetRawCookies
+client.SetRawCookies("cookie1=xxx; cookie2=xxx")
 ```
+
+> [!NOTE]
+> - `GetCookiesString`和`SetCookiesString`使用的字符串是`"cookie1=xxx; expires=xxx; domain=xxx.com; path=/\ncookie2=xxx; expires=xxx; domain=xxx.com; path=/"`，包含过期时间、domain等一些其它信息，以`"\n"`分隔多个cookie
+> - `SetRawCookies`使用的字符串是`"cookie1=xxx; cookie2=xxx"`，只包含key=value，以`"; "`分隔多个cookie，这和在浏览器F12里复制的一样
+>
+> 请注意不要混用。
 
 ### 其它接口
 
@@ -187,11 +197,14 @@ if err != nil {
     var e bilibili.Error
     if errors.As(err, &e) { // B站返回的错误
         log.Printf("错误码: %d, 错误信息: %s", e.Code, e.Message)
-    } else { // 不是B站返回的错误
-        log.Printf("%+v\n", err)
+    } else { // 其它错误
+        log.Printf("%+v", err)
     }
 }
 ```
+
+> [!TIP]
+> 我们的所有`error`都包含堆栈信息。如有需要，你可以用`log.Printf("%+v", err)`打印出堆栈信息，方便追踪错误。
 
 ### 可能用到的工具接口
 
