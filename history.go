@@ -4,7 +4,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-type HistoryParam struct {
+type GetHistoryParam struct {
 	Max      int    `json:"max,omitempty" request:"query,omitempty"`      // 历史记录截止目标 id。默认为 0。稿件：稿件 avid。剧集（番剧 / 影视）：剧集 ssid。直播：直播间 id。文集：文集 rlid。文章：文章 cvid
 	Business string `json:"business,omitempty" request:"query,omitempty"` // 历史记录截止目标业务类型。默认为空。archive：稿件。pgc：剧集（番剧 / 影视）。live：直播。article-list：文集。article：文章
 	ViewAt   int    `json:"view_at,omitempty" request:"query,omitempty"`  // 历史记录截止时间。时间戳。默认为 0。0 为当前 时间
@@ -62,7 +62,7 @@ type HistoryInfo struct {
 }
 
 // GetHistory 获取历史记录列表
-func (c *Client) GetHistory(param HistoryParam) (*HistoryInfo, error) {
+func (c *Client) GetHistory(param GetHistoryParam) (*HistoryInfo, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/web-interface/history/cursor"
