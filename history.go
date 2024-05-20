@@ -11,16 +11,19 @@ type GetHistoryParam struct {
 	Type     string `json:"type,omitempty" request:"query,omitempty"`     // 历史记录分类筛选。all：全部类型（默认）。archive：稿件。live：直播。article：文章
 	Ps       int    `json:"ps,omitempty" request:"query,omitempty"`       // 每页项数。默认为 20，最大 30
 }
+
 type HistoryCursor struct {
 	Max      int    `json:"max"`      // 最后一项目标 id。**见请求参数**
 	ViewAt   int    `json:"view_at"`  // 最后一项时间节点。时间戳
 	Business string `json:"business"` // 最后一项业务类型。**见请求参数**
 	Ps       int    `json:"ps"`       // 每页项数
 }
+
 type HistoryTab struct {
 	Type string `json:"type"` // 类型
 	Name string `json:"name"` // 类型名
 }
+
 type HistoryDetail struct {
 	Oid      int    `json:"oid"`      // 目标id。稿件视频&剧集（当business=archive或business=pgc时）：稿件avid。直播（当business=live时）：直播间id。文章（当business=article时）：文章cvid。文集（当business=article-list时）：文集rlid
 	Epid     int    `json:"epid"`     // 剧集epid。仅用于剧集
@@ -31,6 +34,7 @@ type HistoryDetail struct {
 	Business string `json:"business"` // 业务类型。**见请求参数**
 	Dt       int    `json:"dt"`       // 记录查看的平台代码。1 3 5 7：手机端。2：web端。4 6：pad端。33：TV端。0：其他
 }
+
 type HistoryList struct {
 	Title      string        `json:"title"`       // 条目标题
 	LongTitle  string        `json:"long_title"`  // 条目副标题
@@ -55,6 +59,7 @@ type HistoryList struct {
 	TagName    string        `json:"tag_name"`    // 子分区名。用于稿件视频和直播
 	LiveStatus int           `json:"live_status"` // 直播状态。仅用于直播。0：未开播。1：已开播
 }
+
 type HistoryInfo struct {
 	Cursor HistoryCursor `json:"cursor"` // 历史记录页面信息
 	Tab    []HistoryTab  `json:"tab"`    // 历史记录筛选类型
