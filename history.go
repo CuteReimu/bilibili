@@ -98,3 +98,26 @@ func (c *Client) ClearHistory() error {
 	_, err := execute[any](c, method, url, nil, fillCsrf(c))
 	return err
 }
+
+type SetHistoryDisableParam struct {
+	Switch bool `json:"switch,omitempty" request:"query,omitempty"` // 停用开关。true：停用。false：正常。默认为false
+}
+
+// SetHistoryDisable 停用历史记录
+func (c *Client) SetHistoryDisable(param SetHistoryDisableParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v2/history/shadow/set"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
+	return err
+}
+
+// GetHistoryDisableState 查询历史记录停用状态 true：停用 false：正常
+func (c *Client) GetHistoryDisableState() (bool, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/v2/history/shadow"
+	)
+	return execute[bool](c, method, url, nil)
+}
