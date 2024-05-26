@@ -104,12 +104,12 @@ type SetHistoryDisableParam struct {
 }
 
 // SetHistoryDisable 停用历史记录
-func (c *Client) SetHistoryDisable(pram SetHistoryDisableParam) error {
+func (c *Client) SetHistoryDisable(param SetHistoryDisableParam) error {
 	const (
 		method = resty.MethodPost
 		url    = "https://api.bilibili.com/x/v2/history/shadow/set"
 	)
-	_, err := execute[any](c, method, url, nil, fillCsrf(c))
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
 
