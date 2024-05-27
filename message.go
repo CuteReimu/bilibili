@@ -89,6 +89,7 @@ func (c *Client) SendPrivateMessage(param SendPrivateMessageParam) (*SendPrivate
 }
 
 type GetPrivateMessageRecordsParam struct {
+	TalkerId       int    `json:"talker_id"`                                            // 聊天对象的uid
 	SenderDeviceId int    `json:"sender_device_id,omitempty" request:"query,omitempty"` // 发送者设备。1
 	SessionType    int    `json:"session_type"`                                         // 聊天对象的类型。1为用户，2为粉丝团
 	Size           int    `json:"size,omitempty" request:"query,omitempty"`             // 列出消息条数。默认是20，最大为200
@@ -122,15 +123,15 @@ type EInfo struct {
 type PrivateMessageRecords struct {
 	Messages []Message `json:"messages"`  // 聊天记录列表
 	HasMore  int       `json:"has_more"`  // 0
-	MinSeqno int       `json:"min_seqno"` // 所有消息最小的序列号（最早）
-	MaxSeqno int       `json:"max_seqno"` // 所有消息最大的序列号（最晚）
+	MinSeqno uint64    `json:"min_seqno"` // 所有消息最小的序列号（最早）
+	MaxSeqno uint64    `json:"max_seqno"` // 所有消息最大的序列号（最晚）
 	EInfos   []EInfo   `json:"e_infos"`   // 聊天表情列表
 }
 
-// GetPrivateMessageRecords 获取私信消息记录
+// GetPrivateMessageRecords 获取与聊天对象的私信消息记录
 func (c *Client) GetPrivateMessageRecords(param GetPrivateMessageRecordsParam) (*PrivateMessageRecords, error) {
 	const (
-		method = resty.MethodPost
+		method = resty.MethodGet
 		url    = "https://api.vc.bilibili.com/svr_sync/v1/svr_sync/fetch_session_msgs"
 	)
 	return execute[*PrivateMessageRecords](c, method, url, param)
