@@ -308,3 +308,27 @@ func (c *Client) CheckNickName(param CheckNickNameParam) error {
 	_, err := execute[any](c, method, url, param)
 	return err
 }
+
+type JoinOldFansParam struct {
+	Aid      string `json:"aid,omitempty" request:"query,omitempty"`      // 空串
+	UpMid    string `json:"up_mid"`                                       // UP主UID
+	Source   string `json:"source,omitempty" request:"query,omitempty"`   // "4"
+	Scene    string `json:"scene,omitempty" request:"query,omitempty"`    // "105"
+	Platform string `json:"platform,omitempty" request:"query,omitempty"` // "web"
+	MobiApp  string `json:"mobi_app,omitempty" request:"query,omitempty"` // "pc"
+}
+
+type JoinOldFansResult struct {
+	AllowMessage bool   `json:"allow_message"` // true
+	InputText    string `json:"input_text"`    // UP主加油！看好你噢
+	InputTitle   string `json:"input_title"`   // 感谢你对UP主的特别支持，“老粉”可期！私信留言鼓励下TA吧
+}
+
+// JoinOldFans 加入老粉计划
+func (c *Client) JoinOldFans(param JoinOldFansParam) (*JoinOldFansResult, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v1/contract/add_contract"
+	)
+	return execute[*JoinOldFansResult](c, method, url, param, fillCsrf(c))
+}
