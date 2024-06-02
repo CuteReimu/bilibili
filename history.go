@@ -121,3 +121,13 @@ func (c *Client) GetHistoryDisableState() (bool, error) {
 	)
 	return execute[bool](c, method, url, nil)
 }
+
+// AddToView 视频添加稍后再看
+func (c *Client) AddToView(param VideoParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v2/history/toview/add"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
+	return err
+}
