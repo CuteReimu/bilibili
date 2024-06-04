@@ -332,3 +332,24 @@ func (c *Client) JoinOldFans(param JoinOldFansParam) (*JoinOldFansResult, error)
 	)
 	return execute[*JoinOldFansResult](c, method, url, param, fillCsrf(c))
 }
+
+type FansSendMessageParam struct {
+	Aid     string `json:"aid,omitempty" request:"query,omitempty"`    // 空串
+	UpMid   string `json:"up_mid"`                                     // UP主UID
+	Source  string `json:"source,omitempty" request:"query,omitempty"` // "4"
+	Scene   string `json:"scene,omitempty" request:"query,omitempty"`  // "105"
+	Content string `json:"content"`                                    // 留言内容
+}
+
+type FansSendMessageResult struct {
+	SuccessToast string `json:"success_toast"` // "提交成功，UP主已收到留言~"
+}
+
+// FansSendMessage 老粉计划发送留言
+func (c *Client) FansSendMessage(param FansSendMessageParam) (*FansSendMessageResult, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v1/contract/add_message"
+	)
+	return execute[*FansSendMessageResult](c, method, url, param, fillCsrf(c))
+}
