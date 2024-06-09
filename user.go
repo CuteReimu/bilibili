@@ -295,6 +295,62 @@ func (c *Client) GetUserCard(param GetUserCardParam) (*UserCard, error) {
 	return execute[*UserCard](c, method, url, param)
 }
 
+type MyVip struct {
+	Type            int    `json:"type"`             // 会员类型。0：无。1：月大会员。2：年度及以上大会员
+	Status          int    `json:"status"`           // 会员状态。0：无。1：有
+	DueDate         int    `json:"due_date"`         // 会员过期时间。Unix时间戳(毫秒)
+	ThemeType       int    `json:"theme_type"`       // 0。作用尚不明确
+	Label           Label  `json:"label"`            // 会员标签
+	AvatarSubscript int    `json:"avatar_subscript"` // 是否显示会员图标。0：不显示。1：显示
+	NicknameColor   string `json:"nickname_color"`   // 会员昵称颜色。颜色码
+}
+
+type MyProfession struct {
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	ShowName string `json:"show_name"`
+}
+
+type MyUserSpaceDetail struct {
+	Mid            int          `json:"mid"`             // mid
+	Name           string       `json:"name"`            // 昵称
+	Sex            string       `json:"sex"`             // 性别。男 女 保密
+	Face           string       `json:"face"`            // 头像图片url
+	Sign           string       `json:"sign"`            // 签名
+	Rank           int          `json:"rank"`            // 10000。**作用尚不明确**
+	Level          int          `json:"level"`           // 当前等级。0-6级
+	Jointime       int          `json:"jointime"`        // 0。**作用尚不明确**
+	Moral          int          `json:"moral"`           // 节操。默认70
+	Silence        int          `json:"silence"`         // 封禁状态。0：正常。1：被封
+	EmailStatus    int          `json:"email_status"`    // 已验证邮箱。0：未验证。1：已验证
+	TelStatus      int          `json:"tel_status"`      // 已验证手机号。0：未验证。1：已验证
+	Identification int          `json:"identification"`  // 1。**作用尚不明确**
+	Vip            MyVip        `json:"vip"`             // 大会员状态
+	Pendant        Pendant      `json:"pendant"`         // 头像框信息
+	Nameplate      Nameplate    `json:"nameplate"`       // 勋章信息
+	Official       Official     `json:"official"`        // 认证信息
+	Birthday       int          `json:"birthday"`        // 生日。时间戳
+	IsTourist      int          `json:"is_tourist"`      // 0。**作用尚不明确**
+	IsFakeAccount  int          `json:"is_fake_account"` // 0。**作用尚不明确**
+	PinPrompting   int          `json:"pin_prompting"`   // 0。**作用尚不明确**
+	IsDeleted      int          `json:"is_deleted"`      // 0。**作用尚不明确**
+	InRegAudit     int          `json:"in_reg_audit"`
+	IsRipUser      bool         `json:"is_rip_user"`
+	Profession     MyProfession `json:"profession"` // 专业资质
+	Coins          float64      `json:"coins"`      // 硬币数
+	Following      int          `json:"following"`  // 粉丝数
+	Follower       int          `json:"follower"`   // 粉丝数
+}
+
+// GetMyUserSpaceDetail 获取登录用户空间详细信息
+func (c *Client) GetMyUserSpaceDetail() (*MyUserSpaceDetail, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/space/myinfo"
+	)
+	return execute[*MyUserSpaceDetail](c, method, url, nil)
+}
+
 type CheckNickNameParam struct {
 	Nickname string `json:"nickName"` // 目标昵称。最长为16字符
 }
