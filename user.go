@@ -409,3 +409,26 @@ func (c *Client) FansSendMessage(param FansSendMessageParam) (*FansSendMessageRe
 	)
 	return execute[*FansSendMessageResult](c, method, url, param, fillCsrf(c))
 }
+
+type BatchGetUserCardsParam struct {
+	Uids []int `json:"uids"` // 目标用户的UID列表
+}
+
+type BatchGetUserCardsResult struct {
+	Mid     int    `json:"mid"`     // mid
+	Name    string `json:"name"`    // 昵称
+	Face    string `json:"face"`    // 头像链接
+	Sign    string `json:"sign"`    // 签名
+	Rank    int    `json:"rank"`    // 用户权限等级
+	Level   int    `json:"level"`   // 当前等级。0-6 级
+	Silence int    `json:"silence"` // 封禁状态。0：正常。1：被封
+}
+
+// BatchGetUserCards 获取多用户详细信息
+func (c *Client) BatchGetUserCards(param BatchGetUserCardsParam) ([]*BatchGetUserCardsResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.vc.bilibili.com/account/v1/user/cards"
+	)
+	return execute[[]*BatchGetUserCardsResult](c, method, url, param)
+}
