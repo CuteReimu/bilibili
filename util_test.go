@@ -218,7 +218,7 @@ func TestFormData(t *testing.T) {
 
 func TestWithParamsSlice(t *testing.T) {
 	type Test struct {
-		Ids  []int    `request:"query"`
+		Ids  []int
 		IdsA []string `request:"query"`
 	}
 
