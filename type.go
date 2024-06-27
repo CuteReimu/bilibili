@@ -179,3 +179,28 @@ type Official struct {
 	Desc  string `json:"desc"`  // 成员认证备注。无为空
 	Type  int    `json:"type"`  // 成员认证类型。-1：无。0：有
 }
+
+type ContractInfo struct {
+	IsContract   bool `json:"is_contract"`   // 目标用户是否为对方的契约者
+	IsContractor bool `json:"is_contractor"` // 对方是否为目标用户的契约者
+	Ts           int  `json:"ts"`            // 对方成为目标用户的契约者的时间。秒级时间戳，仅当 is_contractor 项的值为 true 时才有此项
+	UserAttr     int  `json:"user_attr"`     // 对方作为目标用户的契约者的属性。1：老粉。否则为原始粉丝。仅当有特殊属性时才有此项
+}
+
+type RelationUser struct {
+	Mid            int            `json:"mid"`             // 用户 mid
+	Attribute      int            `json:"attribute"`       // 对方对于自己的关系属性。0：未关注。1：悄悄关注（现已下线）。2：已关注。6：已互粉。128：已拉黑
+	Mtime          int            `json:"mtime"`           // 对方关注目标用户时间。秒级时间戳。互关后刷新
+	Tag            []int          `json:"tag"`             // 目标用户将对方分组到的 id
+	Special        int            `json:"special"`         // 目标用户特别关注对方标识。0：否。1：是
+	ContractInfo   ContractInfo   `json:"contract_info"`   // 契约计划相关信息
+	Uname          string         `json:"uname"`           // 用户昵称
+	Face           string         `json:"face"`            // 用户头像url
+	FaceNft        int            `json:"face_nft"`        // 是否为 NFT 头像。0：非 NFT 头像。1：NFT 头像
+	Sign           string         `json:"sign"`            // 用户签名
+	OfficialVerify OfficialVerify `json:"official_verify"` // 认证信息
+	Vip            Vip            `json:"vip"`             // 会员信息
+	NftIcon        string         `json:"nft_icon"`        // （？）
+	RecReason      string         `json:"rec_reason"`      // （？）
+	TrackId        string         `json:"track_id"`        // （？）
+}

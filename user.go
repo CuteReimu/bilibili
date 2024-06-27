@@ -432,3 +432,47 @@ func (c *Client) BatchGetUserCards(param BatchGetUserCardsParam) ([]*BatchGetUse
 	)
 	return execute[[]*BatchGetUserCardsResult](c, method, url, param)
 }
+
+type GetUserFollowersParam struct {
+	Vmid int `json:"vmid"`                                   // 目标用户 mid
+	Ps   int `json:"ps,omitempty" request:"query,omitempty"` // 每页项数。默认为 50
+	Pn   int `json:"pn,omitempty" request:"query,omitempty"` // 页码。默认为 1。仅可查看前 1000 名粉丝
+}
+
+type GetUserFollowersResult struct {
+	List      []RelationUser `json:"list"`       // 明细列表
+	ReVersion int            `json:"re_version"` // （？）
+	Total     int            `json:"total"`      // 粉丝总数
+}
+
+// GetUserFollowers 查询用户粉丝明细（需要登录）
+func (c *Client) GetUserFollowers(param GetUserFollowersParam) (*GetUserFollowersResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/relation/followers"
+	)
+	return execute[*GetUserFollowersResult](c, method, url, param)
+}
+
+type GetUserFollowingsParam struct {
+	AccessKey string `json:"access_key,omitempty" request:"query,omitempty"` // APP 登录 Token
+	Vmid      int    `json:"vmid"`                                           // 目标用户 mid
+	OrderType string `json:"order_type,omitempty" request:"query,omitempty"` // 排序方式。当目标用户为自己时有效。按照关注顺序排列：留空。按照最常访问排列：attention
+	Ps        int    `json:"ps,omitempty" request:"query,omitempty"`         // 每页项数。默认为 50
+	Pn        int    `json:"pn,omitempty" request:"query,omitempty"`         // 页码。默认为 1。其他用户仅可查看前 100 个
+}
+
+type GetUserFollowingsResult struct {
+	List      []RelationUser `json:"list"`       // 明细列表
+	ReVersion int            `json:"re_version"` // （？）
+	Total     int            `json:"total"`      // 关注总数
+}
+
+// GetUserFollowings 查询用户关注明细（需要登录）
+func (c *Client) GetUserFollowings(param GetUserFollowingsParam) (*GetUserFollowingsResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/relation/followings"
+	)
+	return execute[*GetUserFollowingsResult](c, method, url, param)
+}
