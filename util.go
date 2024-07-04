@@ -67,7 +67,7 @@ func execute[Out any](c *Client, method, url string, in any, handlers ...paramHa
 	if resp.StatusCode() != 200 {
 		return out, errors.Errorf("status code: %d", resp.StatusCode())
 	}
-	c.resty.SetCookies(resp.Cookies())
+	c.SetCookies(resp.Cookies())
 	var cr commonResp[Out]
 	if err = json.Unmarshal(resp.Body(), &cr); err != nil {
 		return out, errors.WithStack(err)
