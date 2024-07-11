@@ -455,7 +455,6 @@ func (c *Client) GetUserFollowers(param GetUserFollowersParam) (*GetUserFollower
 }
 
 type GetUserFollowingsParam struct {
-	AccessKey string `json:"access_key,omitempty" request:"query,omitempty"` // APP 登录 Token
 	Vmid      int    `json:"vmid"`                                           // 目标用户 mid
 	OrderType string `json:"order_type,omitempty" request:"query,omitempty"` // 排序方式。当目标用户为自己时有效。按照关注顺序排列：留空。按照最常访问排列：attention
 	Ps        int    `json:"ps,omitempty" request:"query,omitempty"`         // 每页项数。默认为 50
@@ -475,4 +474,42 @@ func (c *Client) GetUserFollowings(param GetUserFollowingsParam) (*GetUserFollow
 		url    = "https://api.bilibili.com/x/relation/followings"
 	)
 	return execute[*GetUserFollowingsResult](c, method, url, param)
+}
+
+type GetUserFollowings2Param struct {
+	Vmid  int    `json:"vmid"`                                      // 目标用户 mid
+	Order string `json:"order,omitempty" request:"query,omitempty"` // 排序方式。按照降序排列：desc。按照升序排列：asc。默认降序排列
+	Ps    int    `json:"ps,omitempty" request:"query,omitempty"`    // 每页项数。默认为 50
+	Pn    int    `json:"pn,omitempty" request:"query,omitempty"`    // 页码。默认为 1。仅可查看前 5 页
+}
+
+type UserFollowingsDetail struct {
+	Mid            int            `json:"mid"`             // 用户 mid
+	Attribute      int            `json:"attribute"`       // 关注属性。0：未关注。2：已关注。6：已互粉
+	Mtime          int            `json:"mtime"`           // 关注对方时间。时间戳。互关后刷新
+	Tag            []int          `json:"tag"`             // 分组 id
+	Special        int            `json:"special"`         // 特别关注标志。0：否。1：是
+	Uname          string         `json:"uname"`           // 用户昵称
+	Face           string         `json:"face"`            // 用户头像 url
+	Sign           string         `json:"sign"`            // 用户签名
+	OfficialVerify OfficialVerify `json:"official_verify"` // 认证信息
+	Vip            Vip            `json:"vip"`             // 会员信息
+	Live           int            `json:"live"`            // 是否直播。0：未直播。1：直播中
+}
+
+type GetUserFollowings2Result struct {
+	List      []UserFollowingsDetail `json:"list"`       // 明细列表
+	ReVersion int                    `json:"re_version"` // （？）
+	Total     int                    `json:"total"`      // 关注总数
+}
+
+// GetUserFollowings2 查询用户关注明细2
+//
+// 仅可查看前 5 页，对于已设置可见性隐私关注列表的用户，则返回的List为nil，Total为0
+func (c *Client) GetUserFollowings2(param GetUserFollowings2Param) (*GetUserFollowings2Result, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://app.biliapi.net/x/v2/relation/followings"
+	)
+	return execute[*GetUserFollowings2Result](c, method, url, param)
 }
