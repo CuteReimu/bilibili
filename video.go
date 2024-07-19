@@ -490,7 +490,7 @@ type GetTopRecommendVideoParam struct {
 func (c *Client) GetTopRecommendVideo(param GetTopRecommendVideoParam) ([]VideoInfo, error) {
 	const (
 		method = resty.MethodGet
-		url    = "https://api.bilibili.com/x/web-interface/index/top/rcmd"
+		url    = "https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd"
 	)
 	return execute[[]VideoInfo](c, method, url, param)
 }
