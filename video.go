@@ -575,3 +575,171 @@ func (c *Client) GetVideoSeriesInfo(param GetVideoSeriesInfoParam) (*VideoCollec
 	)
 	return execute[*VideoCollectionInfo](c, method, url, param)
 }
+
+/*
+## qn视频清晰度标识
+
+**注：该值在 DASH 格式下无效，因为 DASH 格式会取到所有分辨率的流地址**
+
+| 值   | 含义           | 备注                                                         |
+| ---- | -------------- | ------------------------------------------------------------ |
+| 6    | 240P 极速      | 仅 MP4 格式支持<br />仅`platform=html5`时有效                |
+| 16   | 360P 流畅      |                                                              |
+| 32   | 480P 清晰      |                                                              |
+| 64   | 720P 高清      | WEB 端默认值<br />B站前端需要登录才能选择，但是直接发送请求可以不登录就拿到 720P 的取流地址<br />**无 720P 时则为 720P60** |
+| 74   | 720P60 高帧率  | 登录认证                                                     |
+| 80   | 1080P 高清     | TV 端与 APP 端默认值<br />登录认证                           |
+| 112  | 1080P+ 高码率  | 大会员认证                                                   |
+| 116  | 1080P60 高帧率 | 大会员认证                                                   |
+| 120  | 4K 超清        | 需要`fnval&128=128`且`fourk=1`<br />大会员认证               |
+| 125  | HDR 真彩色     | 仅支持 DASH 格式<br />需要`fnval&64=64`<br />大会员认证      |
+| 126  | 杜比视界       | 仅支持 DASH 格式<br />需要`fnval&512=512`<br />大会员认证    |
+| 127  | 8K 超高清      | 仅支持 DASH 格式<br />需要`fnval&1024=1024`<br />大会员认证  |
+
+例如：请求 1080P+ 的视频，则`qn=112`
+
+## fnver视频流版本标识
+
+目前该值恒为 0，即`fnver=0`
+
+## fnval视频流格式标识
+
+该代码为二进制属性位，如需组合功能需要使用`OR`运算结合一下数值
+
+目前 FLV 格式已下线，应避免使用`fnval=0`
+
+| 值   | 含义               | 备注                                                         |
+| ---- | ------------------ | ------------------------------------------------------------ |
+| ~~0~~ | ~~FLV 格式~~  | FLV 格式已下线<br />~~仅 H.264 编码<br />部分老视频存在分段现象<br />与 MP4、DASH 格式互斥~~ |
+| 1    | MP4 格式        | 仅 H.264 编码<br />与 ~~FLV~~、DASH 格式互斥 |
+| 16   | DASH 格式      | 与 MP4、~~FLV~~ 格式互斥 |
+| 64   | 是否需求 HDR 视频 | 需求 DASH 格式<br />仅 H.265 编码<br />需要`qn=125`<br />大会员认证 |
+| 128  | 是否需求 4K 分辨率 | 该值与`fourk`字段协同作用<br />需要`qn=120`<br />大会员认证 |
+| 256  | 是否需求杜比音频   | 需求 DASH 格式<br />大会员认证 |
+| 512  | 是否需求杜比视界   | 需求 DASH 格式<br />大会员认证 |
+| 1024 | 是否需求 8K 分辨率 | 需求 DASH 格式<br />需要`qn=127`<br />大会员认证 |
+| 2048 | 是否需求 AV1 编码 | 需求 DASH 格式                                       |
+
+例如：请求 DASH 格式，且需要 HDR 的视频流，则`fnval=16|64=80`
+
+## 视频编码代码
+
+| 值 | 含义     | 备注           |
+| ---- | ---------- | ---------------- |
+| 7  | AVC 编码 | 8K 视频不支持该格式 |
+| 12 | HEVC 编码 |                |
+| 13 | AV1 编码 |                |
+
+## 视频伴音音质代码
+
+| 值    | 含义 |
+| ----- | ---- |
+| 30216 | 64K  |
+| 30232 | 132K |
+| 30280 | 192K |
+| 30250 | 杜比全景声 |
+| 30251 | Hi-Res无损 |
+*/
+type GetVideoStreamParam struct {
+	Avid        int    `json:"avid,omitempty" request:"query,omitempty"`         // 稿件 avid。avid 与 bvid 任选一个
+	Bvid        string `json:"bvid,omitempty" request:"query,omitempty"`         // 稿件 bvid。avid 与 bvid 任选一个
+	Cid         int    `json:"cid"`                                              // 视频 cid
+	Qn          int    `json:"qn,omitempty" request:"query,omitempty"`           // 视频清晰度选择。未登录默认 32（480P），登录后默认 64（720P）。含义见 [上表](#qn视频清晰度标识)。**DASH 格式时无效**
+	Fnval       int    `json:"fnval,omitempty" request:"query,omitempty"`        // 视频流格式标识。默认值为1（MP4 格式）。含义见 [ 上表](#fnval视频流格式标识)
+	Fnver       int    `json:"fnver,omitempty" request:"query,omitempty"`        // 0
+	Fourk       int    `json:"fourk,omitempty" request:"query,omitempty"`        // 是否允许 4K 视频。画质最高 1080P：0（默认）。画 质最高 4K：1
+	Session     string `json:"session,omitempty" request:"query,omitempty"`      // 从视频播放页的 HTML 中获取
+	Otype       string `json:"otype,omitempty" request:"query,omitempty"`        // 固定为json
+	Type        string `json:"type,omitempty" request:"query,omitempty"`         // 目前为空
+	Platform    string `json:"platform,omitempty" request:"query,omitempty"`     // pc：web播放（默认值，视频流存在 referer鉴权）。html5：移动端 HTML5 播放（仅支持 MP4 格式，无 referer 鉴权可以直接使用video标签播放）
+	HighQuality int    `json:"high_quality,omitempty" request:"query,omitempty"` // 是否高画质。platform=html5时，此值 为1可使画质为1080p
+}
+
+type SupportFormat struct {
+	Quality        int      `json:"quality"`         // 视频清晰度代码。含义见 [上表](#qn视频清晰度标识)
+	Format         string   `json:"format"`          // 视频格式
+	NewDescription string   `json:"new_description"` // 格式描述
+	DisplayDesc    string   `json:"display_desc"`    // 格式描述
+	Superscript    string   `json:"superscript"`     // (?)
+	Codecs         []string `json:"codecs"`          // 可用编码格式列表 例：av01.0.13M.08.0.110.01.01.01.0 使用AV1编码, avc1.640034 使用AVC编码, hev1.1.6.L153.90 使用HEVC编码
+}
+type Durl struct {
+	Order     int      `json:"order"`      // 视频分段序号。某些视频会分为多个片段（从1顺序增长）
+	Length    int      `json:"length"`     // 视频长度。单位为毫秒
+	Size      int      `json:"size"`       // 视频大小。单位为 Byte
+	Ahead     string   `json:"ahead"`      // （？）
+	Vhead     string   `json:"vhead"`      // （？）
+	Url       string   `json:"url"`        // 默认流 URL。**注意 unicode 转义符**。有效时间为120min
+	BackupUrl []string `json:"backup_url"` // 备用视频流 **注意 unicode 转义符**。有效时间为120min
+}
+type Dash struct {
+	Duration      int            `json:"duration"`        // 视频长度。秒值
+	Minbuffertime int            `json:"minBufferTime"`   // 1.5？
+	MinBufferTime int            `json:"min_buffer_time"` // 1.5？
+	Video         []AudioOrVideo `json:"video"`           // 视频流信息 同一清晰度可拥有 H.264 / H.265 / AV1 多种码流<br />**HDR 仅支持 H.265** |
+	Audio         []AudioOrVideo `json:"audio"`           // 伴音流信息。当视频没有音轨时，此项为 null
+	Dolby         Dolby          `json:"dolby"`           // 杜比全景声伴音信息
+	Flac          Flac           `json:"flac"`            // 无损音轨伴音信息。当视频没有无损音轨时，此项为 null
+}
+type Dolby struct {
+	Type  int            `json:"type"`  // 杜比音效类型。1：普通杜比音效。2：全景杜比音效
+	Audio []AudioOrVideo `json:"audio"` // 杜比伴音流列表
+}
+type Flac struct {
+	Display bool         `json:"display"` // 是否在播放器显示切换Hi-Res无损音轨按钮
+	Audio   AudioOrVideo `json:"audio"`   // 音频流信息。同上文 DASH 流中video及audio数组中的对象
+}
+type AudioOrVideo struct {
+	Id           int         `json:"id"`             // 音视频清晰度代码。参考上表。[qn视频清晰度标识](#qn视频清晰度标识)。[视频伴音音质代码](#视 频伴音音质代码)
+	Baseurl      string      `json:"baseUrl"`        // 默认流 URL。**注意 unicode 转义符**。有效时间为 120min
+	BaseUrl      string      `json:"base_url"`       // **同上**
+	Backupurl    []string    `json:"backupUrl"`      // 备用流 URL
+	BackupUrl    []string    `json:"backup_url"`     // **同上**
+	Bandwidth    int         `json:"bandwidth"`      // 所需最低带宽。单位为 Byte
+	Mimetype     string      `json:"mimeType"`       // 格式 mimetype 类型
+	MimeType     string      `json:"mime_type"`      // **同上**
+	Codecs       string      `json:"codecs"`         // 编码/音频类型。eg：avc1.640032
+	Width        int         `json:"width"`          // 视频宽度。单位为像素。**仅视频流存在该字段**
+	Height       int         `json:"height"`         // 视频高度。单位为像素。**仅视频流存在该字段**
+	Framerate    string      `json:"frameRate"`      // 视频帧率。**仅视频流存在该字段**
+	FrameRate    string      `json:"frame_rate"`     // **同上**
+	Sar          string      `json:"sar"`            // Sample Aspect Ratio（单个像素的宽高比）。音频流该值恒为空
+	Startwithsap int         `json:"startWithSap"`   // Stream Access Point（流媒体访问位点）。音频流该值恒为空
+	StartWithSap int         `json:"start_with_sap"` // **同上**
+	Segmentbase  SegmentBase `json:"SegmentBase"`    // 见下表。url 对应 m4s 文件中，头部的位置。音频流该值恒为空
+	SegmentBase  SegmentBase `json:"segment_base"`   // **同上**
+	Codecid      int         `json:"codecid"`        // 码流编码标识代码。含义见 [上表](#视频编码代码)。音频流该值恒为0
+}
+type SegmentBase struct {
+	Initialization string `json:"initialization"` // ${init_first}-${init_last}。eg：0-821。ftyp (file type) box 加 上 moov box 在 m4s 文件中的范围（单位为 bytes）。如 0-821 表示开头 820 个字节
+	IndexRange     string `json:"index_range"`    // ${sidx_first}-${sidx_last}。eg：822-1309。sidx (segment index) box 在 m4s 文件中的范围（单位为 bytes）。sidx 的核心是一个数组，记录了各关键帧的时间戳及其在文件中的位置，。其作用是索引 (拖进 度条)
+}
+type GetVideoStreamResult struct {
+	From              string          `json:"from"`               // local？
+	Result            string          `json:"result"`             // suee？
+	Message           string          `json:"message"`            // 空？
+	Quality           int             `json:"quality"`            // 清晰度标识。含义见 [上表](#qn视频清晰度标识)
+	Format            string          `json:"format"`             // 视频格式。mp4/flv
+	Timelength        int             `json:"timelength"`         // 视频长度。单位为毫秒。不同分辨率 / 格式可能有略微差异
+	AcceptFormat      string          `json:"accept_format"`      // 支持的全部格式。每项用,分隔
+	AcceptDescription []string        `json:"accept_description"` // 支持的清晰度列表（文字说明）
+	AcceptQuality     []int           `json:"accept_quality"`     // 支持的清晰度列表（代码）。含义见 [上表](#qn视频清晰度标识)
+	VideoCodecid      int             `json:"video_codecid"`      // 默认选择视频流的编码id。含义见 [上表](#视频编码代码)
+	SeekParam         string          `json:"seek_param"`         // start？
+	SeekType          string          `json:"seek_type"`          // offset（DASH / FLV）？。 second（MP4）？
+	Durl              []Durl          `json:"durl"`               // 视频分段流信息。**注：仅 FLV / MP4 格式存在此字段**
+	Dash              Dash            `json:"dash"`               // DASH 流信息。**注：仅 DASH 格式存在此字段**
+	SupportFormats    []SupportFormat `json:"support_formats"`    // 支持格式的详细信息
+	HighFormat        *string         `json:"high_format"`        // （？）null
+	LastPlayTime      int             `json:"last_play_time"`     // 上次播放进度。毫秒值
+	LastPlayCid       int             `json:"last_play_cid"`      // 上次播放分P的 cid
+}
+
+// GetVideoStream 获取视频流地址_web端
+func (c *Client) GetVideoStream(param GetVideoStreamParam) (*GetVideoStreamResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/player/wbi/playurl"
+	)
+	return execute[*GetVideoStreamResult](c, method, url, param)
+}
