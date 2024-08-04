@@ -146,3 +146,42 @@ func (c *Client) AddChannelkAllToView(param AddChannelkAllToViewParam) error {
 	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
+
+type ToViewInfo struct {
+	Count int            `json:"count"` // 稍后再看视频数
+	List  []ToViewDetail `json:"list"`  // 稍后再看视频列表
+}
+
+type ToViewDetail struct {
+	Aid       int         `json:"aid"`       // 稿件avid
+	Videos    int         `json:"videos"`    // 稿件分P总数。默认为1
+	Tid       int         `json:"tid"`       // 分区tid
+	Tname     string      `json:"tname"`     // 子分区名称
+	Copyright int         `json:"copyright"` // 是否转载。1：原创。2：转载
+	Pic       string      `json:"pic"`       // 稿件封面图片url
+	Title     string      `json:"title"`     // 稿件标题
+	Pubdate   int         `json:"pubdate"`   // 稿件发布时间。时间戳
+	Ctime     int         `json:"ctime"`     // 用户提交稿件的时间。时间戳
+	Desc      string      `json:"desc"`      // 视频简介
+	State     int         `json:"state"`     // 视频状态。略，见[获取视频详细信息（web端）](../video/info.md#获取视频详细信息（web端）)中的state备注
+	Duration  int         `json:"duration"`  // 稿件总时长（所有分P）。单位为秒
+	Rights    VideoRights `json:"rights"`    // 稿件属性标志。略，见[获取视频详细信息（web端）](../video/info.md#获取视频详细信息（web端）)中的rights对象
+	Owner     Owner       `json:"owner"`     // 稿件UP主信息。略，见[获取视频详细信息（web端）](../video/info.md#获取视频详细信息 （web端）)中的owner对象
+	Stat      VideoStat   `json:"stat"`      // 稿件状态数。略，见[获取视频详细信息（web端）](../video/info.md#获取视频详细信息（web 端）)中的stat对象
+	Dynamic   string      `json:"dynamic"`   // 视频同步发布的的动态的文字内容。无为空
+	Dimension Dimension   `json:"dimension"` // 稿件1P分辨率。略，见[获取视频详细信息（web端）](../video/info.md#获取 视频详细信息（web端）)中的dimension对象
+	Count     int         `json:"count"`     // 稿件分P数。非投稿视频无此项
+	Cid       int         `json:"cid"`       // 视频cid
+	Progress  int         `json:"progress"`  // 观看进度时间。单位为秒
+	AddAt     int         `json:"add_at"`    // 添加时间。时间戳
+	Bvid      string      `json:"bvid"`      // 稿件bvid
+}
+
+// GetToVviewList 获取稍后再看视频列表
+func (c *Client) GetToViewList() (*ToViewInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/v2/history/toview"
+	)
+	return execute[*ToViewInfo](c, method, url, nil)
+}
