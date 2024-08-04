@@ -441,7 +441,7 @@ type GetUserFollowersParam struct {
 
 type GetUserFollowersResult struct {
 	List      []RelationUser `json:"list"`       // 明细列表
-	ReVersion int            `json:"re_version"` // （？）
+	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
 	Total     int            `json:"total"`      // 粉丝总数
 }
 
@@ -463,7 +463,7 @@ type GetUserFollowingsParam struct {
 
 type GetUserFollowingsResult struct {
 	List      []RelationUser `json:"list"`       // 明细列表
-	ReVersion int            `json:"re_version"` // （？）
+	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
 	Total     int            `json:"total"`      // 关注总数
 }
 
@@ -483,7 +483,7 @@ type GetUserFollowings2Param struct {
 	Pn    int    `json:"pn,omitempty" request:"query,omitempty"`    // 页码。默认为 1。仅可查看前 5 页
 }
 
-type UserFollowingsDetail struct {
+type UserFollowingsDetail2 struct {
 	Mid            int            `json:"mid"`             // 用户 mid
 	Attribute      int            `json:"attribute"`       // 关注属性。0：未关注。2：已关注。6：已互粉
 	Mtime          int            `json:"mtime"`           // 关注对方时间。时间戳。互关后刷新
@@ -498,9 +498,9 @@ type UserFollowingsDetail struct {
 }
 
 type GetUserFollowings2Result struct {
-	List      []UserFollowingsDetail `json:"list"`       // 明细列表
-	ReVersion int                    `json:"re_version"` // （？）
-	Total     int                    `json:"total"`      // 关注总数
+	List      []UserFollowingsDetail2 `json:"list"`       // 明细列表
+	ReVersion any                     `json:"re_version"` // （？）（可能是number，可能是string）
+	Total     int                     `json:"total"`      // 关注总数
 }
 
 // GetUserFollowings2 查询用户关注明细2
@@ -512,4 +512,75 @@ func (c *Client) GetUserFollowings2(param GetUserFollowings2Param) (*GetUserFoll
 		url    = "https://app.biliapi.net/x/v2/relation/followings"
 	)
 	return execute[*GetUserFollowings2Result](c, method, url, param)
+}
+
+type GetUserFollowings3Param struct {
+	Vmid int `json:"vmid"`                                   // 目标用户mid
+	Ps   int `json:"ps,omitempty" request:"query,omitempty"` // 每页项数。默认为20
+	Pn   int `json:"pn,omitempty" request:"query,omitempty"` // 页码。默认为1
+}
+
+type UserFollowingsDetail3 struct {
+	Mid       string `json:"mid"`       // 用户mid
+	Attribute int    `json:"attribute"` // 关注属性。0：未关注。2：已关注。6：已互粉
+	Uname     string `json:"uname"`     // 用户昵称
+	Face      string `json:"face"`      // 用户头像url
+}
+
+type GetUserFollowings3Result struct {
+	List []UserFollowingsDetail3 `json:"list"` // 明细列表
+}
+
+// GetUserFollowings3 查询用户关注明细3
+//
+// 对于设置了可见性隐私关注列表的用户会返回空列表
+func (c *Client) GetUserFollowings3(param GetUserFollowings3Param) (*GetUserFollowings3Result, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://line3-h5-mobile-api.biligame.com/game/center/h5/user/relationship/following_list"
+	)
+	return execute[*GetUserFollowings3Result](c, method, url, param)
+}
+
+type SearchUserFollowingsParam struct {
+	Vmid string `json:"vmid"`                                     // 目标用户 mid
+	Name string `json:"name,omitempty" request:"query,omitempty"` // 搜索关键词
+	Ps   int    `json:"ps,omitempty" request:"query,omitempty"`   // 每页项数。默认为 50
+	Pn   int    `json:"pn,omitempty" request:"query,omitempty"`   // 页码。默认为 1
+}
+
+type SearchUserFollowingsResult struct {
+	List      []RelationUser `json:"list"`       // 明细列表
+	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+	Total     int            `json:"total"`      // 关注总数
+}
+
+// SearchUserFollowings 搜索关注明细
+func (c *Client) SearchUserFollowings(param SearchUserFollowingsParam) (*SearchUserFollowingsResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/relation/followings/search"
+	)
+	return execute[*SearchUserFollowingsResult](c, method, url, param)
+}
+
+type GetSameFollowingsParam struct {
+	Vmid int `json:"vmid"`                                   // 目标用户 mid
+	Ps   int `json:"ps,omitempty" request:"query,omitempty"` // 每页项数。默认为 50
+	Pn   int `json:"pn,omitempty" request:"query,omitempty"` // 页码。默认为 1
+}
+
+type GetSameFollowingsResult struct {
+	List      []RelationUser `json:"list"`       // 明细列表
+	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+	Total     int            `json:"total"`      // 关注总数
+}
+
+// GetSameFollowings 查询共同关注明细
+func (c *Client) GetSameFollowings(param GetSameFollowingsParam) (*GetSameFollowingsResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/relation/same/followings"
+	)
+	return execute[*GetSameFollowingsResult](c, method, url, param)
 }
