@@ -177,11 +177,26 @@ type ToViewDetail struct {
 	Bvid      string      `json:"bvid"`      // 稿件bvid
 }
 
-// GetToVviewList 获取稍后再看视频列表
+// GetToViewList 获取稍后再看视频列表
 func (c *Client) GetToViewList() (*ToViewInfo, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/v2/history/toview"
 	)
 	return execute[*ToViewInfo](c, method, url, nil)
+}
+
+type DeleteToViewParam struct {
+	Viewed bool `json:"viewed,omitempty" request:"query,omitempty"` // 是否删除所有已观看的视频。true：删除已观看视 频。false：不删除已观看视频。默认为false
+	Aid    int  `json:"aid,omitempty" request:"query,omitempty"`    // 删除的目标记录的avid
+}
+
+// DeleteToView 删除稍后再看视频
+func (c *Client) DeleteToView(param DeleteToViewParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v2/history/toview/del"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
+	return err
 }
