@@ -200,3 +200,13 @@ func (c *Client) DeleteToView(param DeleteToViewParam) error {
 	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
+
+// ClearToView 清空稍后再看视频列表
+func (c *Client) ClearToView() error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/v2/history/toview/clear"
+	)
+	_, err := execute[any](c, method, url, nil, fillCsrf(c))
+	return err
+}
