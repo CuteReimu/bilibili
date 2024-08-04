@@ -132,13 +132,13 @@ func (c *Client) AddToView(param VideoParam) error {
 	return err
 }
 
-type AddChannelkAllToViewParam struct {
+type AddChannelAllToViewParam struct {
 	Cid int `json:"cid"` // 目标频道id
 	Mid int `json:"mid"` // 目标频道所属的用户mid
 }
 
 // AddChannelkAllToView 添加频道中所有视频到稍后再看
-func (c *Client) AddChannelkAllToView(param AddChannelkAllToViewParam) error {
+func (c *Client) AddChannelkAllToView(param AddChannelAllToViewParam) error {
 	const (
 		method = resty.MethodPost
 		url    = "https://space.bilibili.com/ajax/channel/addAllToView"
