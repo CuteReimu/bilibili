@@ -17,7 +17,7 @@ type ZoneVideoPage struct {
 	Size  int `json:"size"`  // 每页项数
 }
 
-//GetZoneVideoListNew 获取分区最新视频列表
+// GetZoneVideoListNew 获取分区最新视频列表
 func (c *Client) GetZoneVideoListNew(param GetZoneVideoListNewParam) (*ZoneVideoListInfo, error) {
 	const (
 		method = resty.MethodGet
@@ -33,7 +33,7 @@ type GetZoneVideoListWithTagParam struct {
 	TagId int `json:"tag_id"`                                 // 目标标签id
 }
 
-//GetZoneVideoListWithTag 获取分区标签近期互动列表
+// GetZoneVideoListWithTag 获取分区标签近期互动列表
 func (c *Client) GetZoneVideoListWithTag(param GetZoneVideoListWithTagParam) (*ZoneVideoListInfo, error) {
 	const (
 		method = resty.MethodGet
@@ -49,7 +49,7 @@ type GetZoneVideoListRecentParam struct {
 	Type int `json:"type,omitempty" request:"query,omitempty"` // 类型?。默认为0
 }
 
-//GetZoneVideoListRecent 获取分区近期投稿列表
+// GetZoneVideoListRecent 获取分区近期投稿列表
 func (c *Client) GetZoneVideoListRecent(param GetZoneVideoListRecentParam) (*ZoneVideoListInfo, error) {
 	const (
 		method = resty.MethodGet
@@ -122,7 +122,7 @@ type RankVideoInfo struct {
 	VtDisplay    string `json:"vt_display"`     // 空。作用尚不明确
 }
 
-//GetZoneVideoListByOrder 获取分区近期投稿列表 (带排序)
+// GetZoneVideoListByOrder 获取分区近期投稿列表 (带排序)
 func (c *Client) GetZoneVideoListByOrder(param GetZoneVideoListByOrderParam) (*ZoneVideoRankInfo, error) {
 	const (
 		method = resty.MethodGet
