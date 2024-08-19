@@ -584,3 +584,50 @@ func (c *Client) GetSameFollowings(param GetSameFollowingsParam) (*GetSameFollow
 	)
 	return execute[*GetSameFollowingsResult](c, method, url, param)
 }
+
+type GetWhispersResult struct {
+	List      []RelationUser `json:"list"`       // 明细列表
+	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+}
+
+// GetWhispers 查询悄悄关注明细
+func (c *Client) GetWhispers() (*GetWhispersResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/relation/whispers"
+	)
+	return execute[*GetWhispersResult](c, method, url, nil)
+}
+
+type GetFriendsResult struct {
+	List      []RelationUser `json:"list"`       // 明细列表
+	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+}
+
+// GetFriends 查询互相关注明细
+func (c *Client) GetFriends() (*GetFriendsResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/relation/friends"
+	)
+	return execute[*GetFriendsResult](c, method, url, nil)
+}
+
+type GetBlacksParam struct {
+	Ps int `json:"ps,omitempty" request:"query,omitempty"` // 每页项数。默认为 50
+	Pn int `json:"pn,omitempty" request:"query,omitempty"` // 页码。默认为 1
+}
+
+type GetBlacksResult struct {
+	List      []RelationUser `json:"list"`       // 明细列表
+	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+}
+
+// GetBlacks 查询黑名单明细
+func (c *Client) GetBlacks(param GetBlacksParam) (*GetBlacksResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/relation/blacks"
+	)
+	return execute[*GetBlacksResult](c, method, url, param)
+}

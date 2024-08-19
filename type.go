@@ -187,6 +187,7 @@ type ContractInfo struct {
 	UserAttr     int  `json:"user_attr"`     // 对方作为目标用户的契约者的属性。1：老粉。否则为原始粉丝。仅当有特殊属性时才有此项
 }
 
+// RelationUser 关系列表对象
 type RelationUser struct {
 	Mid            int            `json:"mid"`             // 用户 mid
 	Attribute      int            `json:"attribute"`       // 对方对于自己的关系属性。0：未关注。1：悄悄关注（现已下线）。2：已关注。6：已互粉。128：已拉黑
