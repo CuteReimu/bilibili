@@ -631,3 +631,31 @@ func (c *Client) GetBlacks(param GetBlacksParam) (*GetBlacksResult, error) {
 	)
 	return execute[*GetBlacksResult](c, method, url, param)
 }
+
+type ModifyRelationAct int
+
+const (
+	ModifyRelationActFollow     ModifyRelationAct = iota + 1 // 关注，无法对已注销或不存在的用户进行此操作
+	ModifyRelationActUnfollow                                // 取关
+	ModifyRelationActWhisper                                 // 悄悄关注，现已下线，使用本操作代码请求接口会提示“请求错误”
+	ModifyRelationActUnwhisper                               // 取消悄悄关注
+	ModifyRelationActBlack                                   // 拉黑
+	ModifyRelationActUnblack                                 // 取消拉黑
+	ModifyRelationActUnfollower                              // 踢出粉丝
+)
+
+type ModifyRelationParam struct {
+	Fid   int               `json:"fid"`    // 目标用户mid
+	Act   ModifyRelationAct `json:"act"`    // 操作代码
+	ReSrc int               `json:"re_src"` // 关注来源代码。空间：11。视频：14。文章：115。活动页面：222
+}
+
+// ModifyRelation 操作用户关系
+func (c *Client) ModifyRelation(param ModifyRelationParam) error {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/relation/modify"
+	)
+	_, err := execute[any](c, method, url, param, fillCsrf(c))
+	return err
+}
