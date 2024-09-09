@@ -659,3 +659,22 @@ func (c *Client) ModifyRelation(param ModifyRelationParam) error {
 	_, err := execute[any](c, method, url, param, fillCsrf(c))
 	return err
 }
+
+type BatchModifyRelationParam struct {
+	Fids  []int             `json:"fids"`   // 目标用户 mid 列表
+	Act   ModifyRelationAct `json:"act"`    // 操作代码。仅可为 1 或 5，故只能进行批量关注和拉黑
+	ReSrc int               `json:"re_src"` // 关注来源代码。同上
+}
+
+type BatchModifyRelationResult struct {
+	FailedFids []int `json:"failed_fids"` // 操作失败的 mid 列表
+}
+
+// BatchModifyRelation 批量操作用户关系
+func (c *Client) BatchModifyRelation(param BatchModifyRelationParam) (*BatchModifyRelationResult, error) {
+	const (
+		method = resty.MethodPost
+		url    = "https://api.bilibili.com/x/relation/batch/modify"
+	)
+	return execute[*BatchModifyRelationResult](c, method, url, param, fillCsrf(c))
+}
