@@ -356,8 +356,8 @@ type SelfFavourList struct {
 	URI string `json:"uri"`
 }
 
-// SelfFavourList 获取自己的收藏夹列表
-func (c *Client) SelfFavourList() ([]SelfFavourList, error) {
+// GetSelfFavourList 获取自己的收藏夹列表
+func (c *Client) GetSelfFavourList() ([]SelfFavourList, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/v3/fav/folder/list4navigate"
