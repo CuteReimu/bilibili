@@ -316,3 +316,51 @@ func (c *Client) GetFavourIds(param GetFavourIdsParam) ([]FavourId, error) {
 	)
 	return execute[[]FavourId](c, method, url, param)
 }
+
+type SelfFavourList struct {
+	ID                int64  `json:"id"`
+	Name              string `json:"name"`
+	MediaListResponse struct {
+		Count int `json:"count"`
+		List  []struct {
+			ID       int64  `json:"id"`
+			Fid      int    `json:"fid"`
+			Mid      int    `json:"mid"`
+			Attr     int    `json:"attr"`
+			AttrDesc string `json:"attr_desc"`
+			Title    string `json:"title"`
+			Cover    string `json:"cover"`
+			Upper    struct {
+				Mid  int    `json:"mid"`
+				Name string `json:"name"`
+				Face string `json:"face"`
+			} `json:"upper"`
+			CoverType  int         `json:"cover_type"`
+			Intro      string      `json:"intro"`
+			Ctime      int         `json:"ctime"`
+			Mtime      int         `json:"mtime"`
+			State      int         `json:"state"`
+			FavState   int         `json:"fav_state"`
+			MediaCount int         `json:"media_count"`
+			ViewCount  int         `json:"view_count"`
+			Vt         int         `json:"vt"`
+			IsTop      bool        `json:"is_top"`
+			RecentFav  interface{} `json:"recent_fav"`
+			PlaySwitch int         `json:"play_switch"`
+			Type       int         `json:"type"`
+			Link       string      `json:"link"`
+			Bvid       string      `json:"bvid"`
+		} `json:"list"`
+		HasMore bool `json:"has_more"`
+	} `json:"mediaListResponse"`
+	URI string `json:"uri"`
+}
+
+// GetSelfFavourList 获取自己的收藏夹列表
+func (c *Client) GetSelfFavourList() ([]SelfFavourList, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/v3/fav/folder/list4navigate"
+	)
+	return execute[[]SelfFavourList](c, method, url, nil)
+}
