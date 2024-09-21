@@ -199,6 +199,9 @@ type FavourInfo struct {
 	BvId    string `json:"bv_id"`
 	Bvid    string `json:"bvid"`
 	Season  any    `json:"season"`
+	Ugc     struct {
+		FirstCid int `json:"first_cid"` // 视频cid
+	} `json:"ugc"`
 }
 
 type GetFavourInfoParam struct {
@@ -283,6 +286,9 @@ type FavourList struct {
 		FavTime int    `json:"fav_time"` // 收藏时间戳
 		BvId    string `json:"bv_id"`    // 视频稿件bvid
 		Bvid    string `json:"bvid"`     // 视频稿件bvid
+		Ugc     struct {
+			FirstCid int `json:"first_cid"` // 视频cid
+		} `json:"ugc"`
 	} `json:"medias"`
 	HasMore bool `json:"has_more"`
 }
