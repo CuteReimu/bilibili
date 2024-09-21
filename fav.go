@@ -205,7 +205,7 @@ type FavourInfo struct {
 }
 
 type GetFavourInfoParam struct {
-	Resources []string `json:"resources"`                                    // 目标内容id列表。格式：{内容id}:{内容类型}。类型：2：视频稿件。12：音频。21：视频合集。内容id：视频稿件：视频稿件avid。音频：音频auid。视频合集：视频合集id
+	Resources []string `json:"resources"`                                    // 目标内容id列表。格式：{内容id}:{内容类型}。类型：2：视频稿件。12：音频。21：视频合集。内容id：视频稿件：视频稿件avid。音频：音频auid。视频合集：视频合集id。注意：一次最多只能请求100个内容id，超过100个内容id将不放回数据。
 	Platform  string   `json:"platform,omitempty" request:"query,omitempty"` // 平台标识。可为web（影响内容列表类型）
 }
 
