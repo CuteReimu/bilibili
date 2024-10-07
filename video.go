@@ -679,3 +679,45 @@ func (c *Client) GetVideoStream(param GetVideoStreamParam) (*GetVideoStreamResul
 	)
 	return execute[*GetVideoStreamResult](c, method, url, param, fillWbiHandler(c.wbi, c.GetCookies()))
 }
+
+type GetVideoConclusionParam struct {
+	Aid   int    `json:"aid,omitempty" request:"query,omitempty"`  // 稿件 avid。avid 与 bvid 任选一个
+	Bvid  string `json:"bvid,omitempty" request:"query,omitempty"` // 稿件 bvid。avid 与 bvid 任选一个
+	Cid   int    `json:"cid"`                                      // 视频 cid
+	UpMid int    `json:"up_mid"`                                   // UP 主 mid
+}
+
+type VideoConclusionResult struct {
+	Code        int                        `json:"code"`         // -1: 不支持AI摘要（敏感内容等）或其他因素导致请求异常 0: 有摘要 1：无摘要（未识别到语音）
+	ModelResult VideoConclusionModelResult `json:"model_result"` // 摘要内容
+	Stid        string                     `json:"stid"`         // 摘要 id 如code=1且该字段为0时，则未进行 AI 总结，即添加总结队列 如code=1且该字段为空时未识别到语音
+	Status      int                        `json:"status"`       // 未知
+	LikeNum     int                        `json:"like_num"`     // 点赞数 默认为0
+	DislikeNum  int                        `json:"dislike_num"`  // 点踩数 默认为0
+}
+
+type VideoConclusionModelResult struct {
+	ResultType int                      `json:"result_type"` // 数据类型 0: 没有摘要 1：仅存着摘要总结 2：存着摘要以及提纲
+	Summary    string                   `json:"summary"`     // 视频摘要 通常为一段概括整个视频内容的文本
+	Outline    []VideoConclusionOutline `json:"outline"`     // 分段提纲 通常为视频中叙述的各部分及其要点, 有数据时：array 无数据时：null
+}
+
+type VideoConclusionOutline struct {
+	Title       string                       `json:"title"`        // 分段标题 段落内容的概括
+	PartOutline []VideoConclusionPartOutline `json:"part_outline"` // 分段要点 当前分段中多个提到的细节
+	TimeStamp   int                          `json:"timestamp"`    // 分段起始时间 单位为秒
+}
+
+type VideoConclusionPartOutline struct {
+	TimeStamp int    `json:"timestamp"` // 要点起始时间 单位为秒
+	Content   string `json:"content"`   // 小结内容 其中一个分段的要点
+}
+
+// GetVideoConclusion 获取官方 AI 视频摘要
+func (c *Client) GetVideoConclusion(param GetVideoConclusionParam) (*VideoConclusionResult, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/web-interface/view/conclusion/get"
+	)
+	return execute[*VideoConclusionResult](c, method, url, param, fillCsrf(c), fillWbiHandler(c.wbi, c.GetCookies()))
+}
