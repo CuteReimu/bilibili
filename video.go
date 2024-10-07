@@ -530,7 +530,7 @@ type CollectionMeta struct {
 	Covr        string `json:"covr"`        // 合集封面 URL
 	Description string `json:"description"` // 合集描述
 	Mid         int    `json:"mid"`         // UP 主 ID
-	Name        int    `json:"name"`        // 合集标题
+	Name        string `json:"name"`        // 合集标题
 	Ptime       int    `json:"ptime"`       // 发布时间。Unix 时间戳
 	SeasonId    int    `json:"season_id"`   // 合集 ID
 	Total       int    `json:"total"`       // 合集内视频数量
