@@ -209,42 +209,42 @@ type ArgueInfo struct {
 }
 
 type VideoInfo struct {
-	Bvid               string        `json:"bvid"`         // 稿件bvid
-	Aid                int           `json:"aid"`          // 稿件avid
-	Videos             int           `json:"videos"`       // 稿件分P总数。默认为1
-	Tid                int           `json:"tid"`          // 分区tid
-	Tname              string        `json:"tname"`        // 子分区名称
-	Copyright          int           `json:"copyright"`    // 视频类型。1：原创。2：转载
-	Pic                string        `json:"pic"`          // 稿件封面图片url
-	Title              string        `json:"title"`        // 稿件标题
-	Pubdate            int           `json:"pubdate"`      // 稿件发布时间。秒级时间戳
-	Ctime              int           `json:"ctime"`        // 用户投稿时间。秒级时间戳
-	Desc               string        `json:"desc"`         // 视频简介
-	DescV2             []DescV2      `json:"desc_v2"`      // 新版视频简介
-	State              int           `json:"state"`        // 视频状态。详情见[属性数据文档](attribute_data.md#state字段值(稿件状态))
-	Duration           int           `json:"duration"`     // 稿件总时长(所有分P)。单位为秒
-	Forward            int           `json:"forward"`      // 撞车视频跳转avid。仅撞车视频存在此字段
-	MissionId          int           `json:"mission_id"`   // 稿件参与的活动id
-	RedirectUrl        string        `json:"redirect_url"` // 重定向url。仅番剧或影视视频存在此字段。用于番剧&影视的av/bv->ep
-	Rights             VideoRights   `json:"rights"`       // 视频属性标志
-	Owner              Owner         `json:"owner"`        // 视频UP主信息
-	Stat               VideoStat     `json:"stat"`         // 视频状态数
-	Dynamic            string        `json:"dynamic"`      // 视频同步发布的的动态的文字内容
-	Cid                int           `json:"cid"`          // 视频1P cid
-	Dimension          Dimension     `json:"dimension"`    // 视频1P分辨率
-	Premiere           any           `json:"premiere"`     // null
-	TeenageMode        int           `json:"teenage_mode"`
-	IsChargeableSeason bool          `json:"is_chargeable_season"`
-	IsStory            bool          `json:"is_story"`
-	NoCache            bool          `json:"no_cache"` // 作用尚不明确
-	Pages              []VideoPage   `json:"pages"`    // 视频分P列表
-	Subtitle           VideoSubtitle `json:"subtitle"` // 视频CC字幕信息
-	Staff              []Staff       `json:"staff"`    // 合作成员列表。非合作视频无此项
-	IsSeasonDisplay    bool          `json:"is_season_display"`
-	UserGarb           UserGarb      `json:"user_garb"` // 用户装扮信息
-	HonorReply         HonorReply    `json:"honor_reply"`
-	LikeIcon           string        `json:"like_icon"`
-	ArgueInfo          ArgueInfo     `json:"argue_info"` // 争议/警告信息
+	Bvid               string         `json:"bvid"`         // 稿件bvid
+	Aid                int            `json:"aid"`          // 稿件avid
+	Videos             int            `json:"videos"`       // 稿件分P总数。默认为1
+	Tid                int            `json:"tid"`          // 分区tid
+	Tname              string         `json:"tname"`        // 子分区名称
+	Copyright          int            `json:"copyright"`    // 视频类型。1：原创。2：转载
+	Pic                string         `json:"pic"`          // 稿件封面图片url
+	Title              string         `json:"title"`        // 稿件标题
+	Pubdate            int            `json:"pubdate"`      // 稿件发布时间。秒级时间戳
+	Ctime              int            `json:"ctime"`        // 用户投稿时间。秒级时间戳
+	Desc               string         `json:"desc"`         // 视频简介
+	DescV2             []DescV2       `json:"desc_v2"`      // 新版视频简介
+	State              int            `json:"state"`        // 视频状态。详情见[属性数据文档](attribute_data.md#state字段值(稿件状态))
+	Duration           int            `json:"duration"`     // 稿件总时长(所有分P)。单位为秒
+	Forward            int            `json:"forward"`      // 撞车视频跳转avid。仅撞车视频存在此字段
+	MissionId          int            `json:"mission_id"`   // 稿件参与的活动id
+	RedirectUrl        string         `json:"redirect_url"` // 重定向url。仅番剧或影视视频存在此字段。用于番剧&影视的av/bv->ep
+	Rights             VideoRights    `json:"rights"`       // 视频属性标志
+	Owner              Owner          `json:"owner"`        // 视频UP主信息
+	Stat               VideoStat      `json:"stat"`         // 视频状态数
+	Dynamic            string         `json:"dynamic"`      // 视频同步发布的的动态的文字内容
+	Cid                int            `json:"cid"`          // 视频1P cid
+	Dimension          Dimension      `json:"dimension"`    // 视频1P分辨率
+	Premiere           any            `json:"premiere"`     // null
+	TeenageMode        int            `json:"teenage_mode"`
+	IsChargeableSeason bool           `json:"is_chargeable_season"`
+	IsStory            bool           `json:"is_story"`
+	NoCache            bool           `json:"no_cache"` // 作用尚不明确
+	Pages              []VideoPage    `json:"pages"`    // 视频分P列表
+	Subtitle           VideoSubtitles `json:"subtitle"` // 视频CC字幕信息
+	Staff              []Staff        `json:"staff"`    // 合作成员列表。非合作视频无此项
+	IsSeasonDisplay    bool           `json:"is_season_display"`
+	UserGarb           UserGarb       `json:"user_garb"` // 用户装扮信息
+	HonorReply         HonorReply     `json:"honor_reply"`
+	LikeIcon           string         `json:"like_icon"`
+	ArgueInfo          ArgueInfo      `json:"argue_info"` // 争议/警告信息
 }
 
 // GetVideoInfo 获取视频详细信息
