@@ -721,3 +721,109 @@ func (c *Client) GetVideoConclusion(param GetVideoConclusionParam) (*VideoConclu
 	)
 	return execute[*VideoConclusionResult](c, method, url, param, fillCsrf(c), fillWbiHandler(c.wbi, c.GetCookies()))
 }
+
+type GetVideoPlayerMetaInfoParam struct {
+	Aid      int    `json:"aid,omitempty" request:"query,omitempty"`       // 稿件 avid。avid 与 bvid 任选一个
+	Bvid     string `json:"bvid,omitempty" request:"query,omitempty"`      // 稿件 bvid。avid 与 bvid 任选一个
+	Cid      int    `json:"cid"`                                           // 视频 cid
+	SeasonId int    `json:"season_id,omitempty" request:"query,omitempty"` // 视频合集 ID 番剧 season_id
+	EpId     int    `json:"ep_id,omitempty" request:"query,omitempty"`     // 视频分集 ID 剧集 ep_id
+}
+
+type VideoPlayerMetaInfoOptions struct {
+	Is360      bool `json:"is_360"`      // 是否 360 全景视频
+	WithoutVip bool `json:"without_vip"` // 未知
+}
+
+type VideoPlayerMetaInfoBgmInfo struct {
+	MusicId    string `json:"music_id"`    // 音乐 id
+	MusicTitle string `json:"music_title"` // 音乐标题
+	JumpUrl    string `json:"jump_url"`    // 跳转 URL
+}
+
+type VideoPlayerMetaInfoDmMask struct {
+	Cid     int    `json:"cid"`      // 视频 cid
+	Plat    int    `json:"plat"`     // 未知
+	Fps     int    `json:"fps"`      // webmask 取样 fps
+	Time    int    `json:"time"`     // 未知
+	MaskUrl string `json:"mask_url"` // webmask 资源 url
+}
+
+type VideoPlayerMetaInfoSubtitle struct {
+	AllowSubmit bool                              `json:"allow_submit"` // true
+	Lan         string                            `json:"lan"`          // ""
+	LanDoc      string                            `json:"lan_doc"`      // ""
+	Subtitles   []VideoPlayerMetaInfoSubtitleItem `json:"subtitles"`    // 不登录为 `[]`
+}
+
+type VideoPlayerMetaInfoSubtitleItem struct {
+	AiStatus    int    `json:"ai_status"`    // 未知
+	AiType      int    `json:"ai_type"`      // 未知
+	Id          int    `json:"id"`           // 未知
+	IdStr       string `json:"id_str"`       // 未知
+	IsLock      bool   `json:"is_lock"`      // 未知
+	Lan         string `json:"lan"`          // 语言类型英文字母缩写
+	LanDoc      string `json:"lan_doc"`      // 语言类型中文名称
+	SubtitleUrl string `json:"subtitle_url"` // 资源 url 地址
+	Type        int    `json:"type"`         // 0
+}
+
+type VideoPlayerMetaInfoViewPoint struct {
+	Content string `json:"content"` // 章节名
+	From    int    `json:"from"`    // 未知
+	To      int    `json:"to"`      // 未知
+	Type    int    `json:"type"`    // 未知
+	ImgUrl  string `json:"imgUrl"`  // 图片资源地址
+	LogoUrl string `json:"logoUrl"` // ""
+}
+
+type VideoPlayerMetaInfo struct {
+	Aid               int                            `json:"aid"`                  // 视频 aid
+	Bvid              string                         `json:"bvid"`                 // 视频 bvid
+	AllowBp           bool                           `json:"allow_bp"`             // 未知
+	NoShare           bool                           `json:"no_share"`             // 禁止分享?
+	Cid               int                            `json:"cid"`                  // 视频 cid
+	DmMask            VideoPlayerMetaInfoDmMask      `json:"dm_mask"`              // webmask 防挡字幕信息
+	Subtitle          VideoPlayerMetaInfoSubtitle    `json:"subtitle"`             // 字幕信息
+	ViewPoints        []VideoPlayerMetaInfoViewPoint `json:"view_points"`          // 章节看点信息
+	IpInfo            any                            `json:"ip_info"`              // 请求 IP 信息
+	LoginMid          int                            `json:"login_mid"`            // 登录用户 mid
+	LoginMidHash      string                         `json:"login_mid_hash"`       // 未知
+	IsOwner           bool                           `json:"is_owner"`             // 是否为该视频 UP 主
+	Name              string                         `json:"name"`                 // 未知
+	Permission        string                         `json:"permission"`           // 未知
+	LevelInfo         any                            `json:"level_info"`           // 登录用户等级信息
+	Vip               any                            `json:"vip"`                  // 登录用户 VIP 信息
+	AnswerStatus      int                            `json:"answer_status"`        // 答题状态
+	BlockTime         int                            `json:"block_time"`           // 封禁时间?
+	Role              string                         `json:"role"`                 // 未知
+	LastPlayTime      int                            `json:"last_play_time"`       // 上次观看时间?
+	LastPlayCid       int                            `json:"last_play_cid"`        // 上次观看 cid?
+	NowTime           int                            `json:"now_time"`             // 当前 UNIX 秒级时间戳
+	OnlineCount       int                            `json:"online_count"`         // 在线人数
+	NeedLoginSubtitle bool                           `json:"need_login_subtitle"`  // 是否必须登陆才能查看字幕
+	PreviewToast      string                         `json:"preview_toast"`        // `为创作付费，购买观看完整视频|购买观看`
+	Options           VideoPlayerMetaInfoOptions     `json:"options"`              // 未知
+	GuideAttention    any                            `json:"guide_attention"`      // 未知
+	JumpCard          any                            `json:"jump_card"`            // 未知
+	OperationCard     any                            `json:"operation_card"`       // 未知
+	OnlineSwitch      any                            `json:"online_switch"`        // 未知
+	Fawkes            any                            `json:"fawkes"`               // 播放器相关信息?
+	ShowSwitch        any                            `json:"show_switch"`          // 未知
+	BgmInfo           VideoPlayerMetaInfoBgmInfo     `json:"bgm_info"`             // 背景音乐信息
+	ToastBlock        bool                           `json:"toast_block"`          // 未知
+	IsUpowerExclusive bool                           `json:"is_upower_exclusive"`  // 充电专属?
+	IsUpowerPlay      bool                           `json:"is_upower_play"`       // 未知
+	IsUgcPayPreview   bool                           `json:"is_ugc_pay_preview"`   // 未知
+	ElecHighLevel     any                            `json:"elec_high_level"`      // 未知
+	DisableShowUpInfo bool                           `json:"disable_show_up_info"` // 未知
+}
+
+// GetVideoPlayerMetaInfo 获取视频播放器元信息
+func (c *Client) GetVideoPlayerMetaInfo(param GetVideoPlayerMetaInfoParam) (*VideoPlayerMetaInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/player/wbi/v2"
+	)
+	return execute[*VideoPlayerMetaInfo](c, method, url, param)
+}
