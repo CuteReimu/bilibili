@@ -717,3 +717,16 @@ func (c *Client) GetUserRelation2(param GetUserRelation2Param) (*GetUserRelation
 	)
 	return execute[*GetUserRelation2Result](c, method, url, param, fillWbiHandler(c.wbi, c.GetCookies()))
 }
+
+type BatchGetUserRelationParam struct {
+	Fids []int `json:"fids"` // 目标用户 mid
+}
+
+// BatchGetUserRelation 批量查询用户与自己关系
+func (c *Client) BatchGetUserRelation(param BatchGetUserRelationParam) (map[int]*RelationDetail, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/relation/relations"
+	)
+	return execute[map[int]*RelationDetail](c, method, url, param)
+}
