@@ -1,7 +1,9 @@
 package bilibili
 
 import (
+	"encoding/json"
 	"github.com/go-resty/resty/v2"
+	"github.com/pkg/errors"
 )
 
 type VideoParam struct {
@@ -826,4 +828,41 @@ func (c *Client) GetVideoPlayerMetaInfo(param GetVideoPlayerMetaInfoParam) (*Vid
 		url    = "https://api.bilibili.com/x/player/wbi/v2"
 	)
 	return execute[*VideoPlayerMetaInfo](c, method, url, param)
+}
+
+type VideoPlayerSubtitleItem struct {
+	From     float64 `json:"from"`     // 字幕开始时间
+	To       float64 `json:"to"`       // 字幕结束时间
+	Sid      int     `json:"sid"`      // 字幕 ID
+	Location int     `json:"location"` // 未知
+	Content  string  `json:"content"`  // 字幕内容
+	Music    float64 `json:"music"`    // 未知
+}
+
+type VideoPlayerSubtitle struct {
+	FontSize        float64                   `json:"font_size"`        // 字体大小
+	FontColor       string                    `json:"font_color"`       // 字体颜色
+	BackgroundAlpha float64                   `json:"background_alpha"` // 背景透明度
+	BackgroundColor string                    `json:"background_color"` // 背景颜色
+	Stroke          string                    `json:"Stroke"`           // 未知
+	Type            string                    `json:"type"`             // 字幕类型
+	Lang            string                    `json:"lang"`             // 字幕语言
+	Version         string                    `json:"version"`          // 字幕版本
+	Body            []VideoPlayerSubtitleItem `json:"body"`             // 字幕内容
+}
+
+// GetVideoPlayerSubtitle 获取视频播放器字幕
+// subtitleUrl: 从 GetVideoPlayerMetaInfo 获取的 Subtitle.Subtitles[x].SubtitleUrl
+func (c *Client) GetVideoPlayerSubtitle(subtitleUrl string) (*VideoPlayerSubtitle, error) {
+	res, err := c.Resty().NewRequest().Get("https:" + subtitleUrl)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to get video player subtitle")
+	}
+
+	data := new(VideoPlayerSubtitle)
+	if err := json.Unmarshal(res.Body(), data); err != nil {
+		return nil, errors.Wrap(err, "Failed to unmarshal video player subtitle")
+	}
+
+	return data, nil
 }
