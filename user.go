@@ -730,3 +730,19 @@ func (c *Client) BatchGetUserRelation(param BatchGetUserRelationParam) (map[int]
 	)
 	return execute[map[int]*RelationDetail](c, method, url, param)
 }
+
+type RelationTag struct {
+	Tagid int    `json:"tagid"` // 分组 id。-10：特别关注。0：默认分组
+	Name  string `json:"name"`  // 分组名称
+	Count int    `json:"count"` // 分组成员数
+	Tip   string `json:"tip"`   // 提示信息
+}
+
+// GetRelationTags 查询关注分组列表
+func (c *Client) GetRelationTags() ([]RelationTag, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/relation/relations"
+	)
+	return execute[[]RelationTag](c, method, url, nil)
+}
