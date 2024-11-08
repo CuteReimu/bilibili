@@ -742,7 +742,7 @@ type RelationTag struct {
 func (c *Client) GetRelationTags() ([]RelationTag, error) {
 	const (
 		method = resty.MethodGet
-		url    = "https://api.bilibili.com/x/relation/relations"
+		url    = "https://api.bilibili.com/x/relation/tags"
 	)
 	return execute[[]RelationTag](c, method, url, nil)
 }
