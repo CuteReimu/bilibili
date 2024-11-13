@@ -66,7 +66,7 @@ type CardLabel struct {
 	LabelColorDay    string `json:"label_color_day"`   // 日间标签颜色
 	LabelColorNight  string `json:"label_color_night"` // 夜间标签颜色
 	Image            string `json:"image"`             // 作用不明
-	Type             string `json:"type"`              // 1。作用不明
+	Type             int    `json:"type"`              // 1。作用不明
 	Background       string `json:"background"`        // 背景图片 url
 	BackgroundWidth  int    `json:"background_width"`  // 背景图片宽度
 	BackgroundHeight int    `json:"background_height"` // 背景图片高度
@@ -110,7 +110,7 @@ type Comment struct {
 	UpAction     UpAction       `json:"up_action"`     // 评论 UP 主操作信息
 	ShowFollow   bool           `json:"show_follow"`   // (?)
 	Invisible    bool           `json:"invisible"`     // 评论是否被隐藏
-	CardLabel    CardLabel      `json:"card_label"`    // 右上角卡片标签信息
+	CardLabel    []CardLabel    `json:"card_label"`    // 右上角卡片标签信息
 	ReplyControl ReplyControl   `json:"reply_control"` // 评论提示文案信息
 }
 
