@@ -2,7 +2,7 @@ package bilibili
 
 import "github.com/go-resty/resty/v2"
 
-type EmoteAction struct {
+type EmoteActionParam struct {
 	Package_id int    `json:"package_id"` //表情包ID
 	Bussiness  string `json:"business"`   //表情包使用场景
 	Ids        []int  `json:"ids"`        //表情包ID集合
@@ -45,7 +45,7 @@ type EmotePackage struct {
 }
 
 // AddEmote添加表情包
-func (c *Client) AddEmote(param EmoteAction) error {
+func (c *Client) AddEmote(param EmoteActionParam) error {
 	const (
 		method = resty.MethodPost
 		url    = "https://api.bilibili.com/x/emote/package/add"
@@ -55,7 +55,7 @@ func (c *Client) AddEmote(param EmoteAction) error {
 }
 
 // RemoveEmote移除表情包
-func (c *Client) RemoveEmote(param EmoteAction) error {
+func (c *Client) RemoveEmote(param EmoteActionParam) error {
 	const (
 		method = resty.MethodPost
 		url    = "https://api.bilibili.com/x/emote/package/remove"
@@ -69,7 +69,7 @@ type EmoteList struct {
 }
 
 // GetMyEmoteList获取我的表情包列表
-func (c *Client) GetMyEmoteList(param EmoteAction) (*EmoteList, error) {
+func (c *Client) GetMyEmoteList(param EmoteActionParam) (*EmoteList, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/emote/user/panel"
@@ -78,7 +78,7 @@ func (c *Client) GetMyEmoteList(param EmoteAction) (*EmoteList, error) {
 }
 
 // GetEmotePackageDetailInfo获取指定ID表情包的详细信息
-func (c *Client) GetEmotePackageDetailInfo(param EmoteAction) (*EmoteList, error) {
+func (c *Client) GetEmotePackageDetailInfo(param EmoteActionParam) (*EmoteList, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/emote/package"
@@ -97,7 +97,7 @@ type AllEmoteList struct {
 	Mall                Mall           `json:"mall"`
 }
 
-func (c *Client) GetAllEmoteList(param EmoteAction) (*AllEmoteList, error) {
+func (c *Client) GetAllEmoteList(param EmoteActionParam) (*AllEmoteList, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/emote/setting/panel"
