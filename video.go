@@ -207,7 +207,7 @@ type ArgueInfo struct {
 	ArgueMsg  string `json:"argue_msg"`  // 警告/争议提示信息
 	ArgueType int    `json:"argue_type"` // 作用尚不明确
 }
-type TopRecommendVideo struct {
+type TopRecommendVideoList struct {
 	BusinessCard          any                     `json:"business_card"`            //无意义
 	FloorInfo             any                     `json:"floor_info"`               //无意义
 	Item                  []TopRecommendVideoItem `json:"item"`                     //推荐列表
@@ -531,12 +531,12 @@ type GetTopRecommendVideoParam struct {
 }
 
 // GetTopRecommendVideo 获取首页视频推荐列表
-func (c *Client) GetTopRecommendVideo(param GetTopRecommendVideoParam) (*TopRecommendVideo, error) {
+func (c *Client) GetTopRecommendVideo(param GetTopRecommendVideoParam) (*TopRecommendVideoList, error) {
 	const (
 		method = resty.MethodGet
 		url    = "https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd"
 	)
-	return execute[*TopRecommendVideo](c, method, url, param)
+	return execute[*TopRecommendVideoList](c, method, url, param)
 }
 
 type GetVideoCollectionInfoParam struct {
