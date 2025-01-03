@@ -602,6 +602,30 @@ func (c *Client) GetVideoCollectionInfo(param GetVideoCollectionInfoParam) (*Vid
 	return execute[*VideoCollectionInfo](c, method, url, param)
 }
 
+type VideoCollectionByKeywordsInfo struct {
+	Archives []CollectionVideo `json:"archives"` // 视频列表
+	Page     CollectionPage    `json:"page"`     // 页码信息
+}
+
+type GetVideoByKeywordsParam struct {
+	Mid      int    `json:"mid"`                                           // 用户 mid
+	Keywords string `json:"keywords"`                                      // 关键词。可为空, 即获取所有视频
+	Ps       int    `json:"ps,omitempty" request:"query,omitempty"`        // 每页视频数。默认为 0, 留空为 20
+	Pn       int    `json:"pn,omitempty" request:"query,omitempty"`        // 页码。留空为 1
+	Orderby  string `json:"orderby,omitempty" request:"query,omitempty"`   // 排序方式。最新发布: pubdate(默认)。最多播放: views。senddate: 最新发布
+	SeriesId int    `json:"series_id,omitempty" request:"query,omitempty"` // 系列 ID。用于过滤结果, 即若某一视频包含在系列内则不返回该视频
+}
+
+// GetVideoByKeywords根据关键词查找视频
+// https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md#%E6%A0%B9%E6%8D%AE%E5%85%B3%E9%94%AE%E8%AF%8D%E6%9F%A5%E6%89%BE%E8%A7%86%E9%A2%91
+func (c *Client) GetVideoByKeywords(param GetVideoByKeywordsParam) (*VideoCollectionByKeywordsInfo, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/series/recArchivesByKeywords"
+	)
+	return execute[*VideoCollectionByKeywordsInfo](c, method, url, param)
+}
+
 type GetVideoSeriesInfoParam struct {
 	Mid        int    `json:"mid"`                                             // UP 主 ID
 	SeriesId   int    `json:"series_id"`                                       // 视频合集 ID
