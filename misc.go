@@ -66,14 +66,15 @@ func (c *Client) Now() (time.Time, error) {
 func Av2Bv(aid int) string {
 	const (
 		xorCode  = 0x1552356C4CDB
-		maxAid   = 1 << 51
+		maxAid int64  = 1 << 51
 		alphabet = "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf"
 	)
 	bvid := []byte("BV1000000000")
-	tmp := (maxAid | aid) ^ xorCode
+	tmp := (maxAid | int64(aid)) ^ xorCode
+	l := int64(len(alphabet))
 	for _, e := range []int{11, 10, 3, 8, 4, 6, 5, 7, 9} {
-		bvid[e] = alphabet[tmp%len(alphabet)]
-		tmp /= len(alphabet)
+		bvid[e] = alphabet[tmp%l]
+		tmp /= l
 	}
 	return string(bvid)
 }
@@ -85,15 +86,15 @@ func Bv2Av(bvid string) int {
 	}
 	const (
 		xorCode  = 0x1552356C4CDB
-		maskCode = 1<<51 - 1
+		maskCode int64 = 1<<51 - 1
 		alphabet = "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf"
 	)
-	tmp := 0
+	var tmp int64 = 0
 	for _, e := range []int{9, 7, 5, 6, 4, 8, 3, 10, 11} {
 		idx := strings.IndexByte(alphabet, bvid[e])
-		tmp = tmp*len(alphabet) + idx
+		tmp = tmp*int64(len(alphabet) + idx)
 	}
-	return (tmp & maskCode) ^ xorCode
+	return int((tmp & maskCode) ^ xorCode)
 }
 
 type ZoneLocation struct {
