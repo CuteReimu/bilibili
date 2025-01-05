@@ -65,9 +65,9 @@ func (c *Client) Now() (time.Time, error) {
 // Av2Bv 将av号转换为bv号，返回格式为"BV1xxxxxxxxx"。
 func Av2Bv(aid int) string {
 	const (
-		xorCode  = 0x1552356C4CDB
-		maxAid int64  = 1 << 51
-		alphabet = "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf"
+		xorCode        = 0x1552356C4CDB
+		maxAid   int64 = 1 << 51
+		alphabet       = "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf"
 	)
 	bvid := []byte("BV1000000000")
 	tmp := (maxAid | int64(aid)) ^ xorCode
@@ -85,14 +85,14 @@ func Bv2Av(bvid string) int {
 		panic("bvid 格式错误: " + bvid)
 	}
 	const (
-		xorCode  = 0x1552356C4CDB
+		xorCode        = 0x1552356C4CDB
 		maskCode int64 = 1<<51 - 1
-		alphabet = "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf"
+		alphabet       = "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf"
 	)
 	var tmp int64 = 0
 	for _, e := range []int{9, 7, 5, 6, 4, 8, 3, 10, 11} {
 		idx := strings.IndexByte(alphabet, bvid[e])
-		tmp = tmp*int64(len(alphabet) + idx)
+		tmp = tmp * int64(len(alphabet)+idx)
 	}
 	return int((tmp & maskCode) ^ xorCode)
 }
