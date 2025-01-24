@@ -678,8 +678,8 @@ type Durl struct {
 }
 type Dash struct {
 	Duration      int            `json:"duration"`        // 视频长度。秒值
-	Minbuffertime int            `json:"minBufferTime"`   // 1.5？
-	MinBufferTime int            `json:"min_buffer_time"` // 1.5？
+	Minbuffertime float64        `json:"minBufferTime"`   // 1.5？
+	MinBufferTime float64        `json:"min_buffer_time"` // 1.5？
 	Video         []AudioOrVideo `json:"video"`           // 视频流信息 同一清晰度可拥有 H.264 / H.265 / AV1 多种码流<br />**HDR 仅支持 H.265** |
 	Audio         []AudioOrVideo `json:"audio"`           // 伴音流信息。当视频没有音轨时，此项为 null
 	Dolby         Dolby          `json:"dolby"`           // 杜比全景声伴音信息
