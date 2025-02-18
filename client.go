@@ -26,6 +26,39 @@ func New() *Client {
 	return NewWithClient(restyClient)
 }
 
+// 返回一个带有游客cookie的 bilibili.Client
+func NewAnonymousClient() *Client {
+	url := "https://www.bilibili.com/"
+	method := "GET"
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, nil)
+
+	if err != nil {
+		return nil
+	}
+	req.Header.Add("accept-language", "zh-CN,zh;q=0.9")
+	req.Header.Add("pragma", "no-cache")
+	req.Header.Add("priority", "u=0, i")
+	req.Header.Add("sec-ch-ua", "\"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"")
+	req.Header.Add("sec-ch-ua-mobile", "?0")
+	req.Header.Add("sec-ch-ua-platform", "\"Linux\"")
+	req.Header.Add("sec-fetch-dest", "document")
+	req.Header.Add("sec-fetch-mode", "navigate")
+	req.Header.Add("sec-fetch-site", "none")
+	req.Header.Add("sec-fetch-user", "?1")
+	req.Header.Add("upgrade-insecure-requests", "1")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil
+	}
+
+	bili_client := New()
+	bili_client.SetCookies(res.Cookies())
+	return bili_client
+}
+
 // NewWithClient 接收一个自定义的*resty.Client为参数
 func NewWithClient(restyClient *resty.Client) *Client {
 	return &Client{
