@@ -55,6 +55,7 @@ func NewAnonymousClient() *Client {
 	if err != nil {
 		return nil
 	}
+	defer res.Body.Close()
 
 	bili_client := New()
 	bili_client.SetCookies(res.Cookies())
