@@ -29,7 +29,7 @@ func New() *Client {
 // 返回一个带有游客cookie的 bilibili.Client
 func NewAnonymousClient() *Client {
 	url := "https://www.bilibili.com/"
-	method := "GET"
+	method := resty.MethodGet
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, nil)
