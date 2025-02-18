@@ -37,18 +37,20 @@ func NewAnonymousClient() *Client {
 	if err != nil {
 		return nil
 	}
+
+	req.Header.Add("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
 	req.Header.Add("accept-language", "zh-CN,zh;q=0.9")
 	req.Header.Add("pragma", "no-cache")
 	req.Header.Add("priority", "u=0, i")
-	req.Header.Add("sec-ch-ua", "\"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"")
+	req.Header.Add("sec-ch-ua", "Not")
 	req.Header.Add("sec-ch-ua-mobile", "?0")
-	req.Header.Add("sec-ch-ua-platform", "\"Linux\"")
+	req.Header.Add("sec-ch-ua-platform", "Windows")
 	req.Header.Add("sec-fetch-dest", "document")
 	req.Header.Add("sec-fetch-mode", "navigate")
 	req.Header.Add("sec-fetch-site", "none")
 	req.Header.Add("sec-fetch-user", "?1")
 	req.Header.Add("upgrade-insecure-requests", "1")
-
+	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0")
 	res, err := client.Do(req)
 	if err != nil {
 		return nil
