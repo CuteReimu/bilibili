@@ -3,7 +3,7 @@ package bilibili
 import "github.com/go-resty/resty/v2"
 
 type ZoneVideoRankListParam struct {
-	Tid  int    `json:"tid,omitempty" request:"query,omitempty"`  // 目标分区tid。可调用 GetAllZoneInfos 获取，或者直接自行查阅 video_zone.csv
+	Tid  int    `json:"tid,omitempty" request:"query,omitempty"`  // 目标分区tid，可不填。可调用 GetAllZoneInfos 获取，或者直接自行查阅 video_zone.csv
 	Type string `json:"type,omitempty" request:"query,omitempty"` // 未知。默认为：all，且为目前唯一已知值。怀疑为稿件类型，但没有找到其他值佐证。
 }
 
