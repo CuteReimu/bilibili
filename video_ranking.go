@@ -2,6 +2,25 @@ package bilibili
 
 import "github.com/go-resty/resty/v2"
 
+type ZoneVideoRankListParam struct {
+	Tid  int    `json:"tid,omitempty" request:"query,omitempty"`  // 目标分区tid。可调用 GetAllZoneInfos 获取，或者直接自行查阅 video_zone.csv
+	Type string `json:"type,omitempty" request:"query,omitempty"` // 未知。默认为：all，且为目前唯一已知值。怀疑为稿件类型，但没有找到其他值佐证。
+}
+
+type ZoneVideoRankList struct {
+	Note string      `json:"note"` // “根据稿件内容质量、近期的数据综合展示，动态更新”
+	List []VideoInfo `json:"list"` // 视频列表
+}
+
+// GetZoneVideoRankList 获取分区视频排行榜列表
+func (c *Client) GetZoneVideoRankList(param ZoneVideoRankListParam) (*ZoneVideoRankList, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.bilibili.com/x/web-interface/ranking/v2"
+	)
+	return execute[*ZoneVideoRankList](c, method, url, param)
+}
+
 type GetZoneVideoListNewParam struct {
 	Pn  int `json:"pn,omitempty" request:"query,omitempty"` // 页码。默认为1
 	Ps  int `json:"ps,omitempty" request:"query,omitempty"` // 每页项数。默认为14, 留空为5
