@@ -10,7 +10,7 @@ import (
 func snakeToCamel(snakeStr string) string {
 	parts := strings.Split(snakeStr, "_")
 	for i, word := range parts {
-		parts[i] = strings.Title(word)
+		parts[i] = strings.Title(word) // nolint: staticcheck
 	}
 	return strings.Join(parts, "")
 }
