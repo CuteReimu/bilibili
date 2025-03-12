@@ -1,6 +1,9 @@
 # 生成工具的使用方法
 
 ```bash
+# go 用这个
+go run gen_struct.go
+
 # python3用这个
 python3 gen_struct.py
 
