@@ -16,7 +16,11 @@
 如果因为B站修改了接口导致接口突然不可用，不一定能够及时更新，很大程度上需要依赖各位的告知。
 
 > [!IMPORTANT]
-> 现在是v2版本，v2版本需要Go1.19及以上。[如果还想使用v1版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
+> 现在是v2.1+版本，鉴于`golang.org/x`下面的很多库都已经强制要求Go1.23以上了，我们也同步进行了更新。
+> 
+> 如果想使用v2.0版本（支持Go1.19及以上），请执行`go get -u github.com/CuteReimu/bilibili/v2@v2.0.0`获取旧版本。
+> 
+> [如果还想使用更早的版本可以点击这里跳转](https://github.com/CuteReimu/bilibili/tree/v1)。
 
 **如果你觉得本项目对你有帮助，点亮右上角的↗ :star: 不迷路**
 
