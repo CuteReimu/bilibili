@@ -40,7 +40,7 @@ PS：目前，B站调用接口时强制使用 `https` 协议
 ### 安装
 
 ```bash
-go get -u github.com/CuteReimu/bilibili/v2
+go get -u github.com/CuteReimu/bilibili/v2 # 定期执行可以更新最新版本
 ```
 
 在项目中引用即可使用
