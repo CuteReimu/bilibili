@@ -1,8 +1,6 @@
 package bilibili
 
 import (
-	"fmt"
-
 	"github.com/go-resty/resty/v2"
 )
 
@@ -13,7 +11,10 @@ type GetWebCookieRefreshInfoResult struct {
 
 // GetWebCookieRefreshInfo 获取web端cookie刷新信息
 func (c *Client) GetWebCookieRefreshInfo() (*GetWebCookieRefreshInfoResult, error) {
-	var url = fmt.Sprintf("https://passport.bilibili.com/x/passport-login/web/cookie/info?bili_jct=%s", c.getCookie("bili_jct"))
+	const (
+		method = resty.MethodGet
+		url    = "https://passport.bilibili.com/x/passport-login/web/cookie/info"
+	)
 
-	return execute[*GetWebCookieRefreshInfoResult](c, resty.MethodGet, url, nil)
+	return execute[*GetWebCookieRefreshInfoResult](c, method, url, nil)
 }
