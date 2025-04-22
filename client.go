@@ -1,7 +1,6 @@
 package bilibili
 
 import (
-	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -56,7 +55,7 @@ func NewAnonymousClient() *Client {
 	if err != nil {
 		return nil
 	}
-	defer func(body io.ReadCloser) { _ = body.Close() }(res.Body)
+	defer func() { _ = res.Body.Close() }()
 
 	bili_client := New()
 	bili_client.SetCookies(res.Cookies())

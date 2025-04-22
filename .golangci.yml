@@ -2,12 +2,15 @@ version: "2"
 linters:
   default: all
   disable:
+    - cyclop
     - depguard
     - exhaustive
     - exhaustruct
     - funcorder
+    - funlen
     - gochecknoglobals
     - gochecknoinits
+    - gocognit
     - goconst
     - gocritic
     - godot
