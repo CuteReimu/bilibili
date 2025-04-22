@@ -45,7 +45,7 @@ func encrypt(publicKey, data string) (string, error) {
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
-	pk := publicKeyInterface.(*rsa.PublicKey)
+	pk, _ := publicKeyInterface.(*rsa.PublicKey)
 	// 加密
 	cipherText, err := rsa.EncryptPKCS1v15(rand.Reader, pk, []byte(data))
 	if err != nil {

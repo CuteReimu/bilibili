@@ -3,9 +3,9 @@ package bilibili
 import "github.com/go-resty/resty/v2"
 
 type EmoteActionParam struct {
-	Package_id int    `json:"package_id"` //表情包ID
-	Bussiness  string `json:"business"`   //表情包使用场景
-	Ids        []int  `json:"ids"`        //表情包ID集合
+	PackageId int    `json:"package_id"` //表情包ID
+	Business  string `json:"business"`   //表情包使用场景
+	Ids       []int  `json:"ids"`        //表情包ID集合
 }
 type EmotePackageFlags struct {
 	Added bool `json:"added"` // 是否已添加,需要登录（SESSDATA）否则恒为false,true：已添加 false：未添加

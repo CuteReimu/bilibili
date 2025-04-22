@@ -1,0 +1,50 @@
+version: "2"
+linters:
+  default: all
+  disable:
+    - depguard
+    - exhaustive
+    - exhaustruct
+    - funcorder
+    - gochecknoglobals
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - godot
+    - godox
+    - gosmopolitan
+    - ireturn
+    - lll
+    - mnd
+    - nlreturn
+    - noctx
+    - nonamedreturns
+    - revive
+    - tagalign
+    - tagliatelle
+    - testpackage
+    - paralleltest
+    - varnamelen
+    - wsl
+  settings:
+    gosec:
+      excludes:
+        - G401
+        - G402
+        - G403
+        - G404
+        - G405
+        - G406
+        - G501
+        - G502
+        - G503
+        - G504
+        - G505
+        - G506
+        - G507
+  exclusions:
+    paths:
+      - tools/
+run:
+  tests: false
+  timeout: 3m

@@ -1,6 +1,7 @@
 package bilibili
 
 import (
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -26,7 +27,7 @@ func New() *Client {
 	return NewWithClient(restyClient)
 }
 
-// 返回一个带有游客cookie的 bilibili.Client
+// NewAnonymousClient 返回一个带有游客cookie的 bilibili.Client
 func NewAnonymousClient() *Client {
 	url := "https://www.bilibili.com/"
 	method := resty.MethodGet
@@ -38,24 +39,24 @@ func NewAnonymousClient() *Client {
 		return nil
 	}
 
-	req.Header.Add("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-	req.Header.Add("accept-language", "zh-CN,zh;q=0.9")
-	req.Header.Add("pragma", "no-cache")
-	req.Header.Add("priority", "u=0, i")
-	req.Header.Add("sec-ch-ua", "Not")
-	req.Header.Add("sec-ch-ua-mobile", "?0")
-	req.Header.Add("sec-ch-ua-platform", "Windows")
-	req.Header.Add("sec-fetch-dest", "document")
-	req.Header.Add("sec-fetch-mode", "navigate")
-	req.Header.Add("sec-fetch-site", "none")
-	req.Header.Add("sec-fetch-user", "?1")
-	req.Header.Add("upgrade-insecure-requests", "1")
-	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0")
+	req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+	req.Header.Add("Accept-Language", "zh-CN,zh;q=0.9")
+	req.Header.Add("Pragma", "no-cache")
+	req.Header.Add("Priority", "u=0, i")
+	req.Header.Add("Sec-Ch-Ua", "Not")
+	req.Header.Add("Sec-Ch-Ua-Mobile", "?0")
+	req.Header.Add("Sec-Ch-Ua-Platform", "Windows")
+	req.Header.Add("Sec-Fetch-Dest", "document")
+	req.Header.Add("Sec-Fetch-Mode", "navigate")
+	req.Header.Add("Sec-Fetch-Site", "none")
+	req.Header.Add("Sec-Fetch-User", "?1")
+	req.Header.Add("Upgrade-Insecure-Requests", "1")
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0")
 	res, err := client.Do(req)
 	if err != nil {
 		return nil
 	}
-	defer res.Body.Close()
+	defer func(body io.ReadCloser) { _ = body.Close() }(res.Body)
 
 	bili_client := New()
 	bili_client.SetCookies(res.Cookies())

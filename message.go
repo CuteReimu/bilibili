@@ -46,11 +46,11 @@ func init() {
 	randBytes := make([]byte, len(s))
 	_, _ = rand.Read(randBytes)
 	for i := range s {
-		if '-' == s[i] || '4' == s[i] {
+		if s[i] == '-' || s[i] == '4' {
 			continue
 		}
 		j := randBytes[i] % 16
-		if 'x' == s[i] {
+		if s[i] == 'x' {
 			s[i] = b[j]
 		} else {
 			s[i] = b[3&j|8]

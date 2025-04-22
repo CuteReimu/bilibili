@@ -138,11 +138,11 @@ func (wbi *WBI) GetKeys() (imgKey string, subKey string, err error) {
 
 func (wbi *WBI) getKeys() (imgKey string, subKey string) {
 	if v, isSet := wbi.storage.Get(cacheImgKey); isSet {
-		imgKey = v.(string)
+		imgKey, _ = v.(string)
 	}
 
 	if v, isSet := wbi.storage.Get(cacheSubKey); isSet {
-		subKey = v.(string)
+		subKey, _ = v.(string)
 	}
 
 	return imgKey, subKey
@@ -185,7 +185,6 @@ func (wbi *WBI) SignQuery(query url.Values, ts time.Time) (newQuery url.Values, 
 	payload := make(map[string]string, 10)
 	for k := range query {
 		payload[k] = query.Get(k)
-
 	}
 
 	newPayload, err := wbi.SignMap(payload, ts)

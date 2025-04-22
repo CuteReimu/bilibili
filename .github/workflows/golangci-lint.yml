@@ -16,13 +16,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: 'stable'
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v7
         with:
           version: latest
-          args: --out-${NO_FUTURE}format line-number --timeout 3m0s -p bugs -p error -p performance -D unused -D gosmopolitan -D exhaustive -D noctx -D gosec
 
       - name: Test
         run: go test -v ./...

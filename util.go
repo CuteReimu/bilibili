@@ -107,7 +107,7 @@ func withParams(r *resty.Request, in any) error {
 
 	bodyMap := make(map[string]any, 4)
 	contentType := ""
-	for i := 0; i < inType.NumField(); i++ {
+	for i := range inType.NumField() {
 		fieldType := inType.Field(i)
 		if !fieldType.IsExported() {
 			continue
@@ -169,7 +169,7 @@ func withParams(r *resty.Request, in any) error {
 				// 对query类型的字段进行特殊处理
 				if fieldType.Type.Kind() == reflect.Slice {
 					strSlice := make([]string, 0, 4)
-					for i := 0; i < fieldValue.Len(); i++ {
+					for i := range fieldValue.Len() {
 						strSlice = append(strSlice, cast.ToString(fieldValue.Index(i).Interface()))
 					}
 					realVal = strings.Join(strSlice, ",")
