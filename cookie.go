@@ -38,6 +38,9 @@ type (
 	}
 )
 
+// 正则匹配 <div id="1-name">RefreshCsrf</div> 中的刷新口令
+var refreshCsrfRegex = regexp.MustCompile(`<div\s+id="1-name"\s*>(.*?)</div>`)
+
 // GetWebCookieRefreshCsrf 获取web端cookie刷新口令
 func (c *Client) GetWebCookieRefreshCsrf(param GetWebCookieRefreshCsrfParam) (*GetWebCookieRefreshCsrfResult, error) {
 	correspondPath, err := getCorrespondPath(param.Timestamp)
@@ -51,9 +54,7 @@ func (c *Client) GetWebCookieRefreshCsrf(param GetWebCookieRefreshCsrfParam) (*G
 		return nil, errors.Errorf("Request RefreshCsrf failed: %v", err)
 	}
 
-	// 正则匹配 <div id="1-name">RefreshCsrf</div> 中的刷新口令
-	re := regexp.MustCompile(`<div\s+id="1-name"\s*>(.*?)</div>`)
-	matches := re.FindStringSubmatch(response.String())
+	matches := refreshCsrfRegex.FindStringSubmatch(response.String())
 	if len(matches) < 2 {
 		return nil, errors.Errorf("Failed to match RefreshCsrf")
 	}
@@ -61,8 +62,7 @@ func (c *Client) GetWebCookieRefreshCsrf(param GetWebCookieRefreshCsrfParam) (*G
 	return &GetWebCookieRefreshCsrfResult{RefreshCsrf: matches[1]}, nil
 }
 
-// 生成CorrespondPath 算法，参数：GetWebCookieRefreshInfoResult.Timestamp
-func getCorrespondPath(timestamp int64) (string, error) {
+func init() {
 	const publicKeyPEM = `
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLgd2OAkcGVtoE3ThUREbio0Eg
@@ -74,20 +74,22 @@ JNrRuoEUXpabUzGB8QIDAQAB
 	pubKeyBlock, _ := pem.Decode([]byte(publicKeyPEM))
 	pubInterface, err := x509.ParsePKIXPublicKey(pubKeyBlock.Bytes)
 	if err != nil {
-		return "", errors.WithStack(err)
+		panic(err)
 	}
 
-	publicKey, ok := pubInterface.(*rsa.PublicKey)
-	if !ok {
-		return "", errors.WithStack(errors.New("Failed to parse public key"))
-	}
+	correspondPathPublicKey = pubInterface.(*rsa.PublicKey) //nolint:forcetypeassert // 在init中，直接panic，无需处理
+}
 
+var correspondPathPublicKey *rsa.PublicKey
+
+// 生成CorrespondPath 算法，参数：GetWebCookieRefreshInfoResult.Timestamp
+func getCorrespondPath(timestamp int64) (string, error) {
 	var (
 		hash   = sha256.New()
 		random = rand.Reader
 		msg    = []byte(fmt.Sprintf("refresh_%d", timestamp))
 	)
-	encryptedData, err := rsa.EncryptOAEP(hash, random, publicKey, msg, nil)
+	encryptedData, err := rsa.EncryptOAEP(hash, random, correspondPathPublicKey, msg, nil)
 	if err != nil {
 		return "", errors.WithStack(err)
 	}
