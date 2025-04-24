@@ -42,7 +42,7 @@ type (
 func (c *Client) GetWebCookieRefreshCsrf(param GetWebCookieRefreshCsrfParam) (*GetWebCookieRefreshCsrfResult, error) {
 	correspondPath, err := getCorrespondPath(param.Timestamp)
 	if err != nil {
-		return nil, errors.Errorf("getCorrespondPath falied: %v", err)
+		return nil, errors.Errorf("getCorrespondPath failed: %v", err)
 	}
 
 	url := "https://www.bilibili.com/correspond/1/" + correspondPath
