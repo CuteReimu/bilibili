@@ -66,7 +66,7 @@ type (
 	RefreshCookieParam struct {
 		Csrf         string `json:"csrf,omitempty"`   // 位于 Cookie 中的bili_jct字段，不传将当前 client 中获取
 		RefreshCsrf  string `json:"refresh_csrf"`     // 实时刷新口令
-		Source       string `json:"source，omitempty"` // 访问来源，一般为：main_web
+		Source       string `json:"source,omitempty"` // 访问来源，一般为：main_web
 		RefreshToken string `json:"refresh_token"`    // 在登录成功时返回的持久化刷新口令，localStorage 中的ac_time_value字段
 	}
 	RefreshCookieResult struct {
