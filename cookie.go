@@ -62,6 +62,36 @@ func (c *Client) GetWebCookieRefreshCsrf(param GetWebCookieRefreshCsrfParam) (*G
 	return &GetWebCookieRefreshCsrfResult{RefreshCsrf: matches[1]}, nil
 }
 
+type (
+	RefreshCookieParam struct {
+		Csrf         string `json:"csrf,omitempty"`   // 位于 Cookie 中的bili_jct字段，不传将当前 client 中获取
+		RefreshCsrf  string `json:"refresh_csrf"`     // 实时刷新口令
+		Source       string `json:"source，omitempty"` // 访问来源，一般为：main_web
+		RefreshToken string `json:"refresh_token"`    // 在登录成功时返回的持久化刷新口令，localStorage 中的ac_time_value字段
+	}
+	RefreshCookieResult struct {
+		Status       int    `json:"status"`        // 未知
+		Message      string `json:"message"`       // 未知
+		RefreshToken string `json:"refresh_token"` // 新的持久化刷新口令
+	}
+)
+
+// RefreshCookie 刷新Cookie
+func (c *Client) RefreshCookie(param RefreshCookieParam) (*RefreshCookieResult, error) {
+	if param.Csrf == "" {
+		param.Csrf = c.getCookie("bili_jct")
+	}
+	if param.Source == "" {
+		param.Source = "main_web"
+	}
+	const (
+		method = resty.MethodPost
+		url    = "https://passport.bilibili.com/x/passport-login/web/cookie/refresh"
+	)
+
+	return execute[*RefreshCookieResult](c, method, url, param)
+}
+
 func init() {
 	const publicKeyPEM = `
 -----BEGIN PUBLIC KEY-----
