@@ -276,6 +276,7 @@ type VideoInfo struct {
 	Dynamic            string        `json:"dynamic"`      // 视频同步发布的的动态的文字内容
 	Cid                int           `json:"cid"`          // 视频1P cid
 	Dimension          Dimension     `json:"dimension"`    // 视频1P分辨率
+	SeasonId           int           `json:"season_id"`    // 合集id
 	Premiere           any           `json:"premiere"`     // null
 	TeenageMode        int           `json:"teenage_mode"`
 	IsChargeableSeason bool          `json:"is_chargeable_season"`
