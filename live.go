@@ -99,13 +99,8 @@ type UpdateLiveRoomTitleParam struct {
 }
 
 type UpdateLiveRoomTitleResult struct {
-	SubSessionKey string   `json:"sub_session_key"` // 信息变动标识
-	AuditInfo     struct { // 标题审核信息
-		AuditTitleReason string `json:"audit_title_reason"` // 标题审核提示
-		UpdateTitle      string `json:"update_title"`       // 空。作用尚不明确
-		AuditTitleStatus int    `json:"audit_title_status"` // 标题审核状态
-		AuditTitle       string `json:"audit_title"`        // 被审核的标题。更新标题时存在
-	} `json:"audit_info"`
+	SubSessionKey string `json:"sub_session_key"` // 信息变动标识
+	AuditInfo     any    `json:"audit_info"`      // 标题审核信息（不一定有值，因此在这里不进行解析）
 }
 
 // UpdateLiveRoomTitle 更新直播间信息
