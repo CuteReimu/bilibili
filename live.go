@@ -89,24 +89,38 @@ func (c *Client) GetLiveRoomInfo(param GetLiveRoomInfoParam) (*LiveRoomInfo, err
 }
 
 type UpdateLiveRoomTitleParam struct {
-	RoomId int    `json:"room_id"`                                   // 直播间id。必须为自己的直播间id
-	Title  string `json:"title,omitempty" request:"query,omitempty"` // 直播间标题。最大20字符
+	Platform string `json:"platform,omitempty" request:"query,omitempty"` // 平台标识
+	VisitId  string `json:"visit_id,omitempty" request:"query,omitempty"` // (?)。某种标识？
+	RoomId   int    `json:"room_id"`                                      // 直播间id。必须为自己的直播间id
+	Title    string `json:"title,omitempty" request:"query,omitempty"`    // 直播间标题。上限40个字符
+	AreaId   int    `json:"area_id,omitempty" request:"query,omitempty"`  // 直播分区id（子分区id）。详见[直播分区](live_area.md)
+	AddTag   string `json:"add_tag,omitempty" request:"query,omitempty"`  // 要添加的标签。开播设置界面上限10个字符
+	DelTag   string `json:"del_tag,omitempty" request:"query,omitempty"`  // 要删除的标签。若存在add_tag时不起作用
 }
 
-// UpdateLiveRoomTitle 更新直播间标题
-func (c *Client) UpdateLiveRoomTitle(param UpdateLiveRoomTitleParam) error {
+type UpdateLiveRoomTitleResult struct {
+	SubSessionKey string   `json:"sub_session_key"` // 信息变动标识
+	AuditInfo     struct { // 标题审核信息
+		AuditTitleReason string `json:"audit_title_reason"` // 标题审核提示
+		UpdateTitle      string `json:"update_title"`       // 空。作用尚不明确
+		AuditTitleStatus int    `json:"audit_title_status"` // 标题审核状态
+		AuditTitle       string `json:"audit_title"`        // 被审核的标题。更新标题时存在
+	} `json:"audit_info"`
+}
+
+// UpdateLiveRoomTitle 更新直播间信息
+func (c *Client) UpdateLiveRoomTitle(param UpdateLiveRoomTitleParam) (*UpdateLiveRoomTitleResult, error) {
 	const (
 		method = resty.MethodPost
 		url    = "https://api.live.bilibili.com/room/v1/Room/update"
 	)
-	_, err := execute[any](c, method, url, param, fillCsrf(c))
-	return err
+	return execute[*UpdateLiveRoomTitleResult](c, method, url, param, fillCsrf(c))
 }
 
 type StartLiveParam struct {
 	RoomId   int    `json:"room_id"`  // 直播间id。必须为自己的直播间id
-	AreaV2   int    `json:"area_v2"`  // 直播分区id（子分区id）。详见[直播分区](live_area.md)
-	Platform string `json:"platform"` // 直播平台。web端：。bililink：android_link
+	AreaV2   int    `json:"area_v2"`  // 直播分区id（子分区id）。详见[直播分区]
+	Platform string `json:"platform"` // 直播平台。直播姬（pc）：pc_link。web在线直播：web_link（已下线）。bililink：android_link。
 }
 
 type Rtmp struct {
@@ -154,7 +168,8 @@ func (c *Client) StartLive(param StartLiveParam) (*StartLiveResult, error) {
 }
 
 type StopLiveParam struct {
-	RoomId int `json:"room_id"` // 直播间id。必须为自己的直播间id
+	Platform string `json:"platform"` // 直播平台。直播姬（pc）：pc_link。web在线直播：web_link（已下线）。bililink：android_link。
+	RoomId   int    `json:"room_id"`  // 直播间id。必须为自己的直播间id
 }
 
 type StopLiveResult struct {
