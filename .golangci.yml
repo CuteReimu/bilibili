@@ -21,6 +21,7 @@ linters:
     - mnd
     - nlreturn
     - noctx
+    - noinlineerr
     - nonamedreturns
     - revive
     - tagalign
@@ -29,6 +30,7 @@ linters:
     - paralleltest
     - varnamelen
     - wsl
+    - wsl_v5
   settings:
     gosec:
       excludes:

@@ -18,4 +18,4 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 )
 
-retract v2.3.0
+retract v2.3.0 // 接口调整
