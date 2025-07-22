@@ -122,6 +122,9 @@ type StartLiveParam struct {
 	Build   int    `json:"build"`   // 直播姬构建号
 	Appkey  string `json:"appkey"`  // APP密钥
 	Sign    string `json:"sign"`    // APP API签名得到的sign
+
+	// 还需要一个ts，详见：https://github.com/SocialSisterYi/bilibili-API-collect/issues/1349
+	Ts int `json:"ts,omitempty" request:"query,omitempty"` // 10位时间戳
 }
 
 type Rtmp struct {
