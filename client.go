@@ -124,7 +124,7 @@ func (c *Client) GetCookies() []*http.Cookie {
 }
 
 // 根据key获取指定的cookie值
-func (c *Client) getCookie(name string) string {
+func (c *Client) getCookie(name string) string { //nolint:unparam
 	now := time.Now()
 	// 查找指定name的cookie
 	for _, cookie := range c.resty.Cookies {
