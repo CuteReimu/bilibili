@@ -1,6 +1,13 @@
 package bilibili
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"net/url"
+	"sort"
+	"strconv"
+	"time"
+
 	"github.com/go-resty/resty/v2"
 )
 
@@ -127,6 +134,42 @@ type StartLiveParam struct {
 	Ts int `json:"ts,omitempty" request:"query,omitempty"` // 10位时间戳
 }
 
+// 已知的 Bilibili APP 密钥对应的秘钥
+// 这些是公开的常量，用于计算 API 签名
+const (
+	appSecret = "af125a0d5279fd576c1b4418a3e8276d" // 对应 appkey aae92bc66f3edfab 的秘钥
+)
+
+// calculateAppSign 计算 APP API 签名
+// 按照 Bilibili APP API 签名算法：参数按 key 排序后拼接，加上秘钥后计算 MD5
+func calculateAppSign(params map[string]string) string {
+	// 收集所有非空参数
+	keys := make([]string, 0, len(params))
+	for k, v := range params {
+		if v != "" {
+			keys = append(keys, k)
+		}
+	}
+
+	// 按 key 排序
+	sort.Strings(keys)
+
+	// 构建查询字符串
+	query := url.Values{}
+	for _, k := range keys {
+		if params[k] != "" {
+			query.Set(k, params[k])
+		}
+	}
+
+	// 拼接参数和秘钥
+	signStr := query.Encode() + appSecret
+
+	// 计算 MD5
+	hash := md5.Sum([]byte(signStr))
+	return hex.EncodeToString(hash[:])
+}
+
 type Rtmp struct {
 	Addr     string `json:"addr"`     // RTMP推流（发送）地址。**重要**
 	Code     string `json:"code"`     // RTMP推流参数（密钥）。**重要**
@@ -168,6 +211,33 @@ func (c *Client) StartLive(param StartLiveParam) (*StartLiveResult, error) {
 		method = resty.MethodPost
 		url    = "https://api.live.bilibili.com/room/v1/Room/startLive"
 	)
+
+	// 如果没有提供签名，自动计算
+	if param.Sign == "" && param.Appkey != "" {
+		// 设置默认时间戳（如果未提供）
+		if param.Ts == 0 {
+			param.Ts = int(time.Now().Unix())
+		}
+
+		// 准备签名参数
+		signParams := map[string]string{
+			"appkey":   param.Appkey,
+			"build":    strconv.Itoa(param.Build),
+			"platform": param.Platform,
+			"room_id":  strconv.Itoa(param.RoomId),
+			"ts":       strconv.Itoa(param.Ts),
+			"version":  param.Version,
+		}
+
+		// 只有当 area_v2 不为 0 时才包含它
+		if param.AreaV2 != 0 {
+			signParams["area_v2"] = strconv.Itoa(param.AreaV2)
+		}
+
+		// 计算签名
+		param.Sign = calculateAppSign(signParams)
+	}
+
 	return execute[*StartLiveResult](c, method, url, param, fillCsrf(c))
 }
 
