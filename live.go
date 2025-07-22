@@ -116,6 +116,12 @@ type StartLiveParam struct {
 	RoomId   int    `json:"room_id"`  // 直播间id。必须为自己的直播间id
 	AreaV2   int    `json:"area_v2"`  // 直播分区id（子分区id）。详见[直播分区]
 	Platform string `json:"platform"` // 直播平台。直播姬（pc）：pc_link。web在线直播：web_link（已下线）。bililink：android_link。
+
+	// 下面四个参数详见：https://github.com/SocialSisterYi/bilibili-API-collect/pull/1351/files
+	Version string `json:"version"` // 直播姬版本号
+	Build   int    `json:"build"`   // 直播姬构建号
+	Appkey  string `json:"appkey"`  // APP密钥
+	Sign    string `json:"sign"`    // APP API签名得到的sign
 }
 
 type Rtmp struct {
@@ -208,4 +214,29 @@ func (c *Client) GetLiveAreaList() ([]LiveAreaList, error) {
 		url    = "https://api.live.bilibili.com/room/v1/Area/getList"
 	)
 	return execute[[]LiveAreaList](c, method, url, nil)
+}
+
+type GetHomePageLiveVersionParam struct {
+	SystemVersion int `json:"system_version"`                         // 暂不清楚。可以直接写2
+	Ts            int `json:"ts,omitempty" request:"query,omitempty"` // 10位时间戳
+}
+
+type HomePageLiveVersion struct {
+	CurrVersion      string `json:"curr_version,omitempty" request:"query,omitempty"`      // 直播姬最新版本号
+	Build            int    `json:"build,omitempty" request:"query,omitempty"`             // 直播姬构建号
+	Instruction      string `json:"instruction,omitempty" request:"query,omitempty"`       // 更新说明（简要）
+	FileSize         string `json:"file_size,omitempty" request:"query,omitempty"`         // 文件大小（字节）
+	FileMd5          string `json:"file_md5,omitempty" request:"query,omitempty"`          // 安装包文件MD5
+	Content          string `json:"content,omitempty" request:"query,omitempty"`           // HTML格式的更新内容
+	DownloadUrl      string `json:"download_url,omitempty" request:"query,omitempty"`      // 安装包下载链接
+	HdiffpatchSwitch int    `json:"hdiffpatch_switch,omitempty" request:"query,omitempty"` // 增量更新开关?
+}
+
+// GetHomePageLiveVersion PC直播姬版本号获取
+func (c *Client) GetHomePageLiveVersion(param GetHomePageLiveVersionParam) (*HomePageLiveVersion, error) {
+	const (
+		method = resty.MethodGet
+		url    = "https://api.live.bilibili.com/xlive/app-blink/v1/liveVersionInfo/getHomePageLiveVersion"
+	)
+	return execute[*HomePageLiveVersion](c, method, url, param)
 }
