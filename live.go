@@ -1,6 +1,9 @@
 package bilibili
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/go-resty/resty/v2"
 )
 
@@ -117,13 +120,13 @@ type StartLiveParam struct {
 	AreaV2   int    `json:"area_v2"`  // 直播分区id（子分区id）。详见[直播分区]
 	Platform string `json:"platform"` // 直播平台。直播姬（pc）：pc_link。web在线直播：web_link（已下线）。bililink：android_link。
 
-	// 下面四个参数详见：https://github.com/SocialSisterYi/bilibili-API-collect/pull/1351/files
-	Version string `json:"version"` // 直播姬版本号
-	Build   int    `json:"build"`   // 直播姬构建号
-	Appkey  string `json:"appkey"`  // APP密钥
-	Sign    string `json:"sign"`    // APP API签名得到的sign
+	// 下面四个参数详见：https://github.com/SocialSisterYi/bilibili-API-collect/pull/1351/files 。
+	// 可以调用 GetHomePageLiveVersion 方法获取 Version 和 Build 参数。
+	Version string `json:"version"`          // 直播姬版本号，2025.7.20后对于某些用户必填
+	Build   int    `json:"build"`            // 直播姬构建号，2025.7.20后对于某些用户必填
+	Appkey  string `json:"appkey,omitempty"` // APP密钥，不填会自动计算
+	Sign    string `json:"sign,omitempty"`   // APP API签名得到的sign，不填会自动计算
 
-	// 还需要一个ts，详见：https://github.com/SocialSisterYi/bilibili-API-collect/issues/1349
 	Ts int `json:"ts,omitempty" request:"query,omitempty"` // 10位时间戳
 }
 
@@ -163,11 +166,41 @@ type StartLiveResult struct {
 }
 
 // StartLive 开始直播
+//
+// 注意：为了方便使用，这个函数的很多参数做了自动填入，使用例子可以参考：https://github.com/CuteReimu/bilibili/issues/121
 func (c *Client) StartLive(param StartLiveParam) (*StartLiveResult, error) {
 	const (
 		method = resty.MethodPost
 		url    = "https://api.live.bilibili.com/room/v1/Room/startLive"
 	)
+
+	// 如果没有提供签名，自动计算
+	if param.Sign == "" && param.Appkey == "" {
+		// 已知的 Bilibili 直播姬的密钥和对应的秘钥
+		// 这些是公开的常量，用于计算 API 签名
+		const (
+			appKey    = "aae92bc66f3edfab"
+			appSecret = "af125a0d5279fd576c1b4418a3e8276d" //nolint:gosec
+		)
+		if param.Ts == 0 {
+			param.Ts = int(time.Now().Unix())
+		}
+		param.Appkey = appKey
+		csrf := c.getCookie("bili_jct")
+		signParams := map[string]string{
+			"appkey":     param.Appkey,
+			"build":      strconv.Itoa(param.Build),
+			"platform":   param.Platform,
+			"room_id":    strconv.Itoa(param.RoomId),
+			"area_v2":    strconv.Itoa(param.AreaV2),
+			"ts":         strconv.Itoa(param.Ts),
+			"version":    param.Version,
+			"csrf":       csrf,
+			"csrf_token": csrf,
+		}
+		param.Sign = calculateAppSign(signParams, appSecret)
+	}
+
 	return execute[*StartLiveResult](c, method, url, param, fillCsrf(c))
 }
 
