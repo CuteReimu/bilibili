@@ -218,7 +218,7 @@ type TopRecommendVideoList struct {
 	UserFeature           any                     `json:"user_feature"`             //无意义
 }
 
-// 推荐理由
+// RcmdReason 推荐理由
 type RcmdReason struct {
 	ReasonType int    `json:"reason_type"` // 原因类型
 	Content    string `json:"content"`     // 原因描述（仅当 reason_type 为 3 时存在）
