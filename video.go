@@ -1,6 +1,7 @@
 package bilibili
 
 import (
+	"encoding/json"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -496,22 +497,22 @@ func (c *Client) GetVideoOnlineInfo(param VideoCidParam) (*VideoOnlineInfo, erro
 }
 
 type VideoStatusNumber struct {
-	Aid        int    `json:"aid"`        // 稿件avid
-	Bvid       string `json:"bvid"`       // 稿件bvid
-	View       any    `json:"view"`       // 正常：播放次数(num)。屏蔽："--"(str)
-	Danmaku    int    `json:"danmaku"`    // 弹幕条数
-	Reply      int    `json:"reply"`      // 评论条数
-	Favorite   int    `json:"favorite"`   // 收藏人数
-	Coin       int    `json:"coin"`       // 投币枚数
-	Share      int    `json:"share"`      // 分享次数
-	NowRank    int    `json:"now_rank"`   // 0。作用尚不明确
-	HisRank    int    `json:"his_rank"`   // 历史最高排行
-	Like       int    `json:"like"`       // 获赞次数
-	Dislike    int    `json:"dislike"`    // 0。作用尚不明确
-	NoReprint  int    `json:"no_reprint"` // 禁止转载标志。0：无。1：禁止
-	Copyright  int    `json:"copyright"`  // 版权标志。1：自制。2：转载
-	ArgueMsg   string `json:"argue_msg"`  // 警告信息。默认为空
-	Evaluation string `json:"evaluation"` // 视频评分。默认为空
+	Aid        int         `json:"aid"`        // 稿件avid
+	Bvid       string      `json:"bvid"`       // 稿件bvid
+	View       json.Number `json:"view"`       // 正常：播放次数(num)。屏蔽："--"(str)
+	Danmaku    int         `json:"danmaku"`    // 弹幕条数
+	Reply      int         `json:"reply"`      // 评论条数
+	Favorite   int         `json:"favorite"`   // 收藏人数
+	Coin       int         `json:"coin"`       // 投币枚数
+	Share      int         `json:"share"`      // 分享次数
+	NowRank    int         `json:"now_rank"`   // 0。作用尚不明确
+	HisRank    int         `json:"his_rank"`   // 历史最高排行
+	Like       int         `json:"like"`       // 获赞次数
+	Dislike    int         `json:"dislike"`    // 0。作用尚不明确
+	NoReprint  int         `json:"no_reprint"` // 禁止转载标志。0：无。1：禁止
+	Copyright  int         `json:"copyright"`  // 版权标志。1：自制。2：转载
+	ArgueMsg   string      `json:"argue_msg"`  // 警告信息。默认为空
+	Evaluation string      `json:"evaluation"` // 视频评分。默认为空
 }
 
 // GetVideoStatusNumber 获取视频状态数视频

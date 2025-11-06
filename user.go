@@ -1,6 +1,9 @@
 package bilibili
 
-import "github.com/go-resty/resty/v2"
+import (
+	"encoding/json"
+	"github.com/go-resty/resty/v2"
+)
 
 type GetUserVideosParam struct {
 	Mid     int    `json:"mid"`                                         // 目标用户mid
@@ -441,7 +444,7 @@ type GetUserFollowersParam struct {
 
 type GetUserFollowersResult struct {
 	List      []RelationUser `json:"list"`       // 明细列表
-	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+	ReVersion json.Number    `json:"re_version"` // （？）（可能是number，可能是string）
 	Total     int            `json:"total"`      // 粉丝总数
 }
 
@@ -463,7 +466,7 @@ type GetUserFollowingsParam struct {
 
 type GetUserFollowingsResult struct {
 	List      []RelationUser `json:"list"`       // 明细列表
-	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+	ReVersion json.Number    `json:"re_version"` // （？）（可能是number，可能是string）
 	Total     int            `json:"total"`      // 关注总数
 }
 
@@ -499,7 +502,7 @@ type UserFollowingsDetail2 struct {
 
 type GetUserFollowings2Result struct {
 	List      []UserFollowingsDetail2 `json:"list"`       // 明细列表
-	ReVersion any                     `json:"re_version"` // （？）（可能是number，可能是string）
+	ReVersion json.Number             `json:"re_version"` // （？）（可能是number，可能是string）
 	Total     int                     `json:"total"`      // 关注总数
 }
 
@@ -551,7 +554,7 @@ type SearchUserFollowingsParam struct {
 
 type SearchUserFollowingsResult struct {
 	List      []RelationUser `json:"list"`       // 明细列表
-	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+	ReVersion json.Number    `json:"re_version"` // （？）（可能是number，可能是string）
 	Total     int            `json:"total"`      // 关注总数
 }
 
@@ -572,7 +575,7 @@ type GetSameFollowingsParam struct {
 
 type GetSameFollowingsResult struct {
 	List      []RelationUser `json:"list"`       // 明细列表
-	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+	ReVersion json.Number    `json:"re_version"` // （？）（可能是number，可能是string）
 	Total     int            `json:"total"`      // 关注总数
 }
 
@@ -587,7 +590,7 @@ func (c *Client) GetSameFollowings(param GetSameFollowingsParam) (*GetSameFollow
 
 type GetWhispersResult struct {
 	List      []RelationUser `json:"list"`       // 明细列表
-	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+	ReVersion json.Number    `json:"re_version"` // （？）（可能是number，可能是string）
 }
 
 // GetWhispers 查询悄悄关注明细
@@ -601,7 +604,7 @@ func (c *Client) GetWhispers() (*GetWhispersResult, error) {
 
 type GetFriendsResult struct {
 	List      []RelationUser `json:"list"`       // 明细列表
-	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+	ReVersion json.Number    `json:"re_version"` // （？）（可能是number，可能是string）
 }
 
 // GetFriends 查询互相关注明细
@@ -620,7 +623,7 @@ type GetBlacksParam struct {
 
 type GetBlacksResult struct {
 	List      []RelationUser `json:"list"`       // 明细列表
-	ReVersion any            `json:"re_version"` // （？）（可能是number，可能是string）
+	ReVersion json.Number    `json:"re_version"` // （？）（可能是number，可能是string）
 }
 
 // GetBlacks 查询黑名单明细

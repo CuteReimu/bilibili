@@ -563,7 +563,7 @@ type DynamicItem struct {
 		} `json:"like_icon"`
 		RidStr string `json:"rid_str"`
 	} `json:"basic"`
-	IdStr   any `json:"id_str"` // 这个字段，B站返回的数据有时是number，有时是string，不知道为什么。这里用any会带来一个问题，number会解析成为float64，有可能存在丢失精度问题。请谨慎使用
+	IdStr   json.Number `json:"id_str"` // 这个字段，B站返回的数据有时是number，有时是string
 	Modules struct {
 		ModuleAuthor struct {
 			Avatar struct {
@@ -631,13 +631,13 @@ type DynamicItem struct {
 				} `json:"fallback_layers"`
 				Mid string `json:"mid"`
 			} `json:"avatar"`
-			Face           string `json:"face"`
-			FaceNft        bool   `json:"face_nft"`
-			Following      any    `json:"following"`
-			JumpUrl        string `json:"jump_url"`
-			Label          string `json:"label"`
-			Mid            int    `json:"mid"`
-			Name           string `json:"name"`
+			Face           string      `json:"face"`
+			FaceNft        bool        `json:"face_nft"`
+			Following      json.Number `json:"following"`
+			JumpUrl        string      `json:"jump_url"`
+			Label          string      `json:"label"`
+			Mid            int         `json:"mid"`
+			Name           string      `json:"name"`
 			OfficialVerify struct {
 				Desc string `json:"desc"`
 				Type int    `json:"type"`
@@ -769,7 +769,7 @@ type DynamicItem struct {
 			} `json:"like_icon"`
 			RidStr string `json:"rid_str"`
 		} `json:"basic"`
-		IdStr   any `json:"id_str"`
+		IdStr   json.Number `json:"id_str"`
 		Modules struct {
 			ModuleAuthor struct {
 				Avatar struct {
@@ -848,13 +848,13 @@ type DynamicItem struct {
 					Name    string `json:"name"`
 					Type    int    `json:"type"`
 				} `json:"decorate,omitempty"`
-				Face           string `json:"face"`
-				FaceNft        bool   `json:"face_nft"`
-				Following      any    `json:"following"`
-				JumpUrl        string `json:"jump_url"`
-				Label          string `json:"label"`
-				Mid            int    `json:"mid"`
-				Name           string `json:"name"`
+				Face           string      `json:"face"`
+				FaceNft        bool        `json:"face_nft"`
+				Following      json.Number `json:"following"`
+				JumpUrl        string      `json:"jump_url"`
+				Label          string      `json:"label"`
+				Mid            int         `json:"mid"`
+				Name           string      `json:"name"`
 				OfficialVerify struct {
 					Desc string `json:"desc"`
 					Type int    `json:"type"`
@@ -962,7 +962,7 @@ type DynamicInfo struct {
 	Items          []DynamicItem `json:"items"`           // 数据数组
 	Offset         string        `json:"offset"`          // 偏移量，等于items中最后一条记录的id，获取下一页时使用
 	UpdateBaseline string        `json:"update_baseline"` // 更新基线，等于items中第一条记录的id
-	UpdateNum      int           `json:"update_num"`      // 本次获取获取到了多少条新动态，在更新基线以上的动态条数
+	UpdateNum      json.Number   `json:"update_num"`      // 本次获取获取到了多少条新动态，在更新基线以上的动态条数
 }
 
 type GetUserSpaceDynamicParam struct {

@@ -2,6 +2,7 @@ package bilibili
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -60,14 +61,14 @@ func init() {
 }
 
 type SendPrivateMessageParam struct {
-	SenderUid      int `json:"msg[sender_uid]"`                                           // 发送者mid
-	ReceiverId     int `json:"msg[receiver_id]"`                                          // 接收者mid
-	ReceiverType   int `json:"msg[receiver_type]"`                                        // 1。固定为1
-	MsgType        int `json:"msg[msg_type]"`                                             // 消息类型。1:发送文字。2:发送图片。5:撤回消息
-	MsgStatus      int `json:"msg[msg_status],omitempty" request:"query,omitempty"`       // 0
-	Timestamp      int `json:"msg[timestamp]"`                                            // 时间戳（秒）
-	NewFaceVersion int `json:"msg[new_face_version],omitempty" request:"query,omitempty"` // 表情包版本
-	Content        any `json:"msg[content]"`                                              // 消息内容。发送文字时：str<br />撤回消息时：num
+	SenderUid      int         `json:"msg[sender_uid]"`                                           // 发送者mid
+	ReceiverId     int         `json:"msg[receiver_id]"`                                          // 接收者mid
+	ReceiverType   int         `json:"msg[receiver_type]"`                                        // 1。固定为1
+	MsgType        int         `json:"msg[msg_type]"`                                             // 消息类型。1:发送文字。2:发送图片。5:撤回消息
+	MsgStatus      int         `json:"msg[msg_status],omitempty" request:"query,omitempty"`       // 0
+	Timestamp      int         `json:"msg[timestamp]"`                                            // 时间戳（秒）
+	NewFaceVersion int         `json:"msg[new_face_version],omitempty" request:"query,omitempty"` // 表情包版本
+	Content        json.Number `json:"msg[content]"`                                              // 消息内容。发送文字时：str<br />撤回消息时：num
 }
 
 type SendPrivateMessageResult struct {
