@@ -117,7 +117,7 @@ func getCorrespondPath(timestamp int64) (string, error) {
 	var (
 		hash   = sha256.New()
 		random = rand.Reader
-		msg    = []byte(fmt.Sprintf("refresh_%d", timestamp))
+		msg    = fmt.Appendf(nil, "refresh_%d", timestamp)
 	)
 	encryptedData, err := rsa.EncryptOAEP(hash, random, correspondPathPublicKey, msg, nil)
 	if err != nil {

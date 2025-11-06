@@ -3,6 +3,7 @@ package bilibili
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"maps"
 	"net/http"
 	"net/url"
 	"sort"
@@ -30,28 +31,28 @@ var (
 	}
 
 	_defaultStorage = &MemoryStorage{
-		data: make(map[string]interface{}, 15),
+		data: make(map[string]any, 15),
 	}
 )
 
 type Storage interface {
-	Set(key string, value interface{})
-	Get(key string) (v interface{}, isSet bool)
+	Set(key string, value any)
+	Get(key string) (v any, isSet bool)
 }
 
 type MemoryStorage struct {
-	data map[string]interface{}
+	data map[string]any
 	mu   sync.RWMutex
 }
 
-func (impl *MemoryStorage) Set(key string, value interface{}) {
+func (impl *MemoryStorage) Set(key string, value any) {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
 
 	impl.data[key] = value
 }
 
-func (impl *MemoryStorage) Get(key string) (v interface{}, isSet bool) {
+func (impl *MemoryStorage) Get(key string) (v any, isSet bool) {
 	impl.mu.RLock()
 	defer impl.mu.RUnlock()
 
@@ -201,10 +202,7 @@ func (wbi *WBI) SignQuery(query url.Values, ts time.Time) (newQuery url.Values, 
 }
 
 func (wbi *WBI) SignMap(payload map[string]string, ts time.Time) (newPayload map[string]string, err error) {
-	newPayload = make(map[string]string, 10)
-	for k, v := range payload {
-		newPayload[k] = v
-	}
+	newPayload = maps.Clone(payload)
 
 	newPayload["wts"] = strconv.FormatInt(ts.Unix(), 10)
 
@@ -243,7 +241,7 @@ func (wbi *WBI) SignMap(payload map[string]string, ts time.Time) (newPayload map
 }
 
 func (wbi *WBI) initWbi() error {
-	_, err, _ := wbi.sfg.Do("initWbi", func() (interface{}, error) {
+	_, err, _ := wbi.sfg.Do("initWbi", func() (any, error) {
 		return nil, wbi.doInitWbi()
 	})
 

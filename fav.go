@@ -341,21 +341,21 @@ type SelfFavourList struct {
 				Name string `json:"name"`
 				Face string `json:"face"`
 			} `json:"upper"`
-			CoverType  int         `json:"cover_type"`
-			Intro      string      `json:"intro"`
-			Ctime      int         `json:"ctime"`
-			Mtime      int         `json:"mtime"`
-			State      int         `json:"state"`
-			FavState   int         `json:"fav_state"`
-			MediaCount int         `json:"media_count"`
-			ViewCount  int         `json:"view_count"`
-			Vt         int         `json:"vt"`
-			IsTop      bool        `json:"is_top"`
-			RecentFav  interface{} `json:"recent_fav"`
-			PlaySwitch int         `json:"play_switch"`
-			Type       int         `json:"type"`
-			Link       string      `json:"link"`
-			Bvid       string      `json:"bvid"`
+			CoverType  int    `json:"cover_type"`
+			Intro      string `json:"intro"`
+			Ctime      int    `json:"ctime"`
+			Mtime      int    `json:"mtime"`
+			State      int    `json:"state"`
+			FavState   int    `json:"fav_state"`
+			MediaCount int    `json:"media_count"`
+			ViewCount  int    `json:"view_count"`
+			Vt         int    `json:"vt"`
+			IsTop      bool   `json:"is_top"`
+			RecentFav  any    `json:"recent_fav"`
+			PlaySwitch int    `json:"play_switch"`
+			Type       int    `json:"type"`
+			Link       string `json:"link"`
+			Bvid       string `json:"bvid"`
 		} `json:"list"`
 		HasMore bool `json:"has_more"`
 	} `json:"mediaListResponse"`
