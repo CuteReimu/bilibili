@@ -2,9 +2,10 @@ package bilibili
 
 import (
 	"encoding/json"
+	"io"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
-	"io"
 )
 
 type SearchDynamicAtParam struct {
@@ -556,10 +557,10 @@ type DynamicItem struct {
 		CommentIdStr string `json:"comment_id_str"`
 		CommentType  int    `json:"comment_type"`
 		LikeIcon     struct {
-			ActionUrl string `json:"action_url"`
-			EndUrl    string `json:"end_url"`
-			Id        int    `json:"id"`
-			StartUrl  string `json:"start_url"`
+			ActionUrl string      `json:"action_url"`
+			EndUrl    string      `json:"end_url"`
+			Id        json.Number `json:"id"`
+			StartUrl  string      `json:"start_url"`
 		} `json:"like_icon"`
 		RidStr string `json:"rid_str"`
 	} `json:"basic"`
@@ -633,33 +634,33 @@ type DynamicItem struct {
 			} `json:"avatar"`
 			Face           string      `json:"face"`
 			FaceNft        bool        `json:"face_nft"`
-			Following      json.Number `json:"following"`
+			Following      bool        `json:"following"`
 			JumpUrl        string      `json:"jump_url"`
 			Label          string      `json:"label"`
-			Mid            int         `json:"mid"`
+			Mid            json.Number `json:"mid"`
 			Name           string      `json:"name"`
 			OfficialVerify struct {
 				Desc string `json:"desc"`
 				Type int    `json:"type"`
 			} `json:"official_verify"`
 			Pendant struct {
-				Expire            int    `json:"expire"`
-				Image             string `json:"image"`
-				ImageEnhance      string `json:"image_enhance"`
-				ImageEnhanceFrame string `json:"image_enhance_frame"`
-				NPid              int    `json:"n_pid"`
-				Name              string `json:"name"`
-				Pid               int    `json:"pid"`
+				Expire            json.Number `json:"expire"`
+				Image             string      `json:"image"`
+				ImageEnhance      string      `json:"image_enhance"`
+				ImageEnhanceFrame string      `json:"image_enhance_frame"`
+				NPid              json.Number `json:"n_pid"`
+				Name              string      `json:"name"`
+				Pid               json.Number `json:"pid"`
 			} `json:"pendant"`
-			PubAction       string `json:"pub_action"`
-			PubLocationText string `json:"pub_location_text"`
-			PubTime         string `json:"pub_time"`
-			PubTs           int    `json:"pub_ts"`
-			Type            string `json:"type"`
+			PubAction       string      `json:"pub_action"`
+			PubLocationText string      `json:"pub_location_text"`
+			PubTime         string      `json:"pub_time"`
+			PubTs           json.Number `json:"pub_ts"`
+			Type            string      `json:"type"`
 			Vip             struct {
-				AvatarSubscript    int    `json:"avatar_subscript"`
-				AvatarSubscriptUrl string `json:"avatar_subscript_url"`
-				DueDate            int64  `json:"due_date"`
+				AvatarSubscript    int         `json:"avatar_subscript"`
+				AvatarSubscriptUrl string      `json:"avatar_subscript_url"`
+				DueDate            json.Number `json:"due_date"`
 				Label              struct {
 					BgColor               string `json:"bg_color"`
 					BgStyle               int    `json:"bg_style"`
@@ -743,17 +744,17 @@ type DynamicItem struct {
 		} `json:"module_more"`
 		ModuleStat struct {
 			Comment struct {
-				Count     int  `json:"count"`
-				Forbidden bool `json:"forbidden"`
+				Count     json.Number `json:"count"`
+				Forbidden bool        `json:"forbidden"`
 			} `json:"comment"`
 			Forward struct {
-				Count     int  `json:"count"`
-				Forbidden bool `json:"forbidden"`
+				Count     json.Number `json:"count"`
+				Forbidden bool        `json:"forbidden"`
 			} `json:"forward"`
 			Like struct {
-				Count     int  `json:"count"`
-				Forbidden bool `json:"forbidden"`
-				Status    bool `json:"status"`
+				Count     json.Number `json:"count"`
+				Forbidden bool        `json:"forbidden"`
+				Status    bool        `json:"status"`
 			} `json:"like"`
 		} `json:"module_stat"`
 	} `json:"modules"`
@@ -838,44 +839,44 @@ type DynamicItem struct {
 				Decorate struct {
 					CardUrl string `json:"card_url"`
 					Fan     struct {
-						Color  string `json:"color"`
-						IsFan  bool   `json:"is_fan"`
-						NumStr string `json:"num_str"`
-						Number int    `json:"number"`
+						Color  string      `json:"color"`
+						IsFan  bool        `json:"is_fan"`
+						NumStr string      `json:"num_str"`
+						Number json.Number `json:"number"`
 					} `json:"fan"`
-					Id      int    `json:"id"`
-					JumpUrl string `json:"jump_url"`
-					Name    string `json:"name"`
-					Type    int    `json:"type"`
+					Id      json.Number `json:"id"`
+					JumpUrl string      `json:"jump_url"`
+					Name    string      `json:"name"`
+					Type    int         `json:"type"`
 				} `json:"decorate,omitempty"`
 				Face           string      `json:"face"`
 				FaceNft        bool        `json:"face_nft"`
-				Following      json.Number `json:"following"`
+				Following      bool        `json:"following"`
 				JumpUrl        string      `json:"jump_url"`
 				Label          string      `json:"label"`
-				Mid            int         `json:"mid"`
+				Mid            json.Number `json:"mid"`
 				Name           string      `json:"name"`
 				OfficialVerify struct {
 					Desc string `json:"desc"`
 					Type int    `json:"type"`
 				} `json:"official_verify"`
 				Pendant struct {
-					Expire            int    `json:"expire"`
-					Image             string `json:"image"`
-					ImageEnhance      string `json:"image_enhance"`
-					ImageEnhanceFrame string `json:"image_enhance_frame"`
-					NPid              int    `json:"n_pid"`
-					Name              string `json:"name"`
-					Pid               int    `json:"pid"`
+					Expire            json.Number `json:"expire"`
+					Image             string      `json:"image"`
+					ImageEnhance      string      `json:"image_enhance"`
+					ImageEnhanceFrame string      `json:"image_enhance_frame"`
+					NPid              json.Number `json:"n_pid"`
+					Name              string      `json:"name"`
+					Pid               int         `json:"pid"`
 				} `json:"pendant"`
-				PubAction string `json:"pub_action"`
-				PubTime   string `json:"pub_time"`
-				PubTs     int    `json:"pub_ts"`
-				Type      string `json:"type"`
+				PubAction string      `json:"pub_action"`
+				PubTime   string      `json:"pub_time"`
+				PubTs     json.Number `json:"pub_ts"`
+				Type      string      `json:"type"`
 				Vip       struct {
-					AvatarSubscript    int    `json:"avatar_subscript"`
-					AvatarSubscriptUrl string `json:"avatar_subscript_url"`
-					DueDate            int64  `json:"due_date"`
+					AvatarSubscript    int         `json:"avatar_subscript"`
+					AvatarSubscriptUrl string      `json:"avatar_subscript_url"`
+					DueDate            json.Number `json:"due_date"`
 					Label              struct {
 						BgColor               string `json:"bg_color"`
 						BgStyle               int    `json:"bg_style"`
@@ -937,13 +938,13 @@ type DynamicItem struct {
 					} `json:"archive,omitempty"`
 					Type string `json:"type"`
 					Draw struct {
-						Id    int `json:"id"`
+						Id    json.Number `json:"id"`
 						Items []struct {
-							Height int     `json:"height"`
-							Size   float64 `json:"size"`
-							Src    string  `json:"src"`
-							Tags   []any   `json:"tags"`
-							Width  int     `json:"width"`
+							Height json.Number `json:"height"`
+							Size   json.Number `json:"size"`
+							Src    string      `json:"src"`
+							Tags   []any       `json:"tags"`
+							Width  json.Number `json:"width"`
 						} `json:"items"`
 					} `json:"draw,omitempty"`
 				} `json:"major"`
