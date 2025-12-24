@@ -2,6 +2,7 @@ package bilibili
 
 import (
 	"encoding/json"
+
 	"github.com/go-resty/resty/v2"
 )
 
@@ -209,14 +210,14 @@ type ArgueInfo struct {
 	ArgueType int    `json:"argue_type"` // 作用尚不明确
 }
 type TopRecommendVideoList struct {
-	BusinessCard          any                     `json:"business_card"`            //无意义
-	FloorInfo             any                     `json:"floor_info"`               //无意义
-	Item                  []TopRecommendVideoItem `json:"item"`                     //推荐列表
-	Mid                   int                     `json:"mid"`                      //用户mid,未登录为0
-	PreloadExposePct      float64                 `json:"preload_expose_pct"`       //用于预加载?
-	PreloadFloorExposePct float64                 `json:"preload_floor_expose_pct"` //用于预加载?
-	SideBarColumn         []any                   `json:"side_bar_column"`          //边栏列表?	可参考字段 item 及对应功能文档
-	UserFeature           any                     `json:"user_feature"`             //无意义
+	BusinessCard          any                     `json:"business_card"`            // 无意义
+	FloorInfo             any                     `json:"floor_info"`               // 无意义
+	Item                  []TopRecommendVideoItem `json:"item"`                     // 推荐列表
+	Mid                   int                     `json:"mid"`                      // 用户mid,未登录为0
+	PreloadExposePct      float64                 `json:"preload_expose_pct"`       // 用于预加载?
+	PreloadFloorExposePct float64                 `json:"preload_floor_expose_pct"` // 用于预加载?
+	SideBarColumn         []any                   `json:"side_bar_column"`          // 边栏列表?	可参考字段 item 及对应功能文档
+	UserFeature           any                     `json:"user_feature"`             // 无意义
 }
 
 // RcmdReason 推荐理由
@@ -618,7 +619,8 @@ type GetVideoByKeywordsParam struct {
 	SeriesId int    `json:"series_id,omitempty" request:"query,omitempty"` // 系列 ID。用于过滤结果, 即若某一视频包含在系列内则不返回该视频
 }
 
-// GetVideoByKeywords根据关键词查找视频
+// GetVideoByKeywords 根据关键词查找视频
+//
 // https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md#%E6%A0%B9%E6%8D%AE%E5%85%B3%E9%94%AE%E8%AF%8D%E6%9F%A5%E6%89%BE%E8%A7%86%E9%A2%91
 func (c *Client) GetVideoByKeywords(param GetVideoByKeywordsParam) (*VideoCollectionByKeywordsInfo, error) {
 	const (
@@ -650,7 +652,7 @@ type GetVideoStreamParam struct {
 	Avid        int    `json:"avid,omitempty" request:"query,omitempty"`         // 稿件 avid。avid 与 bvid 任选一个
 	Bvid        string `json:"bvid,omitempty" request:"query,omitempty"`         // 稿件 bvid。avid 与 bvid 任选一个
 	Cid         int    `json:"cid"`                                              // 视频 cid
-	Qn          int    `json:"qn,omitempty" request:"query,omitempty"`           // 视频清晰度选择。未登录默认 32（480P），登录后默认 64（720P）。含义见 [上表](#qn视频清晰度标识)。**DASH 格式时无效**
+	Qn          int    `json:"qn,omitempty" request:"query,omitempty"`           // 视频清晰度选择。未登录默认 32（480P），登录后默认 64（720P）。含义见 [上表](#qn视频清晰度标识)。DASH 格式时无效
 	Fnval       int    `json:"fnval,omitempty" request:"query,omitempty"`        // 视频流格式标识。默认值为1（MP4 格式）。含义见 [ 上表](#fnval视频流格式标识)
 	Fnver       int    `json:"fnver,omitempty" request:"query,omitempty"`        // 0
 	Fourk       int    `json:"fourk,omitempty" request:"query,omitempty"`        // 是否允许 4K 视频。画质最高 1080P：0（默认）。画 质最高 4K：1
@@ -675,14 +677,14 @@ type Durl struct {
 	Size      int      `json:"size"`       // 视频大小。单位为 Byte
 	Ahead     string   `json:"ahead"`      // （？）
 	Vhead     string   `json:"vhead"`      // （？）
-	Url       string   `json:"url"`        // 默认流 URL。**注意 unicode 转义符**。有效时间为120min
-	BackupUrl []string `json:"backup_url"` // 备用视频流 **注意 unicode 转义符**。有效时间为120min
+	Url       string   `json:"url"`        // 默认流 URL。注意 unicode 转义符。有效时间为120min
+	BackupUrl []string `json:"backup_url"` // 备用视频流 注意 unicode 转义符。有效时间为120min
 }
 type Dash struct {
 	Duration      int            `json:"duration"`        // 视频长度。秒值
 	Minbuffertime float64        `json:"minBufferTime"`   // 1.5？
 	MinBufferTime float64        `json:"min_buffer_time"` // 1.5？
-	Video         []AudioOrVideo `json:"video"`           // 视频流信息 同一清晰度可拥有 H.264 / H.265 / AV1 多种码流<br />**HDR 仅支持 H.265** |
+	Video         []AudioOrVideo `json:"video"`           // 视频流信息 同一清晰度可拥有 H.264 / H.265 / AV1 多种码流<br />HDR 仅支持 H.265 |
 	Audio         []AudioOrVideo `json:"audio"`           // 伴音流信息。当视频没有音轨时，此项为 null
 	Dolby         Dolby          `json:"dolby"`           // 杜比全景声伴音信息
 	Flac          Flac           `json:"flac"`            // 无损音轨伴音信息。当视频没有无损音轨时，此项为 null
@@ -697,23 +699,23 @@ type Flac struct {
 }
 type AudioOrVideo struct {
 	Id           int         `json:"id"`             // 音视频清晰度代码。参考上表。[qn视频清晰度标识](#qn视频清晰度标识)。[视频伴音音质代码](#视 频伴音音质代码)
-	Baseurl      string      `json:"baseUrl"`        // 默认流 URL。**注意 unicode 转义符**。有效时间为 120min
-	BaseUrl      string      `json:"base_url"`       // **同上**
+	Baseurl      string      `json:"baseUrl"`        // 默认流 URL。注意 unicode 转义符。有效时间为 120min
+	BaseUrl      string      `json:"base_url"`       // 同上
 	Backupurl    []string    `json:"backupUrl"`      // 备用流 URL
-	BackupUrl    []string    `json:"backup_url"`     // **同上**
+	BackupUrl    []string    `json:"backup_url"`     // 同上
 	Bandwidth    int         `json:"bandwidth"`      // 所需最低带宽。单位为 Byte
 	Mimetype     string      `json:"mimeType"`       // 格式 mimetype 类型
-	MimeType     string      `json:"mime_type"`      // **同上**
+	MimeType     string      `json:"mime_type"`      // 同上
 	Codecs       string      `json:"codecs"`         // 编码/音频类型。eg：avc1.640032
-	Width        int         `json:"width"`          // 视频宽度。单位为像素。**仅视频流存在该字段**
-	Height       int         `json:"height"`         // 视频高度。单位为像素。**仅视频流存在该字段**
-	Framerate    string      `json:"frameRate"`      // 视频帧率。**仅视频流存在该字段**
-	FrameRate    string      `json:"frame_rate"`     // **同上**
+	Width        int         `json:"width"`          // 视频宽度。单位为像素。仅视频流存在该字段
+	Height       int         `json:"height"`         // 视频高度。单位为像素。仅视频流存在该字段
+	Framerate    string      `json:"frameRate"`      // 视频帧率。仅视频流存在该字段
+	FrameRate    string      `json:"frame_rate"`     // 同上
 	Sar          string      `json:"sar"`            // Sample Aspect Ratio（单个像素的宽高比）。音频流该值恒为空
 	Startwithsap int         `json:"startWithSap"`   // Stream Access Point（流媒体访问位点）。音频流该值恒为空
-	StartWithSap int         `json:"start_with_sap"` // **同上**
+	StartWithSap int         `json:"start_with_sap"` // 同上
 	Segmentbase  SegmentBase `json:"SegmentBase"`    // 见下表。url 对应 m4s 文件中，头部的位置。音频流该值恒为空
-	SegmentBase  SegmentBase `json:"segment_base"`   // **同上**
+	SegmentBase  SegmentBase `json:"segment_base"`   // 同上
 	Codecid      int         `json:"codecid"`        // 码流编码标识代码。含义见 [上表](#视频编码代码)。音频流该值恒为0
 }
 type SegmentBase struct {
@@ -733,8 +735,8 @@ type GetVideoStreamResult struct {
 	VideoCodecid      int             `json:"video_codecid"`      // 默认选择视频流的编码id。含义见 [上表](#视频编码代码)
 	SeekParam         string          `json:"seek_param"`         // start？
 	SeekType          string          `json:"seek_type"`          // offset（DASH / FLV）？。 second（MP4）？
-	Durl              []Durl          `json:"durl"`               // 视频分段流信息。**注：仅 FLV / MP4 格式存在此字段**
-	Dash              Dash            `json:"dash"`               // DASH 流信息。**注：仅 DASH 格式存在此字段**
+	Durl              []Durl          `json:"durl"`               // 视频分段流信息。注：仅 FLV / MP4 格式存在此字段
+	Dash              Dash            `json:"dash"`               // DASH 流信息。注：仅 DASH 格式存在此字段
 	SupportFormats    []SupportFormat `json:"support_formats"`    // 支持格式的详细信息
 	HighFormat        *string         `json:"high_format"`        // （？）null
 	LastPlayTime      int             `json:"last_play_time"`     // 上次播放进度。毫秒值

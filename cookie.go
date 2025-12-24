@@ -107,7 +107,11 @@ JNrRuoEUXpabUzGB8QIDAQAB
 		panic(err)
 	}
 
-	correspondPathPublicKey = pubInterface.(*rsa.PublicKey) //nolint:forcetypeassert // 在init中，直接panic，无需处理
+	var ok bool
+	correspondPathPublicKey, ok = pubInterface.(*rsa.PublicKey)
+	if !ok {
+		panic("rsa public key type error")
+	}
 }
 
 var correspondPathPublicKey *rsa.PublicKey
