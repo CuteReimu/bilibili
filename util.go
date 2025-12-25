@@ -125,7 +125,6 @@ func withParams(r *resty.Request, in any) error {
 
 		// 获取字段名
 		var fieldName string
-
 		tagMap := parseTag(tValue)
 		if name, ok := tagMap["field"]; ok {
 			fieldName = name
@@ -142,15 +141,12 @@ func withParams(r *resty.Request, in any) error {
 		if !fieldValue.IsZero() {
 			realVal = fieldValue.Interface()
 		} else {
-			// 设置了 omitempty 代表不传
-			if _, ok := tagMap["omitempty"]; ok {
+			if _, ok := tagMap["omitempty"]; ok { // 设置了 omitempty 代表不传
 				continue
 			}
-			// 设置了 default 代表使用默认值
-			if v, ok := tagMap["default"]; ok {
+			if v, ok := tagMap["default"]; ok { // 设置了 default 代表使用默认值
 				realVal = v
-			} else {
-				// 否则使用零值
+			} else { // 否则使用零值
 				realVal = fieldValue.Interface()
 			}
 		}

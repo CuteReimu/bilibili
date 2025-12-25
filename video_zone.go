@@ -11,11 +11,11 @@ import (
 
 // ZoneInfo 结构体用来表示CSV文件中的数据, 包含名称、代码、主分区tid、子分区tid,概述和备注等信息
 type ZoneInfo struct {
-	Name      string //中文名称
-	Code      string //代号即英文名
-	MasterTid int    //主分区tid
-	Tid       int    //子分区tid
-	Overview  string //概述,简介
+	Name      string // 中文名称
+	Code      string // 代号即英文名
+	MasterTid int    // 主分区tid
+	Tid       int    // 子分区tid
+	Overview  string // 概述,简介
 }
 
 //go:embed video_zone.csv
@@ -83,7 +83,7 @@ func (info ZoneInfo) GetDescription() string {
 		description += "\n【描述】" + info.Overview
 		description += info.Overview
 	}
-	//备注写到主分区的备注中了
+	// 备注写到主分区的备注中了
 	if masterInfo.Overview != "" {
 		description += "\n【备注】" + masterInfo.Overview
 	}

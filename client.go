@@ -70,6 +70,7 @@ func NewWithClient(restyClient *resty.Client) *Client {
 	}
 }
 
+// Resty 返回底层的 resty.Client 实例，方便自行扩展使用
 func (c *Client) Resty() *resty.Client {
 	return c.resty
 }

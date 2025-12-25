@@ -23,7 +23,6 @@ linters:
     - noctx
     - noinlineerr
     - nonamedreturns
-    - revive
     - tagalign
     - tagliatelle
     - testpackage
@@ -32,6 +31,43 @@ linters:
     - wsl
     - wsl_v5
   settings:
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: exported
+          arguments: ["disable-checks-on-types", "disable-checks-on-constants"]
+        - name: var-naming
+          disabled: true
+        - name: add-constant
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+        - name: unhandled-error
+          arguments:
+            - "^strings\\.Builder\\.Write(?:Byte|Rune|String)?$"
+        - name: nested-structs
+          disabled: true
+        - name: bare-return
+          disabled: true
+        - name: unchecked-type-assertion
+          arguments:
+            - accept-ignored-assertion-result: true
+        - name: enforce-switch-style
+          disabled: true
+        - name: package-comments
+          disabled: true
+        - name: line-length-limit
+          disabled: true
+        - name: confusing-naming
+          disabled: true
+        - name: import-shadowing
+          disabled: true
+        - name: cognitive-complexity
+          disabled: true
+        - name: cyclomatic
+          disabled: true
+        - name: function-length
+          arguments: [0, 100]
     gosec:
       excludes:
         - G401

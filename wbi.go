@@ -45,6 +45,7 @@ type MemoryStorage struct {
 	mu   sync.RWMutex
 }
 
+// Set 设置值
 func (impl *MemoryStorage) Set(key string, value any) {
 	impl.mu.Lock()
 	defer impl.mu.Unlock()
@@ -52,6 +53,7 @@ func (impl *MemoryStorage) Set(key string, value any) {
 	impl.data[key] = value
 }
 
+// Get 获取值, isSet 表示值是否存在
 func (impl *MemoryStorage) Get(key string) (v any, isSet bool) {
 	impl.mu.RLock()
 	defer impl.mu.RUnlock()
@@ -83,6 +85,7 @@ type WBI struct {
 	sfg singleflight.Group
 }
 
+// NewDefaultWbi 返回一个默认的 WBI 实例
 func NewDefaultWbi() *WBI {
 	return &WBI{
 		cookies:        nil,
@@ -93,16 +96,19 @@ func NewDefaultWbi() *WBI {
 	}
 }
 
+// WithUpdateInterval 设置更新间隔
 func (wbi *WBI) WithUpdateInterval(updateInterval time.Duration) *WBI {
 	wbi.updateCheckerInterval = updateInterval
 	return wbi
 }
 
+// WithCookies 设置 cookies
 func (wbi *WBI) WithCookies(cookies []*http.Cookie) *WBI {
 	wbi.cookies = cookies
 	return wbi
 }
 
+// WithRawCookies 如果你是从浏览器request的header中直接复制出来的cookies，调用这个函数。
 func (wbi *WBI) WithRawCookies(rawCookies string) *WBI {
 	header := http.Header{}
 	header.Add("Cookie", rawCookies)
@@ -112,16 +118,19 @@ func (wbi *WBI) WithRawCookies(rawCookies string) *WBI {
 	return wbi
 }
 
+// WithMixinKeyEncTab 设置 mixin key 加密表
 func (wbi *WBI) WithMixinKeyEncTab(mixinKeyEncTab []int) *WBI {
 	wbi.mixinKeyEncTab = mixinKeyEncTab
 	return wbi
 }
 
+// WithStorage 设置存储
 func (wbi *WBI) WithStorage(storage Storage) *WBI {
 	wbi.storage = storage
 	return wbi
 }
 
+// GetKeys 获取 imgKey 和 subKey
 func (wbi *WBI) GetKeys() (imgKey string, subKey string, err error) {
 	imgKey, subKey = wbi.getKeys()
 
@@ -149,12 +158,14 @@ func (wbi *WBI) getKeys() (imgKey string, subKey string) {
 	return imgKey, subKey
 }
 
+// SetKeys 设置 imgKey 和 subKey
 func (wbi *WBI) SetKeys(imgKey, subKey string) {
 	wbi.storage.Set(cacheImgKey, imgKey)
 	wbi.storage.Set(cacheSubKey, subKey)
 	wbi.lastInitTime = time.Now()
 }
 
+// GetMixinKey 获取 mixin key
 func (wbi *WBI) GetMixinKey() (string, error) {
 	imgKey, subKey, err := wbi.GetKeys()
 	if err != nil {
@@ -164,6 +175,7 @@ func (wbi *WBI) GetMixinKey() (string, error) {
 	return wbi.GenerateMixinKey(imgKey + subKey), nil
 }
 
+// GenerateMixinKey 生成 mixin key
 func (wbi *WBI) GenerateMixinKey(orig string) string {
 	var str strings.Builder
 	for _, v := range wbi.mixinKeyEncTab {
@@ -174,7 +186,7 @@ func (wbi *WBI) GenerateMixinKey(orig string) string {
 	return str.String()[:32]
 }
 
-func (wbi *WBI) sanitizeString(s string) string {
+func wbiSanitizeString(s string) string {
 	unwantedChars := []string{"!", "'", "(", ")", "*"}
 	for _, char := range unwantedChars {
 		s = strings.ReplaceAll(s, char, "")
@@ -182,6 +194,7 @@ func (wbi *WBI) sanitizeString(s string) string {
 	return s
 }
 
+// SignQuery 对 URL 查询参数进行 WBI 签名
 func (wbi *WBI) SignQuery(query url.Values, ts time.Time) (newQuery url.Values, err error) {
 	payload := make(map[string]string, 10)
 	for k := range query {
@@ -201,6 +214,7 @@ func (wbi *WBI) SignQuery(query url.Values, ts time.Time) (newQuery url.Values, 
 	return newQuery, nil
 }
 
+// SignMap 对 map[string]string 进行 WBI 签名
 func (wbi *WBI) SignMap(payload map[string]string, ts time.Time) (newPayload map[string]string, err error) {
 	newPayload = maps.Clone(payload)
 
@@ -216,7 +230,7 @@ func (wbi *WBI) SignMap(payload map[string]string, ts time.Time) (newPayload map
 
 	// Remove unwanted characters
 	for k, v := range newPayload {
-		v = wbi.sanitizeString(v)
+		v = wbiSanitizeString(v)
 		newPayload[k] = v
 	}
 
@@ -292,8 +306,10 @@ func (wbi *WBI) doInitWbi() error {
 		wbi.cookies = resp.Cookies()
 	}
 
-	imgKey := strings.Split(strings.Split(result.Data.WbiImg.ImgUrl, "/")[len(strings.Split(result.Data.WbiImg.ImgUrl, "/"))-1], ".")[0]
-	subKey := strings.Split(strings.Split(result.Data.WbiImg.SubUrl, "/")[len(strings.Split(result.Data.WbiImg.SubUrl, "/"))-1], ".")[0]
+	imgKeys := strings.Split(result.Data.WbiImg.ImgUrl, "/")
+	imgKey, _, _ := strings.Cut(imgKeys[len(imgKeys)-1], ".")
+	subKeys := strings.Split(result.Data.WbiImg.SubUrl, "/")
+	subKey, _, _ := strings.Cut(subKeys[len(subKeys)-1], ".")
 
 	wbi.SetKeys(imgKey, subKey)
 	return nil
