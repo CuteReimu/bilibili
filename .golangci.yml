@@ -38,8 +38,6 @@ linters:
           arguments: ["disable-checks-on-types", "disable-checks-on-constants"]
         - name: var-naming
           disabled: true
-        - name: line-length-limit
-          arguments: [128]
         - name: add-constant
           disabled: true
         - name: max-public-structs
