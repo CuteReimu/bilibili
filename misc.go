@@ -1,12 +1,13 @@
 package bilibili
 
 import (
-	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -63,7 +64,7 @@ func (c *Client) Now() (time.Time, error) {
 }
 
 // Av2Bv 将av号转换为bv号，返回格式为"BV1xxxxxxxxx"。
-func Av2Bv(aid int) string {
+func Av2Bv(aid int64) string {
 	const (
 		xorCode  = 0x1552356C4CDB
 		maxAid   = 1 << 51
@@ -71,15 +72,16 @@ func Av2Bv(aid int) string {
 	)
 	bvid := []byte("BV1000000000")
 	tmp := (maxAid | aid) ^ xorCode
+	l := int64(len(alphabet))
 	for _, e := range []int{11, 10, 3, 8, 4, 6, 5, 7, 9} {
-		bvid[e] = alphabet[tmp%len(alphabet)]
-		tmp /= len(alphabet)
+		bvid[e] = alphabet[tmp%l]
+		tmp /= l
 	}
 	return string(bvid)
 }
 
 // Bv2Av 将bv号转换为av号，传入的bv号格式为"BV1xxxxxxxxx"，前面的"BV"不区分大小写。
-func Bv2Av(bvid string) int {
+func Bv2Av(bvid string) int64 {
 	if len(bvid) != 12 {
 		panic("bvid 格式错误: " + bvid)
 	}
@@ -88,10 +90,10 @@ func Bv2Av(bvid string) int {
 		maskCode = 1<<51 - 1
 		alphabet = "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf"
 	)
-	tmp := 0
+	var tmp int64 = 0
 	for _, e := range []int{9, 7, 5, 6, 4, 8, 3, 10, 11} {
-		idx := strings.IndexByte(alphabet, bvid[e])
-		tmp = tmp*len(alphabet) + idx
+		idx := int64(strings.IndexByte(alphabet, bvid[e]))
+		tmp = tmp*int64(len(alphabet)) + idx
 	}
 	return (tmp & maskCode) ^ xorCode
 }
