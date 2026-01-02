@@ -72,20 +72,24 @@ func execute[Out any](c *Client, method, url string, in any, handlers ...paramHa
 		return out, errors.Errorf("status code: %d", resp.StatusCode())
 	}
 	c.SetCookies(resp.Cookies())
-	var cr commonResp[Out]
+	var cr commonResp
 	if err = json.Unmarshal(resp.Body(), &cr); err != nil {
 		return out, errors.WithStack(err)
 	}
 	if cr.Code != 0 {
 		return out, errors.WithStack(Error{Code: cr.Code, Message: cr.Message})
 	}
-	return cr.Data, errors.WithStack(err)
+	var data Out
+	if err = json.Unmarshal(cr.Data, &data); err != nil {
+		return out, errors.WithStack(err)
+	}
+	return data, errors.WithStack(err)
 }
 
-type commonResp[T any] struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Data    T      `json:"data"`
+type commonResp struct {
+	Code    int             `json:"code"`
+	Message string          `json:"message"`
+	Data    json.RawMessage `json:"data"`
 }
 
 func withParams(r *resty.Request, in any) error {

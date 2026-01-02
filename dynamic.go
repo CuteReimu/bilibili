@@ -495,18 +495,21 @@ func (c *Client) UploadDynamicBfs(fileName string, file io.Reader, category stri
 	if resp.StatusCode() != 200 {
 		return "", Size{}, errors.Errorf("status code: %d", resp.StatusCode())
 	}
-	var response commonResp[struct {
-		ImageUrl    string `json:"image_url"`
-		ImageWidth  int    `json:"image_width"`
-		ImageHeight int    `json:"image_height"`
-	}]
+	var response commonResp
 	if err = json.Unmarshal(resp.Body(), &response); err != nil {
 		return "", Size{}, errors.WithStack(err)
 	}
 	if response.Code != 0 {
 		return "", Size{}, errors.Errorf("错误码: %d, 错误信息: %s", response.Code, response.Message)
 	}
-	data := response.Data
+	var data struct {
+		ImageUrl    string `json:"image_url"`
+		ImageWidth  int    `json:"image_width"`
+		ImageHeight int    `json:"image_height"`
+	}
+	if err = json.Unmarshal(response.Data, &data); err != nil {
+		return "", Size{}, errors.WithStack(err)
+	}
 	return data.ImageUrl, Size{Width: data.ImageWidth, Height: data.ImageHeight}, errors.WithStack(err)
 }
 
